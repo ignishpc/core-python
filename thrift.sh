@@ -13,4 +13,4 @@ for file in `find $1/ignis -name "*thrift"`; do
     thrift --gen py -out $out $file &
 done
 wait
-rm -f "__init__.py"
+rm -fr "__init__.py" "ignis/rpc/manager"

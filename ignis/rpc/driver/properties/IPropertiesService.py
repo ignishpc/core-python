@@ -22,6 +22,13 @@ class Iface(object):
     def newInstance(self):
         pass
 
+    def newInstance2(self, id):
+        """
+        Parameters:
+         - id
+        """
+        pass
+
     def setProperty(self, id, key, value):
         """
         Parameters:
@@ -117,7 +124,42 @@ class Client(Iface):
         iprot.readMessageEnd()
         if result.success is not None:
             return result.success
+        if result.ex is not None:
+            raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "newInstance failed: unknown result")
+
+    def newInstance2(self, id):
+        """
+        Parameters:
+         - id
+        """
+        self.send_newInstance2(id)
+        return self.recv_newInstance2()
+
+    def send_newInstance2(self, id):
+        self._oprot.writeMessageBegin('newInstance2', TMessageType.CALL, self._seqid)
+        args = newInstance2_args()
+        args.id = id
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_newInstance2(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = newInstance2_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.ex is not None:
+            raise result.ex
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "newInstance2 failed: unknown result")
 
     def setProperty(self, id, key, value):
         """
@@ -395,6 +437,7 @@ class Processor(Iface, TProcessor):
         self._handler = handler
         self._processMap = {}
         self._processMap["newInstance"] = Processor.process_newInstance
+        self._processMap["newInstance2"] = Processor.process_newInstance2
         self._processMap["setProperty"] = Processor.process_setProperty
         self._processMap["getProperty"] = Processor.process_getProperty
         self._processMap["isProperty"] = Processor.process_isProperty
@@ -429,6 +472,9 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
+        except ignis.rpc.exception.ttypes.IRemoteException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
         except TApplicationException as ex:
             logging.exception('TApplication exception in handler')
             msg_type = TMessageType.EXCEPTION
@@ -438,6 +484,32 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
         oprot.writeMessageBegin("newInstance", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_newInstance2(self, seqid, iprot, oprot):
+        args = newInstance2_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = newInstance2_result()
+        try:
+            result.success = self._handler.newInstance2(args.id)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.exception.ttypes.IRemoteException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("newInstance2", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -700,11 +772,13 @@ class newInstance_result(object):
     """
     Attributes:
      - success
+     - ex
     """
 
 
-    def __init__(self, success=None,):
+    def __init__(self, success=None, ex=None,):
         self.success = success
+        self.ex = ex
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -720,6 +794,12 @@ class newInstance_result(object):
                     self.success = iprot.readI64()
                 else:
                     iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.exception.ttypes.IRemoteException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -733,6 +813,10 @@ class newInstance_result(object):
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.I64, 0)
             oprot.writeI64(self.success)
+            oprot.writeFieldEnd()
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -753,6 +837,141 @@ class newInstance_result(object):
 all_structs.append(newInstance_result)
 newInstance_result.thrift_spec = (
     (0, TType.I64, 'success', None, None, ),  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.exception.ttypes.IRemoteException, None], None, ),  # 1
+)
+
+
+class newInstance2_args(object):
+    """
+    Attributes:
+     - id
+    """
+
+
+    def __init__(self, id=None,):
+        self.id = id
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I64:
+                    self.id = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('newInstance2_args')
+        if self.id is not None:
+            oprot.writeFieldBegin('id', TType.I64, 1)
+            oprot.writeI64(self.id)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(newInstance2_args)
+newInstance2_args.thrift_spec = (
+    None,  # 0
+    (1, TType.I64, 'id', None, None, ),  # 1
+)
+
+
+class newInstance2_result(object):
+    """
+    Attributes:
+     - success
+     - ex
+    """
+
+
+    def __init__(self, success=None, ex=None,):
+        self.success = success
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.I64:
+                    self.success = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.exception.ttypes.IRemoteException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('newInstance2_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.I64, 0)
+            oprot.writeI64(self.success)
+            oprot.writeFieldEnd()
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(newInstance2_result)
+newInstance2_result.thrift_spec = (
+    (0, TType.I64, 'success', None, None, ),  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.exception.ttypes.IRemoteException, None], None, ),  # 1
 )
 
 
