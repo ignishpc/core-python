@@ -28,6 +28,34 @@ class IData:
 		except Exception as ex:
 			raise IDriverException(ex) from ex
 
+	def flatmap(self, fun):
+		try:
+			with Ignis._pool.client() as client:
+				return IData(client.getIDataService().flatmap(self._id, self.__enconde(fun)))
+		except Exception as ex:
+			raise IDriverException(ex) from ex
+
+	def streamingFlatmap(self, fun, ordered=True):
+		try:
+			with Ignis._pool.client() as client:
+				return IData(client.getIDataService().streamingFlatmap(self._id, self.__enconde(fun), ordered))
+		except Exception as ex:
+			raise IDriverException(ex) from ex
+
+	def filter(self, fun):
+		try:
+			with Ignis._pool.client() as client:
+				return IData(client.getIDataService().filter(self._id, self.__enconde(fun)))
+		except Exception as ex:
+			raise IDriverException(ex) from ex
+
+	def streamingFilter(self, fun, ordered=True):
+		try:
+			with Ignis._pool.client() as client:
+				return IData(client.getIDataService().streamingFilter(self._id, self.__enconde(fun), ordered))
+		except Exception as ex:
+			raise IDriverException(ex) from ex
+
 	def reduceByKey(self, fun):
 		try:
 			with Ignis._pool.client() as client:
