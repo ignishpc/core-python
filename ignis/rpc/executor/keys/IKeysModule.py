@@ -19,25 +19,27 @@ all_structs = []
 
 
 class Iface(object):
-    def getKeys(self, single):
+    def getKeys(self):
+        pass
+
+    def getKeysWithCount(self):
+        pass
+
+    def prepareKeys(self, executorKeys):
         """
         Parameters:
-         - single
+         - executorKeys
         """
         pass
 
-    def sendPairs(self, addr, keys_id):
+    def collectKeys(self):
+        pass
+
+    def reduceByKey(self, funct):
         """
         Parameters:
-         - addr
-         - keys_id
+         - funct
         """
-        pass
-
-    def joinPairs(self):
-        pass
-
-    def reset(self):
         pass
 
 
@@ -48,18 +50,13 @@ class Client(Iface):
             self._oprot = oprot
         self._seqid = 0
 
-    def getKeys(self, single):
-        """
-        Parameters:
-         - single
-        """
-        self.send_getKeys(single)
+    def getKeys(self):
+        self.send_getKeys()
         return self.recv_getKeys()
 
-    def send_getKeys(self, single):
+    def send_getKeys(self):
         self._oprot.writeMessageBegin('getKeys', TMessageType.CALL, self._seqid)
         args = getKeys_args()
-        args.single = single
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -81,25 +78,51 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "getKeys failed: unknown result")
 
-    def sendPairs(self, addr, keys_id):
+    def getKeysWithCount(self):
+        self.send_getKeysWithCount()
+        return self.recv_getKeysWithCount()
+
+    def send_getKeysWithCount(self):
+        self._oprot.writeMessageBegin('getKeysWithCount', TMessageType.CALL, self._seqid)
+        args = getKeysWithCount_args()
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_getKeysWithCount(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = getKeysWithCount_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.ex is not None:
+            raise result.ex
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "getKeysWithCount failed: unknown result")
+
+    def prepareKeys(self, executorKeys):
         """
         Parameters:
-         - addr
-         - keys_id
+         - executorKeys
         """
-        self.send_sendPairs(addr, keys_id)
-        self.recv_sendPairs()
+        self.send_prepareKeys(executorKeys)
+        self.recv_prepareKeys()
 
-    def send_sendPairs(self, addr, keys_id):
-        self._oprot.writeMessageBegin('sendPairs', TMessageType.CALL, self._seqid)
-        args = sendPairs_args()
-        args.addr = addr
-        args.keys_id = keys_id
+    def send_prepareKeys(self, executorKeys):
+        self._oprot.writeMessageBegin('prepareKeys', TMessageType.CALL, self._seqid)
+        args = prepareKeys_args()
+        args.executorKeys = executorKeys
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_sendPairs(self):
+    def recv_prepareKeys(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -107,25 +130,25 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = sendPairs_result()
+        result = prepareKeys_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.ex is not None:
             raise result.ex
         return
 
-    def joinPairs(self):
-        self.send_joinPairs()
-        self.recv_joinPairs()
+    def collectKeys(self):
+        self.send_collectKeys()
+        self.recv_collectKeys()
 
-    def send_joinPairs(self):
-        self._oprot.writeMessageBegin('joinPairs', TMessageType.CALL, self._seqid)
-        args = joinPairs_args()
+    def send_collectKeys(self):
+        self._oprot.writeMessageBegin('collectKeys', TMessageType.CALL, self._seqid)
+        args = collectKeys_args()
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_joinPairs(self):
+    def recv_collectKeys(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -133,25 +156,30 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = joinPairs_result()
+        result = collectKeys_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.ex is not None:
             raise result.ex
         return
 
-    def reset(self):
-        self.send_reset()
-        self.recv_reset()
+    def reduceByKey(self, funct):
+        """
+        Parameters:
+         - funct
+        """
+        self.send_reduceByKey(funct)
+        self.recv_reduceByKey()
 
-    def send_reset(self):
-        self._oprot.writeMessageBegin('reset', TMessageType.CALL, self._seqid)
-        args = reset_args()
+    def send_reduceByKey(self, funct):
+        self._oprot.writeMessageBegin('reduceByKey', TMessageType.CALL, self._seqid)
+        args = reduceByKey_args()
+        args.funct = funct
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_reset(self):
+    def recv_reduceByKey(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -159,7 +187,7 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = reset_result()
+        result = reduceByKey_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.ex is not None:
@@ -172,9 +200,10 @@ class Processor(Iface, TProcessor):
         self._handler = handler
         self._processMap = {}
         self._processMap["getKeys"] = Processor.process_getKeys
-        self._processMap["sendPairs"] = Processor.process_sendPairs
-        self._processMap["joinPairs"] = Processor.process_joinPairs
-        self._processMap["reset"] = Processor.process_reset
+        self._processMap["getKeysWithCount"] = Processor.process_getKeysWithCount
+        self._processMap["prepareKeys"] = Processor.process_prepareKeys
+        self._processMap["collectKeys"] = Processor.process_collectKeys
+        self._processMap["reduceByKey"] = Processor.process_reduceByKey
 
     def process(self, iprot, oprot):
         (name, type, seqid) = iprot.readMessageBegin()
@@ -197,7 +226,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = getKeys_result()
         try:
-            result.success = self._handler.getKeys(args.single)
+            result.success = self._handler.getKeys()
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -217,13 +246,13 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_sendPairs(self, seqid, iprot, oprot):
-        args = sendPairs_args()
+    def process_getKeysWithCount(self, seqid, iprot, oprot):
+        args = getKeysWithCount_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = sendPairs_result()
+        result = getKeysWithCount_result()
         try:
-            self._handler.sendPairs(args.addr, args.keys_id)
+            result.success = self._handler.getKeysWithCount()
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -238,18 +267,18 @@ class Processor(Iface, TProcessor):
             logging.exception('Unexpected exception in handler')
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("sendPairs", msg_type, seqid)
+        oprot.writeMessageBegin("getKeysWithCount", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_joinPairs(self, seqid, iprot, oprot):
-        args = joinPairs_args()
+    def process_prepareKeys(self, seqid, iprot, oprot):
+        args = prepareKeys_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = joinPairs_result()
+        result = prepareKeys_result()
         try:
-            self._handler.joinPairs()
+            self._handler.prepareKeys(args.executorKeys)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -264,18 +293,18 @@ class Processor(Iface, TProcessor):
             logging.exception('Unexpected exception in handler')
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("joinPairs", msg_type, seqid)
+        oprot.writeMessageBegin("prepareKeys", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_reset(self, seqid, iprot, oprot):
-        args = reset_args()
+    def process_collectKeys(self, seqid, iprot, oprot):
+        args = collectKeys_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = reset_result()
+        result = collectKeys_result()
         try:
-            self._handler.reset()
+            self._handler.collectKeys()
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -290,7 +319,33 @@ class Processor(Iface, TProcessor):
             logging.exception('Unexpected exception in handler')
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("reset", msg_type, seqid)
+        oprot.writeMessageBegin("collectKeys", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_reduceByKey(self, seqid, iprot, oprot):
+        args = reduceByKey_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = reduceByKey_result()
+        try:
+            self._handler.reduceByKey(args.funct)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.exception.ttypes.IRemoteException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("reduceByKey", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -299,14 +354,7 @@ class Processor(Iface, TProcessor):
 
 
 class getKeys_args(object):
-    """
-    Attributes:
-     - single
-    """
 
-
-    def __init__(self, single=None,):
-        self.single = single
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -317,11 +365,6 @@ class getKeys_args(object):
             (fname, ftype, fid) = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
-            if fid == 1:
-                if ftype == TType.BOOL:
-                    self.single = iprot.readBool()
-                else:
-                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -332,10 +375,6 @@ class getKeys_args(object):
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
         oprot.writeStructBegin('getKeys_args')
-        if self.single is not None:
-            oprot.writeFieldBegin('single', TType.BOOL, 1)
-            oprot.writeBool(self.single)
-            oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
@@ -354,8 +393,6 @@ class getKeys_args(object):
         return not (self == other)
 all_structs.append(getKeys_args)
 getKeys_args.thrift_spec = (
-    None,  # 0
-    (1, TType.BOOL, 'single', None, None, ),  # 1
 )
 
 
@@ -381,14 +418,13 @@ class getKeys_result(object):
             if ftype == TType.STOP:
                 break
             if fid == 0:
-                if ftype == TType.MAP:
-                    self.success = {}
-                    (_ktype1, _vtype2, _size0) = iprot.readMapBegin()
-                    for _i4 in range(_size0):
-                        _key5 = iprot.readI64()
-                        _val6 = iprot.readI64()
-                        self.success[_key5] = _val6
-                    iprot.readMapEnd()
+                if ftype == TType.LIST:
+                    self.success = []
+                    (_etype10, _size7) = iprot.readListBegin()
+                    for _i11 in range(_size7):
+                        _elem12 = iprot.readI64()
+                        self.success.append(_elem12)
+                    iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
             elif fid == 1:
@@ -408,12 +444,11 @@ class getKeys_result(object):
             return
         oprot.writeStructBegin('getKeys_result')
         if self.success is not None:
-            oprot.writeFieldBegin('success', TType.MAP, 0)
-            oprot.writeMapBegin(TType.I64, TType.I64, len(self.success))
-            for kiter7, viter8 in self.success.items():
-                oprot.writeI64(kiter7)
-                oprot.writeI64(viter8)
-            oprot.writeMapEnd()
+            oprot.writeFieldBegin('success', TType.LIST, 0)
+            oprot.writeListBegin(TType.I64, len(self.success))
+            for iter13 in self.success:
+                oprot.writeI64(iter13)
+            oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.ex is not None:
             oprot.writeFieldBegin('ex', TType.STRUCT, 1)
@@ -437,22 +472,146 @@ class getKeys_result(object):
         return not (self == other)
 all_structs.append(getKeys_result)
 getKeys_result.thrift_spec = (
+    (0, TType.LIST, 'success', (TType.I64, None, False), None, ),  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.exception.ttypes.IRemoteException, None], None, ),  # 1
+)
+
+
+class getKeysWithCount_args(object):
+
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('getKeysWithCount_args')
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(getKeysWithCount_args)
+getKeysWithCount_args.thrift_spec = (
+)
+
+
+class getKeysWithCount_result(object):
+    """
+    Attributes:
+     - success
+     - ex
+    """
+
+
+    def __init__(self, success=None, ex=None,):
+        self.success = success
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.MAP:
+                    self.success = {}
+                    (_ktype15, _vtype16, _size14) = iprot.readMapBegin()
+                    for _i18 in range(_size14):
+                        _key19 = iprot.readI64()
+                        _val20 = iprot.readI64()
+                        self.success[_key19] = _val20
+                    iprot.readMapEnd()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.exception.ttypes.IRemoteException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('getKeysWithCount_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.MAP, 0)
+            oprot.writeMapBegin(TType.I64, TType.I64, len(self.success))
+            for kiter21, viter22 in self.success.items():
+                oprot.writeI64(kiter21)
+                oprot.writeI64(viter22)
+            oprot.writeMapEnd()
+            oprot.writeFieldEnd()
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(getKeysWithCount_result)
+getKeysWithCount_result.thrift_spec = (
     (0, TType.MAP, 'success', (TType.I64, None, TType.I64, None, False), None, ),  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.exception.ttypes.IRemoteException, None], None, ),  # 1
 )
 
 
-class sendPairs_args(object):
+class prepareKeys_args(object):
     """
     Attributes:
-     - addr
-     - keys_id
+     - executorKeys
     """
 
 
-    def __init__(self, addr=None, keys_id=None,):
-        self.addr = addr
-        self.keys_id = keys_id
+    def __init__(self, executorKeys=None,):
+        self.executorKeys = executorKeys
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -464,17 +623,13 @@ class sendPairs_args(object):
             if ftype == TType.STOP:
                 break
             if fid == 1:
-                if ftype == TType.STRING:
-                    self.addr = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 2:
                 if ftype == TType.LIST:
-                    self.keys_id = []
-                    (_etype12, _size9) = iprot.readListBegin()
-                    for _i13 in range(_size9):
-                        _elem14 = iprot.readI64()
-                        self.keys_id.append(_elem14)
+                    self.executorKeys = []
+                    (_etype26, _size23) = iprot.readListBegin()
+                    for _i27 in range(_size23):
+                        _elem28 = IExecutorKeys()
+                        _elem28.read(iprot)
+                        self.executorKeys.append(_elem28)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -487,16 +642,12 @@ class sendPairs_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('sendPairs_args')
-        if self.addr is not None:
-            oprot.writeFieldBegin('addr', TType.STRING, 1)
-            oprot.writeString(self.addr.encode('utf-8') if sys.version_info[0] == 2 else self.addr)
-            oprot.writeFieldEnd()
-        if self.keys_id is not None:
-            oprot.writeFieldBegin('keys_id', TType.LIST, 2)
-            oprot.writeListBegin(TType.I64, len(self.keys_id))
-            for iter15 in self.keys_id:
-                oprot.writeI64(iter15)
+        oprot.writeStructBegin('prepareKeys_args')
+        if self.executorKeys is not None:
+            oprot.writeFieldBegin('executorKeys', TType.LIST, 1)
+            oprot.writeListBegin(TType.STRUCT, len(self.executorKeys))
+            for iter29 in self.executorKeys:
+                iter29.write(oprot)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -515,15 +666,14 @@ class sendPairs_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(sendPairs_args)
-sendPairs_args.thrift_spec = (
+all_structs.append(prepareKeys_args)
+prepareKeys_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRING, 'addr', 'UTF8', None, ),  # 1
-    (2, TType.LIST, 'keys_id', (TType.I64, None, False), None, ),  # 2
+    (1, TType.LIST, 'executorKeys', (TType.STRUCT, [IExecutorKeys, None], False), None, ),  # 1
 )
 
 
-class sendPairs_result(object):
+class prepareKeys_result(object):
     """
     Attributes:
      - ex
@@ -557,7 +707,7 @@ class sendPairs_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('sendPairs_result')
+        oprot.writeStructBegin('prepareKeys_result')
         if self.ex is not None:
             oprot.writeFieldBegin('ex', TType.STRUCT, 1)
             self.ex.write(oprot)
@@ -578,119 +728,14 @@ class sendPairs_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(sendPairs_result)
-sendPairs_result.thrift_spec = (
-    None,  # 0
-    (1, TType.STRUCT, 'ex', [ignis.rpc.exception.ttypes.IRemoteException, None], None, ),  # 1
-)
-
-
-class joinPairs_args(object):
-
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('joinPairs_args')
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(joinPairs_args)
-joinPairs_args.thrift_spec = (
-)
-
-
-class joinPairs_result(object):
-    """
-    Attributes:
-     - ex
-    """
-
-
-    def __init__(self, ex=None,):
-        self.ex = ex
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.STRUCT:
-                    self.ex = ignis.rpc.exception.ttypes.IRemoteException()
-                    self.ex.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('joinPairs_result')
-        if self.ex is not None:
-            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
-            self.ex.write(oprot)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(joinPairs_result)
-joinPairs_result.thrift_spec = (
+all_structs.append(prepareKeys_result)
+prepareKeys_result.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.exception.ttypes.IRemoteException, None], None, ),  # 1
 )
 
 
-class reset_args(object):
+class collectKeys_args(object):
 
 
     def read(self, iprot):
@@ -711,7 +756,7 @@ class reset_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('reset_args')
+        oprot.writeStructBegin('collectKeys_args')
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
@@ -728,12 +773,12 @@ class reset_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(reset_args)
-reset_args.thrift_spec = (
+all_structs.append(collectKeys_args)
+collectKeys_args.thrift_spec = (
 )
 
 
-class reset_result(object):
+class collectKeys_result(object):
     """
     Attributes:
      - ex
@@ -767,7 +812,7 @@ class reset_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('reset_result')
+        oprot.writeStructBegin('collectKeys_result')
         if self.ex is not None:
             oprot.writeFieldBegin('ex', TType.STRUCT, 1)
             self.ex.write(oprot)
@@ -788,8 +833,132 @@ class reset_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(reset_result)
-reset_result.thrift_spec = (
+all_structs.append(collectKeys_result)
+collectKeys_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.exception.ttypes.IRemoteException, None], None, ),  # 1
+)
+
+
+class reduceByKey_args(object):
+    """
+    Attributes:
+     - funct
+    """
+
+
+    def __init__(self, funct=None,):
+        self.funct = funct
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.funct = ignis.rpc.source.ttypes.ISource()
+                    self.funct.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('reduceByKey_args')
+        if self.funct is not None:
+            oprot.writeFieldBegin('funct', TType.STRUCT, 1)
+            self.funct.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(reduceByKey_args)
+reduceByKey_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'funct', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
+)
+
+
+class reduceByKey_result(object):
+    """
+    Attributes:
+     - ex
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.exception.ttypes.IRemoteException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('reduceByKey_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(reduceByKey_result)
+reduceByKey_result.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.exception.ttypes.IRemoteException, None], None, ),  # 1
 )

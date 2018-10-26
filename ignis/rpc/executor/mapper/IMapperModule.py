@@ -40,6 +40,13 @@ class Iface(object):
         """
         pass
 
+    def keyBy(self, funct):
+        """
+        Parameters:
+         - funct
+        """
+        pass
+
     def streamingMap(self, funct, ordered):
         """
         Parameters:
@@ -57,6 +64,14 @@ class Iface(object):
         pass
 
     def streamingFilter(self, funct, ordered):
+        """
+        Parameters:
+         - funct
+         - ordered
+        """
+        pass
+
+    def streamingKeyBy(self, funct, ordered):
         """
         Parameters:
          - funct
@@ -165,6 +180,37 @@ class Client(Iface):
             raise result.ex
         return
 
+    def keyBy(self, funct):
+        """
+        Parameters:
+         - funct
+        """
+        self.send_keyBy(funct)
+        self.recv_keyBy()
+
+    def send_keyBy(self, funct):
+        self._oprot.writeMessageBegin('keyBy', TMessageType.CALL, self._seqid)
+        args = keyBy_args()
+        args.funct = funct
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_keyBy(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = keyBy_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
     def streamingMap(self, funct, ordered):
         """
         Parameters:
@@ -264,6 +310,39 @@ class Client(Iface):
             raise result.ex
         return
 
+    def streamingKeyBy(self, funct, ordered):
+        """
+        Parameters:
+         - funct
+         - ordered
+        """
+        self.send_streamingKeyBy(funct, ordered)
+        self.recv_streamingKeyBy()
+
+    def send_streamingKeyBy(self, funct, ordered):
+        self._oprot.writeMessageBegin('streamingKeyBy', TMessageType.CALL, self._seqid)
+        args = streamingKeyBy_args()
+        args.funct = funct
+        args.ordered = ordered
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_streamingKeyBy(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = streamingKeyBy_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
 
 class Processor(Iface, TProcessor):
     def __init__(self, handler):
@@ -272,9 +351,11 @@ class Processor(Iface, TProcessor):
         self._processMap["_map"] = Processor.process__map
         self._processMap["flatmap"] = Processor.process_flatmap
         self._processMap["filter"] = Processor.process_filter
+        self._processMap["keyBy"] = Processor.process_keyBy
         self._processMap["streamingMap"] = Processor.process_streamingMap
         self._processMap["streamingFlatmap"] = Processor.process_streamingFlatmap
         self._processMap["streamingFilter"] = Processor.process_streamingFilter
+        self._processMap["streamingKeyBy"] = Processor.process_streamingKeyBy
 
     def process(self, iprot, oprot):
         (name, type, seqid) = iprot.readMessageBegin()
@@ -369,6 +450,32 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
+    def process_keyBy(self, seqid, iprot, oprot):
+        args = keyBy_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = keyBy_result()
+        try:
+            self._handler.keyBy(args.funct)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.exception.ttypes.IRemoteException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("keyBy", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
     def process_streamingMap(self, seqid, iprot, oprot):
         args = streamingMap_args()
         args.read(iprot)
@@ -447,6 +554,32 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
+    def process_streamingKeyBy(self, seqid, iprot, oprot):
+        args = streamingKeyBy_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = streamingKeyBy_result()
+        try:
+            self._handler.streamingKeyBy(args.funct, args.ordered)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.exception.ttypes.IRemoteException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("streamingKeyBy", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
 # HELPER FUNCTIONS AND STRUCTURES
 
 
@@ -471,7 +604,7 @@ class _map_args(object):
                 break
             if fid == 1:
                 if ftype == TType.STRUCT:
-                    self.funct = ignis.rpc.function.ttypes.ISourceFunction()
+                    self.funct = ignis.rpc.source.ttypes.ISource()
                     self.funct.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -508,7 +641,7 @@ class _map_args(object):
 all_structs.append(_map_args)
 _map_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'funct', [ignis.rpc.function.ttypes.ISourceFunction, None], None, ),  # 1
+    (1, TType.STRUCT, 'funct', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
 )
 
 
@@ -595,7 +728,7 @@ class flatmap_args(object):
                 break
             if fid == 1:
                 if ftype == TType.STRUCT:
-                    self.funct = ignis.rpc.function.ttypes.ISourceFunction()
+                    self.funct = ignis.rpc.source.ttypes.ISource()
                     self.funct.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -632,7 +765,7 @@ class flatmap_args(object):
 all_structs.append(flatmap_args)
 flatmap_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'funct', [ignis.rpc.function.ttypes.ISourceFunction, None], None, ),  # 1
+    (1, TType.STRUCT, 'funct', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
 )
 
 
@@ -719,7 +852,7 @@ class filter_args(object):
                 break
             if fid == 1:
                 if ftype == TType.STRUCT:
-                    self.funct = ignis.rpc.function.ttypes.ISourceFunction()
+                    self.funct = ignis.rpc.source.ttypes.ISource()
                     self.funct.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -756,7 +889,7 @@ class filter_args(object):
 all_structs.append(filter_args)
 filter_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'funct', [ignis.rpc.function.ttypes.ISourceFunction, None], None, ),  # 1
+    (1, TType.STRUCT, 'funct', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
 )
 
 
@@ -822,6 +955,130 @@ filter_result.thrift_spec = (
 )
 
 
+class keyBy_args(object):
+    """
+    Attributes:
+     - funct
+    """
+
+
+    def __init__(self, funct=None,):
+        self.funct = funct
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.funct = ignis.rpc.source.ttypes.ISource()
+                    self.funct.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('keyBy_args')
+        if self.funct is not None:
+            oprot.writeFieldBegin('funct', TType.STRUCT, 1)
+            self.funct.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(keyBy_args)
+keyBy_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'funct', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
+)
+
+
+class keyBy_result(object):
+    """
+    Attributes:
+     - ex
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.exception.ttypes.IRemoteException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('keyBy_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(keyBy_result)
+keyBy_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.exception.ttypes.IRemoteException, None], None, ),  # 1
+)
+
+
 class streamingMap_args(object):
     """
     Attributes:
@@ -845,7 +1102,7 @@ class streamingMap_args(object):
                 break
             if fid == 1:
                 if ftype == TType.STRUCT:
-                    self.funct = ignis.rpc.function.ttypes.ISourceFunction()
+                    self.funct = ignis.rpc.source.ttypes.ISource()
                     self.funct.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -891,7 +1148,7 @@ class streamingMap_args(object):
 all_structs.append(streamingMap_args)
 streamingMap_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'funct', [ignis.rpc.function.ttypes.ISourceFunction, None], None, ),  # 1
+    (1, TType.STRUCT, 'funct', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
     (2, TType.BOOL, 'ordered', None, None, ),  # 2
 )
 
@@ -981,7 +1238,7 @@ class streamingFlatmap_args(object):
                 break
             if fid == 1:
                 if ftype == TType.STRUCT:
-                    self.funct = ignis.rpc.function.ttypes.ISourceFunction()
+                    self.funct = ignis.rpc.source.ttypes.ISource()
                     self.funct.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -1027,7 +1284,7 @@ class streamingFlatmap_args(object):
 all_structs.append(streamingFlatmap_args)
 streamingFlatmap_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'funct', [ignis.rpc.function.ttypes.ISourceFunction, None], None, ),  # 1
+    (1, TType.STRUCT, 'funct', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
     (2, TType.BOOL, 'ordered', None, None, ),  # 2
 )
 
@@ -1117,7 +1374,7 @@ class streamingFilter_args(object):
                 break
             if fid == 1:
                 if ftype == TType.STRUCT:
-                    self.funct = ignis.rpc.function.ttypes.ISourceFunction()
+                    self.funct = ignis.rpc.source.ttypes.ISource()
                     self.funct.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -1163,7 +1420,7 @@ class streamingFilter_args(object):
 all_structs.append(streamingFilter_args)
 streamingFilter_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'funct', [ignis.rpc.function.ttypes.ISourceFunction, None], None, ),  # 1
+    (1, TType.STRUCT, 'funct', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
     (2, TType.BOOL, 'ordered', None, None, ),  # 2
 )
 
@@ -1225,6 +1482,142 @@ class streamingFilter_result(object):
         return not (self == other)
 all_structs.append(streamingFilter_result)
 streamingFilter_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.exception.ttypes.IRemoteException, None], None, ),  # 1
+)
+
+
+class streamingKeyBy_args(object):
+    """
+    Attributes:
+     - funct
+     - ordered
+    """
+
+
+    def __init__(self, funct=None, ordered=None,):
+        self.funct = funct
+        self.ordered = ordered
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.funct = ignis.rpc.source.ttypes.ISource()
+                    self.funct.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.BOOL:
+                    self.ordered = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('streamingKeyBy_args')
+        if self.funct is not None:
+            oprot.writeFieldBegin('funct', TType.STRUCT, 1)
+            self.funct.write(oprot)
+            oprot.writeFieldEnd()
+        if self.ordered is not None:
+            oprot.writeFieldBegin('ordered', TType.BOOL, 2)
+            oprot.writeBool(self.ordered)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(streamingKeyBy_args)
+streamingKeyBy_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'funct', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
+    (2, TType.BOOL, 'ordered', None, None, ),  # 2
+)
+
+
+class streamingKeyBy_result(object):
+    """
+    Attributes:
+     - ex
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.exception.ttypes.IRemoteException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('streamingKeyBy_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(streamingKeyBy_result)
+streamingKeyBy_result.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.exception.ttypes.IRemoteException, None], None, ),  # 1
 )

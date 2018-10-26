@@ -1,5 +1,6 @@
 from ignis.driver.api.Ignis import Ignis
 from ignis.driver.api.IDriverException import IDriverException
+from ignis.rpc.source.ttypes import ISource
 
 
 class IData:
@@ -85,4 +86,5 @@ class IData:
 			raise IDriverException(ex) from ex
 
 	def __enconde(self, fun):
-		pass
+		if isinstance(fun, str):
+			return ISource(name=fun)

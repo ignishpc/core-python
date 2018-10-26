@@ -29,19 +29,21 @@ class Iface(object):
         """
         pass
 
-    def saveFile(self, path, joined):
+    def saveFile(self, path, trunc, new_line):
         """
         Parameters:
          - path
-         - joined
+         - trunc
+         - new_line
         """
         pass
 
-    def saveJson(self, path, joined):
+    def saveJson(self, path, array_start, array_end):
         """
         Parameters:
          - path
-         - joined
+         - array_start
+         - array_end
         """
         pass
 
@@ -90,20 +92,22 @@ class Client(Iface):
             raise result.ex
         return
 
-    def saveFile(self, path, joined):
+    def saveFile(self, path, trunc, new_line):
         """
         Parameters:
          - path
-         - joined
+         - trunc
+         - new_line
         """
-        self.send_saveFile(path, joined)
+        self.send_saveFile(path, trunc, new_line)
         self.recv_saveFile()
 
-    def send_saveFile(self, path, joined):
+    def send_saveFile(self, path, trunc, new_line):
         self._oprot.writeMessageBegin('saveFile', TMessageType.CALL, self._seqid)
         args = saveFile_args()
         args.path = path
-        args.joined = joined
+        args.trunc = trunc
+        args.new_line = new_line
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -123,20 +127,22 @@ class Client(Iface):
             raise result.ex
         return
 
-    def saveJson(self, path, joined):
+    def saveJson(self, path, array_start, array_end):
         """
         Parameters:
          - path
-         - joined
+         - array_start
+         - array_end
         """
-        self.send_saveJson(path, joined)
+        self.send_saveJson(path, array_start, array_end)
         self.recv_saveJson()
 
-    def send_saveJson(self, path, joined):
+    def send_saveJson(self, path, array_start, array_end):
         self._oprot.writeMessageBegin('saveJson', TMessageType.CALL, self._seqid)
         args = saveJson_args()
         args.path = path
-        args.joined = joined
+        args.array_start = array_start
+        args.array_end = array_end
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -212,7 +218,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = saveFile_result()
         try:
-            self._handler.saveFile(args.path, args.joined)
+            self._handler.saveFile(args.path, args.trunc, args.new_line)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -238,7 +244,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = saveJson_result()
         try:
-            self._handler.saveJson(args.path, args.joined)
+            self._handler.saveJson(args.path, args.array_start, args.array_end)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -424,13 +430,15 @@ class saveFile_args(object):
     """
     Attributes:
      - path
-     - joined
+     - trunc
+     - new_line
     """
 
 
-    def __init__(self, path=None, joined=None,):
+    def __init__(self, path=None, trunc=None, new_line=None,):
         self.path = path
-        self.joined = joined
+        self.trunc = trunc
+        self.new_line = new_line
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -448,7 +456,12 @@ class saveFile_args(object):
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.BOOL:
-                    self.joined = iprot.readBool()
+                    self.trunc = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.BOOL:
+                    self.new_line = iprot.readBool()
                 else:
                     iprot.skip(ftype)
             else:
@@ -465,9 +478,13 @@ class saveFile_args(object):
             oprot.writeFieldBegin('path', TType.STRING, 1)
             oprot.writeString(self.path.encode('utf-8') if sys.version_info[0] == 2 else self.path)
             oprot.writeFieldEnd()
-        if self.joined is not None:
-            oprot.writeFieldBegin('joined', TType.BOOL, 2)
-            oprot.writeBool(self.joined)
+        if self.trunc is not None:
+            oprot.writeFieldBegin('trunc', TType.BOOL, 2)
+            oprot.writeBool(self.trunc)
+            oprot.writeFieldEnd()
+        if self.new_line is not None:
+            oprot.writeFieldBegin('new_line', TType.BOOL, 3)
+            oprot.writeBool(self.new_line)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -489,7 +506,8 @@ all_structs.append(saveFile_args)
 saveFile_args.thrift_spec = (
     None,  # 0
     (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
-    (2, TType.BOOL, 'joined', None, None, ),  # 2
+    (2, TType.BOOL, 'trunc', None, None, ),  # 2
+    (3, TType.BOOL, 'new_line', None, None, ),  # 3
 )
 
 
@@ -559,13 +577,15 @@ class saveJson_args(object):
     """
     Attributes:
      - path
-     - joined
+     - array_start
+     - array_end
     """
 
 
-    def __init__(self, path=None, joined=None,):
+    def __init__(self, path=None, array_start=None, array_end=None,):
         self.path = path
-        self.joined = joined
+        self.array_start = array_start
+        self.array_end = array_end
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -583,7 +603,12 @@ class saveJson_args(object):
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.BOOL:
-                    self.joined = iprot.readBool()
+                    self.array_start = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.BOOL:
+                    self.array_end = iprot.readBool()
                 else:
                     iprot.skip(ftype)
             else:
@@ -600,9 +625,13 @@ class saveJson_args(object):
             oprot.writeFieldBegin('path', TType.STRING, 1)
             oprot.writeString(self.path.encode('utf-8') if sys.version_info[0] == 2 else self.path)
             oprot.writeFieldEnd()
-        if self.joined is not None:
-            oprot.writeFieldBegin('joined', TType.BOOL, 2)
-            oprot.writeBool(self.joined)
+        if self.array_start is not None:
+            oprot.writeFieldBegin('array_start', TType.BOOL, 2)
+            oprot.writeBool(self.array_start)
+            oprot.writeFieldEnd()
+        if self.array_end is not None:
+            oprot.writeFieldBegin('array_end', TType.BOOL, 3)
+            oprot.writeBool(self.array_end)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -624,7 +653,8 @@ all_structs.append(saveJson_args)
 saveJson_args.thrift_spec = (
     None,  # 0
     (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
-    (2, TType.BOOL, 'joined', None, None, ),  # 2
+    (2, TType.BOOL, 'array_start', None, None, ),  # 2
+    (3, TType.BOOL, 'array_end', None, None, ),  # 3
 )
 
 

@@ -12,7 +12,7 @@ from thrift.TRecursive import fix_spec
 
 import sys
 import ignis.rpc.exception.ttypes
-import ignis.rpc.function.ttypes
+import ignis.rpc.source.ttypes
 
 from thrift.transport import TTransport
 all_structs = []

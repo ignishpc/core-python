@@ -24,12 +24,14 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('Usage: ' + sys.argv[0] + ' [-h host[:port]] [-u url] [-f[ramed]] [-s[sl]] [-novalidate] [-ca_certs certs] [-keyfile keyfile] [-certfile certfile] function [arg1 [arg2...]]')
     print('')
     print('Functions:')
-    print('  void _map(ISourceFunction funct)')
-    print('  void flatmap(ISourceFunction funct)')
-    print('  void filter(ISourceFunction funct)')
-    print('  void streamingMap(ISourceFunction funct, bool ordered)')
-    print('  void streamingFlatmap(ISourceFunction funct, bool ordered)')
-    print('  void streamingFilter(ISourceFunction funct, bool ordered)')
+    print('  void _map(ISource funct)')
+    print('  void flatmap(ISource funct)')
+    print('  void filter(ISource funct)')
+    print('  void keyBy(ISource funct)')
+    print('  void streamingMap(ISource funct, bool ordered)')
+    print('  void streamingFlatmap(ISource funct, bool ordered)')
+    print('  void streamingFilter(ISource funct, bool ordered)')
+    print('  void streamingKeyBy(ISource funct, bool ordered)')
     print('')
     sys.exit(0)
 
@@ -127,6 +129,12 @@ elif cmd == 'filter':
         sys.exit(1)
     pp.pprint(client.filter(eval(args[0]),))
 
+elif cmd == 'keyBy':
+    if len(args) != 1:
+        print('keyBy requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.keyBy(eval(args[0]),))
+
 elif cmd == 'streamingMap':
     if len(args) != 2:
         print('streamingMap requires 2 args')
@@ -144,6 +152,12 @@ elif cmd == 'streamingFilter':
         print('streamingFilter requires 2 args')
         sys.exit(1)
     pp.pprint(client.streamingFilter(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'streamingKeyBy':
+    if len(args) != 2:
+        print('streamingKeyBy requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.streamingKeyBy(eval(args[0]), eval(args[1]),))
 
 else:
     print('Unrecognized method %s' % cmd)

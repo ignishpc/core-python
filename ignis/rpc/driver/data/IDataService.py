@@ -1196,7 +1196,7 @@ class _map_args(object):
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.STRUCT:
-                    self._function = ignis.rpc.function.ttypes.ISourceFunction()
+                    self._function = ignis.rpc.source.ttypes.ISource()
                     self._function.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -1238,7 +1238,7 @@ all_structs.append(_map_args)
 _map_args.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'data', [IDataId, None], None, ),  # 1
-    (2, TType.STRUCT, '_function', [ignis.rpc.function.ttypes.ISourceFunction, None], None, ),  # 2
+    (2, TType.STRUCT, '_function', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 2
 )
 
 
@@ -1345,7 +1345,7 @@ class flatmap_args(object):
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.STRUCT:
-                    self._function = ignis.rpc.function.ttypes.ISourceFunction()
+                    self._function = ignis.rpc.source.ttypes.ISource()
                     self._function.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -1387,7 +1387,7 @@ all_structs.append(flatmap_args)
 flatmap_args.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'data', [IDataId, None], None, ),  # 1
-    (2, TType.STRUCT, '_function', [ignis.rpc.function.ttypes.ISourceFunction, None], None, ),  # 2
+    (2, TType.STRUCT, '_function', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 2
 )
 
 
@@ -1494,7 +1494,7 @@ class filter_args(object):
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.STRUCT:
-                    self._function = ignis.rpc.function.ttypes.ISourceFunction()
+                    self._function = ignis.rpc.source.ttypes.ISource()
                     self._function.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -1536,7 +1536,7 @@ all_structs.append(filter_args)
 filter_args.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'data', [IDataId, None], None, ),  # 1
-    (2, TType.STRUCT, '_function', [ignis.rpc.function.ttypes.ISourceFunction, None], None, ),  # 2
+    (2, TType.STRUCT, '_function', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 2
 )
 
 
@@ -1645,7 +1645,7 @@ class streamingMap_args(object):
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.STRUCT:
-                    self._function = ignis.rpc.function.ttypes.ISourceFunction()
+                    self._function = ignis.rpc.source.ttypes.ISource()
                     self._function.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -1696,7 +1696,7 @@ all_structs.append(streamingMap_args)
 streamingMap_args.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'data', [IDataId, None], None, ),  # 1
-    (2, TType.STRUCT, '_function', [ignis.rpc.function.ttypes.ISourceFunction, None], None, ),  # 2
+    (2, TType.STRUCT, '_function', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 2
     (3, TType.BOOL, 'ordered', None, None, ),  # 3
 )
 
@@ -1806,7 +1806,7 @@ class streamingFlatmap_args(object):
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.STRUCT:
-                    self._function = ignis.rpc.function.ttypes.ISourceFunction()
+                    self._function = ignis.rpc.source.ttypes.ISource()
                     self._function.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -1857,7 +1857,7 @@ all_structs.append(streamingFlatmap_args)
 streamingFlatmap_args.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'data', [IDataId, None], None, ),  # 1
-    (2, TType.STRUCT, '_function', [ignis.rpc.function.ttypes.ISourceFunction, None], None, ),  # 2
+    (2, TType.STRUCT, '_function', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 2
     (3, TType.BOOL, 'ordered', None, None, ),  # 3
 )
 
@@ -1967,7 +1967,7 @@ class streamingFilter_args(object):
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.STRUCT:
-                    self._function = ignis.rpc.function.ttypes.ISourceFunction()
+                    self._function = ignis.rpc.source.ttypes.ISource()
                     self._function.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -2018,7 +2018,7 @@ all_structs.append(streamingFilter_args)
 streamingFilter_args.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'data', [IDataId, None], None, ),  # 1
-    (2, TType.STRUCT, '_function', [ignis.rpc.function.ttypes.ISourceFunction, None], None, ),  # 2
+    (2, TType.STRUCT, '_function', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 2
     (3, TType.BOOL, 'ordered', None, None, ),  # 3
 )
 
@@ -2126,7 +2126,7 @@ class reduceByKey_args(object):
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.STRUCT:
-                    self._function = ignis.rpc.function.ttypes.ISourceFunction()
+                    self._function = ignis.rpc.source.ttypes.ISource()
                     self._function.read(iprot)
                 else:
                     iprot.skip(ftype)
@@ -2168,7 +2168,7 @@ all_structs.append(reduceByKey_args)
 reduceByKey_args.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'data', [IDataId, None], None, ),  # 1
-    (2, TType.STRUCT, '_function', [ignis.rpc.function.ttypes.ISourceFunction, None], None, ),  # 2
+    (2, TType.STRUCT, '_function', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 2
 )
 
 

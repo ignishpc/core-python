@@ -19,10 +19,9 @@ all_structs = []
 
 
 class Iface(object):
-    def setContext(self, id, properties):
+    def updateProperties(self, properties):
         """
         Parameters:
-         - id
          - properties
         """
         pass
@@ -41,25 +40,23 @@ class Client(Iface):
             self._oprot = oprot
         self._seqid = 0
 
-    def setContext(self, id, properties):
+    def updateProperties(self, properties):
         """
         Parameters:
-         - id
          - properties
         """
-        self.send_setContext(id, properties)
-        self.recv_setContext()
+        self.send_updateProperties(properties)
+        self.recv_updateProperties()
 
-    def send_setContext(self, id, properties):
-        self._oprot.writeMessageBegin('setContext', TMessageType.CALL, self._seqid)
-        args = setContext_args()
-        args.id = id
+    def send_updateProperties(self, properties):
+        self._oprot.writeMessageBegin('updateProperties', TMessageType.CALL, self._seqid)
+        args = updateProperties_args()
         args.properties = properties
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_setContext(self):
+    def recv_updateProperties(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -67,7 +64,7 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = setContext_result()
+        result = updateProperties_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.ex is not None:
@@ -133,7 +130,7 @@ class Processor(Iface, TProcessor):
     def __init__(self, handler):
         self._handler = handler
         self._processMap = {}
-        self._processMap["setContext"] = Processor.process_setContext
+        self._processMap["updateProperties"] = Processor.process_updateProperties
         self._processMap["stop"] = Processor.process_stop
         self._processMap["test"] = Processor.process_test
 
@@ -152,13 +149,13 @@ class Processor(Iface, TProcessor):
             self._processMap[name](self, seqid, iprot, oprot)
         return True
 
-    def process_setContext(self, seqid, iprot, oprot):
-        args = setContext_args()
+    def process_updateProperties(self, seqid, iprot, oprot):
+        args = updateProperties_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = setContext_result()
+        result = updateProperties_result()
         try:
-            self._handler.setContext(args.id, args.properties)
+            self._handler.updateProperties(args.properties)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -173,7 +170,7 @@ class Processor(Iface, TProcessor):
             logging.exception('Unexpected exception in handler')
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("setContext", msg_type, seqid)
+        oprot.writeMessageBegin("updateProperties", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -233,16 +230,14 @@ class Processor(Iface, TProcessor):
 # HELPER FUNCTIONS AND STRUCTURES
 
 
-class setContext_args(object):
+class updateProperties_args(object):
     """
     Attributes:
-     - id
      - properties
     """
 
 
-    def __init__(self, id=None, properties=None,):
-        self.id = id
+    def __init__(self, properties=None,):
         self.properties = properties
 
     def read(self, iprot):
@@ -255,11 +250,6 @@ class setContext_args(object):
             if ftype == TType.STOP:
                 break
             if fid == 1:
-                if ftype == TType.I64:
-                    self.id = iprot.readI64()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 2:
                 if ftype == TType.MAP:
                     self.properties = {}
                     (_ktype1, _vtype2, _size0) = iprot.readMapBegin()
@@ -279,13 +269,9 @@ class setContext_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('setContext_args')
-        if self.id is not None:
-            oprot.writeFieldBegin('id', TType.I64, 1)
-            oprot.writeI64(self.id)
-            oprot.writeFieldEnd()
+        oprot.writeStructBegin('updateProperties_args')
         if self.properties is not None:
-            oprot.writeFieldBegin('properties', TType.MAP, 2)
+            oprot.writeFieldBegin('properties', TType.MAP, 1)
             oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.properties))
             for kiter7, viter8 in self.properties.items():
                 oprot.writeString(kiter7.encode('utf-8') if sys.version_info[0] == 2 else kiter7)
@@ -308,15 +294,14 @@ class setContext_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(setContext_args)
-setContext_args.thrift_spec = (
+all_structs.append(updateProperties_args)
+updateProperties_args.thrift_spec = (
     None,  # 0
-    (1, TType.I64, 'id', None, None, ),  # 1
-    (2, TType.MAP, 'properties', (TType.STRING, 'UTF8', TType.STRING, 'UTF8', False), None, ),  # 2
+    (1, TType.MAP, 'properties', (TType.STRING, 'UTF8', TType.STRING, 'UTF8', False), None, ),  # 1
 )
 
 
-class setContext_result(object):
+class updateProperties_result(object):
     """
     Attributes:
      - ex
@@ -350,7 +335,7 @@ class setContext_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('setContext_result')
+        oprot.writeStructBegin('updateProperties_result')
         if self.ex is not None:
             oprot.writeFieldBegin('ex', TType.STRUCT, 1)
             self.ex.write(oprot)
@@ -371,8 +356,8 @@ class setContext_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(setContext_result)
-setContext_result.thrift_spec = (
+all_structs.append(updateProperties_result)
+updateProperties_result.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.exception.ttypes.IRemoteException, None], None, ),  # 1
 )

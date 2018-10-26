@@ -24,9 +24,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('Usage: ' + sys.argv[0] + ' [-h host[:port]] [-u url] [-f[ramed]] [-s[sl]] [-novalidate] [-ca_certs certs] [-keyfile keyfile] [-certfile certfile] function [arg1 [arg2...]]')
     print('')
     print('Functions:')
-    print('  void createSplits()')
-    print('  void nextSplit(string addr, i64 length)')
-    print('  void finishSplits()')
+    print('  void createSplits( splits)')
     print('  void joinSplits( order)')
     print('')
     sys.exit(0)
@@ -108,22 +106,10 @@ client = IShuffleModule.Client(protocol)
 transport.open()
 
 if cmd == 'createSplits':
-    if len(args) != 0:
-        print('createSplits requires 0 args')
+    if len(args) != 1:
+        print('createSplits requires 1 args')
         sys.exit(1)
-    pp.pprint(client.createSplits())
-
-elif cmd == 'nextSplit':
-    if len(args) != 2:
-        print('nextSplit requires 2 args')
-        sys.exit(1)
-    pp.pprint(client.nextSplit(args[0], eval(args[1]),))
-
-elif cmd == 'finishSplits':
-    if len(args) != 0:
-        print('finishSplits requires 0 args')
-        sys.exit(1)
-    pp.pprint(client.finishSplits())
+    pp.pprint(client.createSplits(eval(args[0]),))
 
 elif cmd == 'joinSplits':
     if len(args) != 1:
