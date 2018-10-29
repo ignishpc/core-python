@@ -24,7 +24,7 @@ class Ignis:
 		try:
 			with Ignis.__lock:
 				if not Ignis._pool:
-					Ignis.__backend = subprocess.Popen(["ignisbackend"], stdout=subprocess.PIPE)
+					Ignis.__backend = subprocess.Popen(["ignis-backend"], stdout=subprocess.PIPE)
 					Ignis._pool = IClientPool("127.0.0.1", int(Ignis.__backend.stdout.readline()))
 		except Exception as ex:
 			raise IDriverException(ex) from ex
