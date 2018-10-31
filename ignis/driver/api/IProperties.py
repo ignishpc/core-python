@@ -24,28 +24,40 @@ class IProperties:
 	def getProperty(self, key):
 		try:
 			with Ignis._pool.client() as client:
-				client.getIPropertiesService().getProperty(self._id, key)
+				return client.getIPropertiesService().getProperty(self._id, key)
 		except Exception as ex:
 			raise IDriverException(ex) from ex
 
 	def isProperty(self, key):
 		try:
 			with Ignis._pool.client() as client:
-				client.getIPropertiesService().isProperty(self._id, key)
+				return client.getIPropertiesService().isProperty(self._id, key)
 		except Exception as ex:
 			raise IDriverException(ex) from ex
+
+	def __getitem__(self, key):
+		return self.getProperty(key)
+
+	def __setitem__(self, key, value):
+		self.setProperty(key, value)
+
+	def __delitem__(self, key):
+		self.setProperty(key, "")
+
+	def __contains__(self, key):
+		return self.isProperty(key)
 
 	def toDict(self):
 		try:
 			with Ignis._pool.client() as client:
-				client.getIPropertiesService().toDict(self._id)
+				return client.getIPropertiesService().toDict(self._id)
 		except Exception as ex:
 			raise IDriverException(ex) from ex
 
 	def fromDict(self, _dict):
 		try:
 			with Ignis._pool.client() as client:
-				client.getIPropertiesService().fromDict(self._id, _dict)
+				return client.getIPropertiesService().fromDict(self._id, _dict)
 		except Exception as ex:
 			raise IDriverException(ex) from ex
 
