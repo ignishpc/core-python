@@ -13,77 +13,77 @@ class IData:
 			with Ignis._pool.client() as client:
 				self._id = client.getIDataService().setName(self._id, name)
 		except Exception as ex:
-			raise IDriverException(ex)
+			raise IDriverException(ex) from None
 
 	def map(self, fun):
 		try:
 			with Ignis._pool.client() as client:
 				return IData(client.getIDataService()._map(self._id, self.__enconde(fun)))
 		except Exception as ex:
-			raise IDriverException(ex)
+			raise IDriverException(ex) from None
 
 	def streamingMap(self, fun, ordered=True):
 		try:
 			with Ignis._pool.client() as client:
 				return IData(client.getIDataService().streamingMap(self._id, self.__enconde(fun), ordered))
 		except Exception as ex:
-			raise IDriverException(ex)
+			raise IDriverException(ex) from None
 
 	def flatmap(self, fun):
 		try:
 			with Ignis._pool.client() as client:
 				return IData(client.getIDataService().flatmap(self._id, self.__enconde(fun)))
 		except Exception as ex:
-			raise IDriverException(ex)
+			raise IDriverException(ex) from None
 
 	def streamingFlatmap(self, fun, ordered=True):
 		try:
 			with Ignis._pool.client() as client:
 				return IData(client.getIDataService().streamingFlatmap(self._id, self.__enconde(fun), ordered))
 		except Exception as ex:
-			raise IDriverException(ex)
+			raise IDriverException(ex) from None
 
 	def filter(self, fun):
 		try:
 			with Ignis._pool.client() as client:
 				return IData(client.getIDataService().filter(self._id, self.__enconde(fun)))
 		except Exception as ex:
-			raise IDriverException(ex)
+			raise IDriverException(ex) from None
 
 	def streamingFilter(self, fun, ordered=True):
 		try:
 			with Ignis._pool.client() as client:
 				return IData(client.getIDataService().streamingFilter(self._id, self.__enconde(fun), ordered))
 		except Exception as ex:
-			raise IDriverException(ex)
+			raise IDriverException(ex) from None
 
 	def reduceByKey(self, fun):
 		try:
 			with Ignis._pool.client() as client:
 				return IData(client.getIDataService().reduceByKey(self._id, self.__enconde(fun)))
 		except Exception as ex:
-			raise IDriverException(ex)
+			raise IDriverException(ex) from None
 
 	def shuffle(self):
 		try:
 			with Ignis._pool.client() as client:
 				return IData(client.getIDataService().shuffle(self._id))
 		except Exception as ex:
-			raise IDriverException(ex)
+			raise IDriverException(ex) from None
 
 	def saveAsTextFile(self, path, join):
 		try:
 			with Ignis._pool.client() as client:
 				client.getIDataService().saveAsTextFile(self._id, path, join)
 		except Exception as ex:
-			raise IDriverException(ex)
+			raise IDriverException(ex) from None
 
 	def saveAsJsonFile(self, path, join):
 		try:
 			with Ignis._pool.client() as client:
 				client.getIDataService().saveAsJsonFile(self._id, path, join)
 		except Exception as ex:
-			raise IDriverException(ex)
+			raise IDriverException(ex) from None
 
 	def __enconde(self, fun):
 		if isinstance(fun, str):

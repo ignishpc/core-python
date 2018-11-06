@@ -10,14 +10,14 @@ class ICluster:
 			with Ignis._pool.client() as client:
 				self._id = client.getIClusterService().newInstance(properties._id)
 		except Exception as ex:
-			raise IDriverException(ex)
+			raise IDriverException(ex) from None
 
 	def setName(self, name):
 		try:
 			with Ignis._pool.client() as client:
 				client.getIClusterService().setName(self._id, name)
 		except Exception as ex:
-			raise IDriverException(ex)
+			raise IDriverException(ex) from None
 
 	def createJob(self, type, properties=None):
 		return IJob(self, type, properties)
@@ -27,11 +27,11 @@ class ICluster:
 			with Ignis._pool.client() as client:
 				client.getIClusterService().sendFiles(self._id, source, target)
 		except Exception as ex:
-			raise IDriverException(ex)
+			raise IDriverException(ex) from None
 
 	def sendCompressedFile(self, source, target):
 		try:
 			with Ignis._pool.client() as client:
 				client.getIClusterService().sendCompressedFile(self._id, source, target)
 		except Exception as ex:
-			raise IDriverException(ex)
+			raise IDriverException(ex) from None
