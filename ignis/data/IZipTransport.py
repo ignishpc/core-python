@@ -1,0 +1,3 @@
+
+class IZipTransport:
+	pass

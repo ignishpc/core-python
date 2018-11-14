@@ -1,0 +1,4 @@
+
+
+class IObjectProtocol:
+	pass
