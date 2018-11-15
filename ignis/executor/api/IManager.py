@@ -1,21 +1,13 @@
 from ignis.data.handle.IReader import IReader
 from ignis.data.handle.IWriter import IWriter
+from ignis.data.handle.INativeReader import INativeReader
+from ignis.data.handle.INativeWriter import INativeWriter
 
 
 class IManager:
 
-	def __init__(self) -> None:
-		self.__writer = IWriter()
-		self.__reader = IReader()
-
-	def setReader(self, reader):
-		self.__reader = reader
-
-	def getReader(self):
-		return self.__reader
-
-	def setWriter(self, writer):
-		self.__writer = writer
-
-	def getWriter(self):
-		return self.__writer
+	def __init__(self):
+		self.writer = IWriter()
+		self.reader = IReader()
+		self.nativeReader = INativeReader()
+		self.nativeWriter = INativeWriter()

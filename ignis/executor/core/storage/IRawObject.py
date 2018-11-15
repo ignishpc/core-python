@@ -1,25 +1,49 @@
-from ignis.executor.core.storage.IObject import IObject
-from ignis.executor.core.storage.iterator.ITransportIterator import IReadTransportIterator, IWriteTransportIterator
-from ignis.executor.core.storage.iterator.ICoreIterator import readToWrite
+from .IObject import IObject
+from .iterator.ICoreIterator import readToWrite
+from .iterator.ISimpleIterator import IBasicReadIterator, IBasicWriteIterator
 from ignis.data.IZipTransport import IZipTransport
+from ignis.data.IObjectProtocol import IObjectProtocol
+
 
 class IRawObject(IObject):
 
-	def __init__(self, transport, compression, manager):
+	def __init__(self, transport, compression, manager, native):
 		self._transport = transport
 		self._compression = compression
 		self._manager = manager
-		self._type = None
+		self._native = native
+		self._reader = None
+		self._writer = None
+		self._protocol = None
 		self._elems = 0
 
 	def readIterator(self):
-		return IReadTransportIterator(self.__transport, self._manager, self._elems)
+		def hasNext(it):
+			return it.__elems < self._elems
+
+		def next(it):
+			it.__elems += 1
+			return self._reader.read(self._protocol)
+
 
 	def writeIterator(self):
-		def written():
-			self._elems = self._elems + 1
+		def write(it, obj):
+			self._elems += 1
+			if self._writer is None:
+				if self._native:
+					self._writer = self._manager.nativeWriter
+					self._reader = self._manager.nativeReader
+					self._protocol = self._transport
+				else:
+					self._writer = self._manager.writer.getWriter(obj)
+					self._reader = self._manager.reader.getReader(self._writer.getId())
+					self._protocol = IObjectProtocol(self._transport)
+			elif self.__type != type(obj):
+				raise ValueError("Current serialization does not support heterogeneous types")
+			self.__type = type(obj)
+			self._writer.write(obj, self._protocol)
 
-		return IWriteTransportIterator(self.__transport, self._manager, lambda: written)
+		return IBasicWriteIterator(write)
 
 	def read(self, trans):
 		self.clear()
@@ -56,7 +80,21 @@ class IRawObject(IObject):
 		self._elems = 0
 
 	def __readHeader(self, transport):
-		pass
+		headProto = IObjectProtocol(transport)
+		self._native = headProto.readBool()
+		self._elems = headProto.readI64()
+		if self._native:
+			self._reader = self._manager.nativeReader
+			self._writer = self._manager.nativeWriter
+			self._protocol = self._transport
+		else:
+			self._reader = self._manager.reader.readTypeAux(headProto)
+			self._writer = self._manager.writer.getWriter(self._reader.getId())
+			self._protocol = IObjectProtocol(self._transport)
 
 	def __writeHeader(self, transport):
-		pass
+		headProto = IObjectProtocol(transport)
+		headProto.writeBool(self._native)
+		headProto.writeI64(self._elems)
+		if self._native:
+			self._writer.writeType(headProto)

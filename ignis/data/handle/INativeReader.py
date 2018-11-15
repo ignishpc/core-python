@@ -2,5 +2,5 @@
 
 class INativeReader:
 
-	def readSizeAux(self, transport):
+	def read(self, transport):
 		pass

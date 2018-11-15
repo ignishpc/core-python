@@ -1,14 +1,21 @@
-from ignis.data.handle.IEnumTypes import IEnumTypes
+from .IEnumTypes import IEnumTypes
+from ignis.data.IObjectProtocol import IObjectProtocol
 
 
 class IWriter:
 	class __IWriterType:
-		def __init__(self, _type, write):
-			self.__type = _type
+		def __init__(self, tp, write):
+			self.__type = tp
 			self.write = write
 
+		def getId(self):
+			return self.__type
+
 		def writeType(self, protocol):
-			protocol.writeByte(type)
+			protocol.writeByte(self._type)
+
+	def getProtocol(self, transport):
+		return IObjectProtocol(transport)
 
 	def __init__(self) -> None:
 		self.__methods = dict()
@@ -24,7 +31,7 @@ class IWriter:
 		self.__methods[type(bytes)] = self.__IWriterType(IEnumTypes.I_BINARY, self.writeBytes)
 		self.__methods[type(bytearray)] = self.__IWriterType(IEnumTypes.I_BINARY, self.writeBytes)
 
-	def getTypeAux(self, object):
+	def getWriter(self, object):
 		if type(object) in self.__methods:
 			return self.methods[type(object)]
 		raise NotImplementedError("IWriterType not implemented for " + str(type(object).__name__))
@@ -60,9 +67,9 @@ class IWriter:
 		size = len(object)
 		self.writeSizeAux(size)
 		if size == 0:
-			writer = self.getTypeAux(None)
+			writer = self.getWriter(None)
 		else:
-			writer = self.getTypeAux(object[0])
+			writer = self.getWriter(object[0])
 		writer.writeType(protocol)
 		for elem in object:
 			writer.write(elem)
@@ -71,9 +78,9 @@ class IWriter:
 		size = len(object)
 		self.writeSizeAux(size)
 		if size == 0:
-			writer = self.getTypeAux(None)
+			writer = self.getWriter(None)
 		else:
-			writer = self.getTypeAux(next(iter(object)))
+			writer = self.getWriter(next(iter(object)))
 		writer.writeType(protocol)
 		for elem in object:
 			writer.write(elem)
@@ -82,12 +89,12 @@ class IWriter:
 		size = len(object)
 		self.writeSizeAux(size)
 		if size == 0:
-			keyWriter = self.getTypeAux(None)
-			valueWriter = self.getTypeAux(None)
+			keyWriter = self.getWriter(None)
+			valueWriter = self.getWriter(None)
 		else:
 			entry = next(iter(object))
-			keyWriter = self.getTypeAux(entry[0])
-			valueWriter = self.getTypeAux(entry[1])
+			keyWriter = self.getWriter(entry[0])
+			valueWriter = self.getWriter(entry[1])
 		keyWriter.writeType(protocol)
 		valueWriter.writeType(protocol)
 		for key, value in object.items():
@@ -97,8 +104,8 @@ class IWriter:
 	def writePair(self, object, protocol):
 		if len(object):
 			raise NotImplementedError("IWriterType not implemented for len(tuple) > 2")
-		firstReader = self.getTypeAux(object[0])
-		secondReader = self.getTypeAux(object[1])
+		firstReader = self.getWriter(object[0])
+		secondReader = self.getWriter(object[1])
 		firstReader.writeType(protocol)
 		secondReader.writeType(protocol)
 		firstReader.write(object[0])

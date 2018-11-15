@@ -1,4 +1,6 @@
 
 
 class INativeWriter:
-	pass
+
+	def write(self, transport, object):
+		pass

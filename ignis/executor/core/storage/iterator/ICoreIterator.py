@@ -1,4 +1,3 @@
-
 class ICoreReadIterator:
 
 	def next(self):
@@ -12,12 +11,14 @@ class ICoreReadIterator:
 			self.next()
 			n = n - 1
 
+
 class ICoreWriteIterator:
 
-	def write(self):
+	def write(self, obj):
 		pass
 
-def readToWrite(reader, writer, n= None):
+
+def readToWrite(reader, writer, n=None):
 	if n:
 		while reader.hasNext() and n > 0:
 			writer.write(reader.next())
