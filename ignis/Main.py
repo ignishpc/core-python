@@ -1,10 +1,11 @@
-import ignis.executor.core.ILog
+import ignis.executor.core.ILog as ILog
 import sys
 import logging
 
 logger = logging.getLogger(__name__)
 
 def main(argv):
+	ILog.init()
 	logger.info("hola")
 	logger.error("adios")
 
