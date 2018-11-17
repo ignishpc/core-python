@@ -12,29 +12,32 @@ class IWriter:
 			return self.__type
 
 		def writeType(self, protocol):
-			protocol.writeByte(self._type)
+			protocol.writeByte(self.__type)
 
 	def getProtocol(self, transport):
 		return IObjectProtocol(transport)
 
 	def __init__(self) -> None:
 		self.__methods = dict()
-		self.__methods[type(None)] = self.__IWriterType(IEnumTypes.I_VOID, self._writeVoid)
-		self.__methods[type(bool)] = self.__IWriterType(IEnumTypes.I_BOOL, self._writeBool)
-		self.__methods[type(int)] = self.__IWriterType(IEnumTypes.I_I64, self.writeI64)
-		self.__methods[type(float)] = self.__IWriterType(IEnumTypes.I_DOUBLE, self.writeDouble)
-		self.__methods[type(str)] = self.__IWriterType(IEnumTypes.I_STRING, self.writeString)
-		self.__methods[type(list)] = self.__IWriterType(IEnumTypes.I_LIST, self.writeList)
-		self.__methods[type(set)] = self.__IWriterType(IEnumTypes.I_SET, self.writeSet)
-		self.__methods[type(dict)] = self.__IWriterType(IEnumTypes.I_MAP, self.writeMap)
-		self.__methods[type(())] = self.__IWriterType(IEnumTypes.I_PAIR, self.writePair)
-		self.__methods[type(bytes)] = self.__IWriterType(IEnumTypes.I_BINARY, self.writeBytes)
-		self.__methods[type(bytearray)] = self.__IWriterType(IEnumTypes.I_BINARY, self.writeBytes)
+		self.__methods[None] = self.__IWriterType(IEnumTypes.I_VOID, self.writeVoid)
+		self.__methods[bool] = self.__IWriterType(IEnumTypes.I_BOOL, self.writeBool)
+		self.__methods[int] = self.__IWriterType(IEnumTypes.I_I64, self.writeI64)
+		self.__methods[float] = self.__IWriterType(IEnumTypes.I_DOUBLE, self.writeDouble)
+		self.__methods[str] = self.__IWriterType(IEnumTypes.I_STRING, self.writeString)
+		self.__methods[list] = self.__IWriterType(IEnumTypes.I_LIST, self.writeList)
+		self.__methods[set] = self.__IWriterType(IEnumTypes.I_SET, self.writeSet)
+		self.__methods[dict] = self.__IWriterType(IEnumTypes.I_MAP, self.writeMap)
+		self.__methods[tuple] = self.__IWriterType(IEnumTypes.I_PAIR, self.writePair)
+		self.__methods[bytes] = self.__IWriterType(IEnumTypes.I_BINARY, self.writeBytes)
+		self.__methods[bytearray] = self.__IWriterType(IEnumTypes.I_BINARY, self.writeBytes)
+
+	def getWriterByType(self, tp):
+		if tp in self.__methods:
+			return self.__methods[tp]
+		raise NotImplementedError("IWriterType not implemented for " + str(tp.__name__))
 
 	def getWriter(self, object):
-		if type(object) in self.__methods:
-			return self.methods[type(object)]
-		raise NotImplementedError("IWriterType not implemented for " + str(type(object).__name__))
+		return self.getWriterByType(type(object))
 
 	def writeSizeAux(self, size, protocol):
 		protocol.writeI64(size)
@@ -65,29 +68,29 @@ class IWriter:
 
 	def writeList(self, object, protocol):
 		size = len(object)
-		self.writeSizeAux(size)
+		self.writeSizeAux(size, protocol)
 		if size == 0:
 			writer = self.getWriter(None)
 		else:
 			writer = self.getWriter(object[0])
 		writer.writeType(protocol)
 		for elem in object:
-			writer.write(elem)
+			writer.write(elem, protocol)
 
 	def writeSet(self, object, protocol):
 		size = len(object)
-		self.writeSizeAux(size)
+		self.writeSizeAux(size, protocol)
 		if size == 0:
 			writer = self.getWriter(None)
 		else:
 			writer = self.getWriter(next(iter(object)))
 		writer.writeType(protocol)
 		for elem in object:
-			writer.write(elem)
+			writer.write(elem, protocol)
 
 	def writeMap(self, object, protocol):
 		size = len(object)
-		self.writeSizeAux(size)
+		self.writeSizeAux(size, protocol)
 		if size == 0:
 			keyWriter = self.getWriter(None)
 			valueWriter = self.getWriter(None)
@@ -98,8 +101,8 @@ class IWriter:
 		keyWriter.writeType(protocol)
 		valueWriter.writeType(protocol)
 		for key, value in object.items():
-			keyWriter.write(key)
-			valueWriter.write(value)
+			keyWriter.write(key, protocol)
+			valueWriter.write(value, protocol)
 
 	def writePair(self, object, protocol):
 		if len(object):
@@ -108,10 +111,10 @@ class IWriter:
 		secondReader = self.getWriter(object[1])
 		firstReader.writeType(protocol)
 		secondReader.writeType(protocol)
-		firstReader.write(object[0])
-		secondReader.write(object[1])
+		firstReader.write(object[0], protocol)
+		secondReader.write(object[1], protocol)
 
 	def writeBytes(self, object, protocol):
-		self.writeSizeAux(len(object))
+		self.writeSizeAux(len(object), protocol)
 		for b in object:
 			protocol.writeByte(b)

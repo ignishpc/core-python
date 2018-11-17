@@ -1,7 +1,6 @@
 from .IEnumTypes import IEnumTypes
 from ignis.data.IObjectProtocol import IObjectProtocol
 
-
 class IReader:
 	class __IReaderType:
 		def __init__(self, tp, read):
@@ -16,28 +15,28 @@ class IReader:
 
 	def __init__(self) -> None:
 		self.__methods = dict()
-		self.__methods[IEnumTypes.I_VOID] = self.__IReaderType(type(None), self.readVoid)
-		self.__methods[IEnumTypes.I_BOOL] = self.__IReaderType(type(bool), self.readBool)
-		self.__methods[IEnumTypes.I_I08] = self.__IReaderType(type(int), self.readByte)
-		self.__methods[IEnumTypes.I_I16] = self.__IReaderType(type(int), self.readI16)
-		self.__methods[IEnumTypes.I_I32] = self.__IReaderType(type(int), self.readI32)
-		self.__methods[IEnumTypes.I_I64] = self.__IReaderType(type(int), self.readI64)
-		self.__methods[IEnumTypes.I_DOUBLE] = self.__IReaderType(type(float), self.readDouble)
-		self.__methods[IEnumTypes.I_STRING] = self.__IReaderType(type(str), self.readString)
-		self.__methods[IEnumTypes.I_LIST] = self.__IReaderType(type(list), self.readList)
-		self.__methods[IEnumTypes.I_SET] = self.__IReaderType(type(set), self.readSet)
-		self.__methods[IEnumTypes.I_MAP] = self.__IReaderType(type(map), self.readMap)
-		self.__methods[IEnumTypes.I_PAIR] = self.__IReaderType(type(()), self.readPair)
-		self.__methods[IEnumTypes.I_BINARY] = self.__IReaderType(type(bytearray), self.readBinary)
-		self.__methods[IEnumTypes.I_PAIR_LIST] = self.__IReaderType(type(list), self.readPairList)
+		self.__methods[IEnumTypes.I_VOID] = self.__IReaderType(None, self.readVoid)
+		self.__methods[IEnumTypes.I_BOOL] = self.__IReaderType(bool, self.readBool)
+		self.__methods[IEnumTypes.I_I08] = self.__IReaderType(int, self.readByte)
+		self.__methods[IEnumTypes.I_I16] = self.__IReaderType(int, self.readI16)
+		self.__methods[IEnumTypes.I_I32] = self.__IReaderType(int, self.readI32)
+		self.__methods[IEnumTypes.I_I64] = self.__IReaderType(int, self.readI64)
+		self.__methods[IEnumTypes.I_DOUBLE] = self.__IReaderType(float, self.readDouble)
+		self.__methods[IEnumTypes.I_STRING] = self.__IReaderType(str, self.readString)
+		self.__methods[IEnumTypes.I_LIST] = self.__IReaderType(list, self.readList)
+		self.__methods[IEnumTypes.I_SET] = self.__IReaderType(set, self.readSet)
+		self.__methods[IEnumTypes.I_MAP] = self.__IReaderType(map, self.readMap)
+		self.__methods[IEnumTypes.I_PAIR] = self.__IReaderType(tuple, self.readPair)
+		self.__methods[IEnumTypes.I_BINARY] = self.__IReaderType(bytearray, self.readBinary)
+		self.__methods[IEnumTypes.I_PAIR_LIST] = self.__IReaderType(list, self.readPairList)
 
 	def getReader(self, tp):
 		if tp in self.__methods:
-			return self.methods[type]
+			return self.__methods[tp]
 		raise NotImplementedError("IReaderType not implemented for id " + type)
 
 	def readTypeAux(self, protocol):
-		return self.getReader(protocol.readI8())
+		return protocol.readByte()
 
 	def readSizeAux(self, protocol):
 		return protocol.readI64()
@@ -69,32 +68,32 @@ class IReader:
 	def readList(self, protocol):
 		object = list()
 		size = self.readSizeAux(protocol)
-		reader = self.readTypeAux(protocol)
+		reader = self.getReader(self.readTypeAux(protocol))
 		for i in range(0, size):
-			object.append(reader.read())
+			object.append(reader.read(protocol))
 		return object
 
 	def readSet(self, protocol):
 		object = set()
 		size = self.readSizeAux(protocol)
-		reader = self.readTypeAux(protocol)
+		reader = self.getReader(self.readTypeAux(protocol))
 		for i in range(0, size):
-			object.add(reader.read())
+			object.add(reader.read(protocol))
 		return object
 
 	def readMap(self, protocol):
 		object = dict()
 		size = self.readSizeAux(protocol)
-		keyReader = self.readTypeAux(protocol)
-		valueReader = self.readTypeAux(protocol)
+		keyReader = self.getReader(self.readTypeAux(protocol))
+		valueReader =self.getReader(self.readTypeAux(protocol))
 		for i in range(0, size):
-			object[keyReader.read()] = valueReader.read()
+			object[keyReader.read(protocol)] = valueReader.read(protocol)
 		return object
 
 	def readPair(self, protocol):
-		firstReader = self.readTypeAux(protocol)
-		secondReader = self.readTypeAux(protocol)
-		return (firstReader.read(), secondReader.read())
+		firstReader = self.getReader(self.readTypeAux(protocol))
+		secondReader = self.getReader(self.readTypeAux(protocol))
+		return firstReader.read(protocol), secondReader.read(protocol)
 
 	def readBinary(self, protocol):
 		object = bytearray()
@@ -106,8 +105,8 @@ class IReader:
 	def readPairList(self, protocol):
 		object = list()
 		size = self.readSizeAux(protocol)
-		firstReader = self.readTypeAux(protocol)
-		secondReader = self.readTypeAux(protocol)
+		firstReader = self.getReader(self.readTypeAux(protocol))
+		secondReader = self.getReader(self.readTypeAux(protocol))
 		for i in range(0, size):
-			object.append((firstReader.read(), secondReader.read()))
+			object.append((firstReader.read(protocol), secondReader.read(protocol)))
 		return object

@@ -1,5 +1,6 @@
-from thrift.protocol.TCompactProtocol import TCompactProtocol
+from thrift.protocol.TCompactProtocol import TCompactProtocol, CompactType, makeZigZag
 from struct import pack, unpack
+
 
 class IObjectProtocol(TCompactProtocol):
 
@@ -8,21 +9,21 @@ class IObjectProtocol(TCompactProtocol):
 
 	def writeBool(self, bool):
 		if bool:
-			self._TCompactProtocol__writeByte(TCompactProtocol.CompactType.TRUE)
+			self._TCompactProtocol__writeByte(CompactType.TRUE)
 		else:
-			self._TCompactProtocol__writeByte(TCompactProtocol.CompactType.FALSE)
+			self._TCompactProtocol__writeByte(CompactType.FALSE)
 
 	def readBool(self):
-		return self._TCompactProtocol__readByte() == TCompactProtocol.CompactType.TRUE
+		return self._TCompactProtocol__readByte() == CompactType.TRUE
 
 	writeByte = TCompactProtocol._TCompactProtocol__writeByte
 	writeI16 = TCompactProtocol._TCompactProtocol__writeI16
 
 	def writeI32(self, i32):
-		self._TCompactProtocol__writeVarint(self.makeZigZag(i32, 32))
+		self._TCompactProtocol__writeVarint(makeZigZag(i32, 32))
 
 	def writeI64(self, i64):
-		self._TCompactProtocol__writeVarint(self.makeZigZag(i64, 64))
+		self._TCompactProtocol__writeVarint(makeZigZag(i64, 64))
 
 	def writeDouble(self, dub):
 		self.trans.write(pack('<d', dub))
@@ -40,3 +41,19 @@ class IObjectProtocol(TCompactProtocol):
 		return val
 
 	readBinary = TCompactProtocol._TCompactProtocol__readBinary
+
+	def readObject(self, manager):
+		native = self.readBool()
+		if native:
+			return manager.nativeReader.read(self.trans)
+		else:
+			return manager.reader.getReader(manager.reader.readTypeAux(self)).read(self)
+
+	def writeObject(self, obj, manager, native):
+		self.writeBool(native)
+		if native:
+			manager.nativeWriter.write(obj, self.trans)
+		else:
+			writer = manager.writer.getWriter(obj)
+			writer.writeType(self)
+			writer.write(obj, self)

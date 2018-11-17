@@ -1,12 +1,12 @@
 from .ICoreIterator import ICoreWriteIterator, ICoreReadIterator
 
 
-class IBasicReadIterator(ICoreReadIterator):
+class ISimpleReadIterator(ICoreReadIterator):
 
 	def __init__(self, next, hasNext):
-		self.__elems = 0
-		self.next = next
-		self.hasNext = hasNext
+		self._elems = 0
+		self.next = next.__get__(self)
+		self.hasNext = hasNext.__get__(self)
 
 	def skip(self, n):
 		while self.hasNext() and n > 0:
@@ -14,7 +14,7 @@ class IBasicReadIterator(ICoreReadIterator):
 			n = n - 1
 
 
-class IBasicWriteIterator(ICoreWriteIterator):
+class ISimpleWriteIterator(ICoreWriteIterator):
 
 	def __init__(self, write):
-		self.write = write
+		self.write = write.__get__(self)

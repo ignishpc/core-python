@@ -1,7 +1,7 @@
 from .IObject import IObject
 from .iterator.ICoreIterator import readToWrite
-from .iterator.ISimpleIterator import IBasicReadIterator, IBasicWriteIterator
-from ignis.data.IZipTransport import IZipTransport
+from .iterator.ISimpleIterator import ISimpleReadIterator, ISimpleWriteIterator
+from ignis.data.IZlibTransport import IZlibTransport
 from ignis.data.IObjectProtocol import IObjectProtocol
 
 
@@ -19,17 +19,18 @@ class IRawObject(IObject):
 
 	def readIterator(self):
 		def hasNext(it):
-			return it.__elems < self._elems
+			return it._elems < self._elems
 
 		def next(it):
-			it.__elems += 1
+			it._elems += 1
 			return self._reader.read(self._protocol)
 
+		return ISimpleReadIterator(next=next, hasNext=hasNext)
 
 	def writeIterator(self):
 		def write(it, obj):
 			self._elems += 1
-			if self._writer is None:
+			if self._writer is None or self._reader is None:
 				if self._native:
 					self._writer = self._manager.nativeWriter
 					self._reader = self._manager.nativeReader
@@ -43,27 +44,27 @@ class IRawObject(IObject):
 			self.__type = type(obj)
 			self._writer.write(obj, self._protocol)
 
-		return IBasicWriteIterator(write)
+		return ISimpleWriteIterator(write)
 
 	def read(self, trans):
 		self.clear()
-		dataTransport = IZipTransport(trans)
+		dataTransport = IZlibTransport(trans)
 		self.__readHeader(dataTransport)
 		while True:
 			buffer = dataTransport.read(256)
 			if not buffer:
 				break
-			self.__transport.write(buffer)
-		self.__transport.flush()
+			self._transport.write(buffer)
+		self._transport.flush()
 
 	def write(self, trans, compression):
-		dataTransport = IZipTransport(trans)
+		dataTransport = IZlibTransport(trans)
 		self.__writeHeader(dataTransport)
 		while True:
-			buffer = self.__transport.read(256)
+			buffer = self._transport.read(256)
 			if not buffer:
 				break
-				dataTransport.write(buffer)
+			dataTransport.write(buffer)
 		dataTransport.flush()
 
 	def copyFrom(self, source):
@@ -71,30 +72,34 @@ class IRawObject(IObject):
 
 	def moveFrom(self, source):
 		self.copyFrom(source)
+		source.clear()
 
 	def __len__(self):
 		return self._elems
 
 	def clear(self):
-		self._type = None
 		self._elems = 0
+		self._writer = None
+		self._reader = None
 
 	def __readHeader(self, transport):
 		headProto = IObjectProtocol(transport)
 		self._native = headProto.readBool()
-		self._elems = headProto.readI64()
+		self._manager.reader.readTypeAux(headProto)
+		self._elems = self._manager.reader.readSizeAux(headProto)
 		if self._native:
 			self._reader = self._manager.nativeReader
 			self._writer = self._manager.nativeWriter
 			self._protocol = self._transport
 		else:
-			self._reader = self._manager.reader.readTypeAux(headProto)
-			self._writer = self._manager.writer.getWriter(self._reader.getId())
+			self._reader = self._manager.reader.getReader(self._manager.reader.readTypeAux(headProto))
+			self._writer = self._manager.writer.getWriterByType(self._reader.getId())
 			self._protocol = IObjectProtocol(self._transport)
 
 	def __writeHeader(self, transport):
 		headProto = IObjectProtocol(transport)
 		headProto.writeBool(self._native)
-		headProto.writeI64(self._elems)
-		if self._native:
+		self._manager.writer.getWriter(list()).writeType(headProto)
+		self._manager.writer.writeSizeAux(self._elems, headProto)
+		if not self._native:
 			self._writer.writeType(headProto)

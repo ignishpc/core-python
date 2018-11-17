@@ -55,9 +55,9 @@ class ISharedMemoryBuffer(TTransportBase):
 			else:
 				self.__initCommon(None, sz, True, 0)
 		else:
-			if policy == MemoryPolicy.OBSERVE or MemoryPolicy.TAKE_OWNERSHIP:
-				self.__initCommon(buf, sz, policy == MemoryPolicy.TAKE_OWNERSHIP, sz)
-			elif policy == MemoryPolicy.COPY:
+			if policy == ISharedMemoryBuffer.MemoryPolicy.OBSERVE or ISharedMemoryBuffer.MemoryPolicy.TAKE_OWNERSHIP:
+				self.__initCommon(buf, sz, policy == ISharedMemoryBuffer.MemoryPolicy.TAKE_OWNERSHIP, sz)
+			elif policy == ISharedMemoryBuffer.MemoryPolicy.COPY:
 				self.__initCommon(None, sz, True, 0)
 				self.write(buf, sz)
 			else:
@@ -100,7 +100,9 @@ class ISharedMemoryBuffer(TTransportBase):
 				# It isn't safe to write into a buffer we don't own.
 				if self.__owner:
 					self.__wBound = self.__wBase
-					self.__bufferSize = 0
+					self.__bufferSize = ISharedMemoryBuffer.defaultSize
+					self.__buffer.seek(self.__wBase)
+					self.__buffer.resize(self.__bufferSize)
 			else:
 				# Construct the new buffer and move it into ourself
 				self._swap(ISharedMemoryBuffer(sz))
@@ -126,7 +128,7 @@ class ISharedMemoryBuffer(TTransportBase):
 		return self.__wBase - self.__rBase
 
 	def availableWrite(self):
-		return self.wBound - self.wBase
+		return self.__wBound - self.__wBase
 
 	def getWritePtr(self, sz):
 		self._ensureCanWrite(sz)
@@ -202,6 +204,7 @@ class ISharedMemoryBuffer(TTransportBase):
 		self.__rBound = buf + sz
 
 	def setWriteBuffer(self, buf, sz):
+		self.__buffer.seek(self.__wBase)
 		self.__wBase = buf
 		self.__Bound = buf + sz
 
@@ -252,7 +255,7 @@ class ISharedMemoryBuffer(TTransportBase):
 		return self.__buffer[start: start + give]
 
 	def _writeSlow(self, buf):
-		self.ensureCanWrite(len(buf))
+		self._ensureCanWrite(len(buf))
 		self.__buffer.write(buf)
 		self.__wBase += len(buf)
 

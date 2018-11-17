@@ -4,7 +4,7 @@ import tempfile
 import os
 import sys
 
-
+from ignis_test.executor.core.storage.IRawMemoryObjectTest import IRawMemoryObjectTest
 
 def main():
 	tests = unittest.TestLoader().discover('.', pattern='*Test.py')
