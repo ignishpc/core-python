@@ -33,7 +33,7 @@ class IReader:
 	def getReader(self, tp):
 		if tp in self.__methods:
 			return self.__methods[tp]
-		raise NotImplementedError("IReaderType not implemented for id " + type)
+		raise NotImplementedError("IReaderType not implemented for id " + str(tp))
 
 	def readTypeAux(self, protocol):
 		return protocol.readByte()

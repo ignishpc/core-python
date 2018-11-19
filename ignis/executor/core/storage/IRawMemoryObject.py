@@ -5,7 +5,7 @@ from ignis.data.IZlibTransport import IZlibTransport
 
 class IRawMemoryObject(IRawObject):
 
-	def __init__(self, compression, manager, native, sz=50 * 1024 * 1024):
+	def __init__(self, compression, manager, native=False, sz=50 * 1024 * 1024):
 		self.__readOnly = False
 		self.__rawMemory = ISharedMemoryBuffer(sz)
 		super().__init__(IZlibTransport(self.__rawMemory, compression), compression, manager, native)
@@ -45,7 +45,9 @@ class IRawMemoryObject(IRawObject):
 		buffer = self.__rawMemory.getBuffer()
 		obs = ISharedMemoryBuffer(buf=buffer, sz=self.__rawMemory.availableRead())
 		object = copy.copy(self)
-		object._protocol = self._protocol.__class__(IZlibTransport(obs))
+		object._protocol = IZlibTransport(obs)
+		if not self._native:
+			object._protocol = self._protocol.__class__(object._protocol)
 		object.__rawMemory = obs
 		object.__readOnly = True
 		return object

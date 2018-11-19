@@ -67,14 +67,14 @@ class IObjectTest():
 			self.assertEqual(elem, reader.next())
 		self.assert_(not reader.hasNext())
 
-	def Dtest_transNativeWriteItRead(self):#TODO remove D
+	def test_transNativeWriteItRead(self):#TODO remove D
 		random.seed(0)
 		examples = [random.randint(0, 100) for i in range(0, 100)]
 		##########################################################################
 		rBuffer = ISharedMemoryBuffer()
 		rTransport = IZlibTransport(rBuffer, 6)
 		rProtocol = IObjectProtocol(rTransport)
-		rProtocol.writeObject(examples, self._manager, native=True)
+		rProtocol.writeObject(examples, self._manager, native=True, listHeader=True)
 		rTransport.flush()
 		self._object.read(rBuffer)
 		self.assertEqual(len(examples), self._object.getSize())
@@ -108,14 +108,14 @@ class IObjectTest():
 		for i, j in zip(examples, result):
 			self.assertEqual(i, j)
 
-	def Dtest_transNativeWriteTransRead(self):#TODO remove D
+	def test_transNativeWriteTransRead(self):#TODO remove D
 		random.seed(0)
 		examples = [random.randint(0, 100) for i in range(0, 100)]
 		##########################################################################
 		rBuffer = ISharedMemoryBuffer()
 		rTransport = IZlibTransport(rBuffer, 6)
 		rProtocol = IObjectProtocol(rTransport)
-		rProtocol.writeObject(examples, self._manager, native=True)
+		rProtocol.writeObject(examples, self._manager, native=True, listHeader=True)
 		rTransport.flush()
 		self._object.read(rBuffer)
 		self.assertEqual(len(examples), self._object.getSize())

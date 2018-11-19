@@ -265,7 +265,7 @@ class ISharedMemoryBuffer(TTransportBase):
 		if buf is None and size != 0:
 			assert owner
 			buf = mmap.mmap(fileno=-1, length=size, access=mmap.ACCESS_WRITE)
-
+		assert buf
 		self.__buffer = buf
 		self.__bufferSize = size
 
@@ -276,3 +276,6 @@ class ISharedMemoryBuffer(TTransportBase):
 		self.__wBound = self.__bufferSize
 
 		self.__owner = owner
+
+	def __getitem__(self, i):
+		return self.__buffer[i]

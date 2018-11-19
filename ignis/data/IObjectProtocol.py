@@ -45,14 +45,29 @@ class IObjectProtocol(TCompactProtocol):
 	def readObject(self, manager):
 		native = self.readBool()
 		if native:
-			return manager.nativeReader.read(self.trans)
+			header = self.readBool()
+			if header:
+				elems = manager.reader.readSizeAux(self)
+				l = list()
+				for i in range(0, elems):
+					l.append(manager.nativeReader.read(self.trans))
+				return l
+			else:
+				return manager.nativeReader.read(self.trans)
 		else:
 			return manager.reader.getReader(manager.reader.readTypeAux(self)).read(self)
 
-	def writeObject(self, obj, manager, native):
+	def writeObject(self, obj, manager, native, listHeader=False):
 		self.writeBool(native)
 		if native:
-			manager.nativeWriter.write(obj, self.trans)
+			isList = type(obj) == list
+			self.writeBool(isList and listHeader)  # Header
+			if isList and listHeader:
+				manager.writer.writeSizeAux(len(obj), self)
+				for i in range(0, len(obj)):
+					manager.nativeWriter.write(obj[i], self.trans)
+			else:
+				manager.nativeWriter.write(obj, self.trans)
 		else:
 			writer = manager.writer.getWriter(obj)
 			writer.writeType(self)

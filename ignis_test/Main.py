@@ -4,7 +4,8 @@ import tempfile
 import os
 import sys
 
-from ignis_test.executor.core.storage.IRawMemoryObjectTest import IRawMemoryObjectTest
+from ignis_test.executor.core.storage.IRawMemoryObjectTest import IRawMemoryObjectTestNative, IRawMemoryObjectTest
+from ignis_test.executor.core.storage.IMemoryObjectTest import IMemoryObjectTest,IMemoryObjectTestNative
 
 def main():
 	tests = unittest.TestLoader().discover('.', pattern='*Test.py')
@@ -24,4 +25,5 @@ def main():
 
 
 if __name__ == '__main__':
+
 	main()
