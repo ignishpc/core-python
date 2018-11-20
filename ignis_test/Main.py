@@ -3,6 +3,7 @@ import coverage
 import tempfile
 import os
 import sys
+import ignis.executor.core.ILog as Ilog
 
 
 def main():
@@ -23,5 +24,5 @@ def main():
 
 
 if __name__ == '__main__':
-
+	Ilog.enable(False)
 	main()

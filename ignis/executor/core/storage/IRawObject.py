@@ -6,6 +6,7 @@ from ignis.data.IObjectProtocol import IObjectProtocol
 
 
 class IRawObject(IObject):
+	TYPE = "raw"
 
 	def __init__(self, transport, compression, manager, native):
 		self._transport = transport

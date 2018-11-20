@@ -9,5 +9,5 @@ class IMessage:
 	def getAddr(self):
 		return self._addr
 
-	def getObject(self):
+	def getObj(self):
 		return self._obj

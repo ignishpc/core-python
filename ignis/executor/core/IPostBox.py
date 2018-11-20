@@ -22,7 +22,7 @@ class IPostBox:
 		return self.__outbox
 
 	def popOutBox(self):
-		outbox = self.__inbox
+		outbox = self.__outbox
 		self.__outbox = dict()
 		return outbox
 

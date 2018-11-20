@@ -7,6 +7,8 @@ from ignis.data.IObjectProtocol import IObjectProtocol
 
 
 class IMemoryObject(IObject):
+	TYPE = "memory"
+
 	class __Index:
 
 		def __init__(self, elems):
@@ -158,4 +160,3 @@ class IMemoryObject(IObject):
 		object.__rawMemory = obs
 		object.__readOnly = True
 		return object
-

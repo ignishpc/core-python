@@ -8,6 +8,7 @@ class IExecutorData:
 		self.__context = IContext()
 		self.__postBox = IPostBox()
 		self.__context = IContext()
+		self.__parser = IPropertyParser(self.__context.getProperties())
 
 	def loadObject(self, obj=None):
 		if obj:
