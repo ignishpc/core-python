@@ -46,9 +46,12 @@ class IRawMemoryObject(IRawObject):
 		buffer = self.__rawMemory.getBuffer()
 		obs = ISharedMemoryBuffer(buf=buffer, sz=self.__rawMemory.availableRead())
 		object = copy.copy(self)
-		object._protocol = IZlibTransport(obs)
-		if not self._native:
-			object._protocol = self._protocol.__class__(object._protocol)
 		object.__rawMemory = obs
+		object._transport = IZlibTransport(obs, self._compression)
+		if self._native:
+			object._protocol = object._transport
+		else:
+			object._protocol = self._protocol.__class__(object._transport)
+
 		object.__readOnly = True
 		return object

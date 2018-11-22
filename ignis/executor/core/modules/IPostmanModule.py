@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class IPostmanModule(IPostmanModuleRpc.Iface, IModule):
 
 	def __init__(self, executorData):
-		IModule.__init__(self, executorData)
+		super().__init__(executorData)
 		self.__started = False
 
 	def __threadAccept(self, transport):

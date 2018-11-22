@@ -28,7 +28,8 @@ class IModule:
 		else:
 			return IMemoryObject(manager, native, elems, bytes)
 
-	def loadSource(self, source):
+	@staticmethod
+	def loadSource(source):
 		logging.info("IModule loading function")
 		loader = IObjectLoader()
 		if source.name:
@@ -37,3 +38,12 @@ class IModule:
 			result = loader.load(source.bytes)
 		logging.info("IModule function loaded")
 		return result
+
+	def memoryObject(self, obj=None):
+		if obj is None:
+			return self.getIObject(storage="memory")
+		if type(obj) != IMemoryObject:
+			menObj = self.getIObject(obj.getSize(), storage="memory")
+			obj.moveTo(menObj)
+			obj = menObj
+		return obj

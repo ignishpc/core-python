@@ -27,7 +27,7 @@ class IMemoryObject(IObject):
 
 	def __init__(self, manager, native=False, elems=1000, sz=50 * 1024 * 1024):
 		self.__readOnly = False
-		self.__rawMemory = ISharedMemoryBuffer(sz)
+		self.__rawMemory = ISharedMemoryBuffer(int(sz / 10))
 		self.__index = IMemoryObject.__Index(elems)
 		self._manager = manager
 		self._native = native
@@ -154,9 +154,11 @@ class IMemoryObject(IObject):
 		buffer = self.__rawMemory.getBuffer()
 		obs = ISharedMemoryBuffer(buf=buffer, sz=self.__rawMemory.availableRead())
 		object = copy.copy(self)
-		object._protocol = obs
-		if not self._native:
-			object._protocol = self._protocol.__class__(object._protocol)
+		if self._native:
+			object._protocol = obs
+		else:
+			object._protocol = IObjectProtocol(obs)
 		object.__rawMemory = obs
 		object.__readOnly = True
 		return object
+

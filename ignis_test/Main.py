@@ -17,11 +17,10 @@ def main():
 	cov.stop()
 	if result.wasSuccessful() and result.testsRun > 0:
 		tmpdir = tempfile.gettempdir()
-		covdir = os.path.join(tmpdir,"ignis-python-coverage")
+		covdir = os.path.join(tmpdir, "ignis-python-coverage")
 		print('Coverage: (HTML version: file://%s/index.html)' % covdir, file=sys.stderr)
 		cov.report(file=sys.stderr)
 		cov.html_report(directory=covdir)
-
 
 if __name__ == '__main__':
 	Ilog.enable(False)

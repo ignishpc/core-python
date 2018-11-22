@@ -2,6 +2,8 @@ from thrift.transport.TTransport import TTransportBase, TTransportException
 from enum import Enum
 import sys
 import mmap
+from multiprocessing.sharedctypes import Value
+from ctypes import c_int64
 
 
 class ISharedMemoryBuffer(TTransportBase):
@@ -67,7 +69,7 @@ class ISharedMemoryBuffer(TTransportBase):
 		return True
 
 	def peek(self):
-		return self.__rBase_ < self.__Base_
+		return self.__rBase_ < self.__wBase_
 
 	def open(self):
 		pass
@@ -79,44 +81,23 @@ class ISharedMemoryBuffer(TTransportBase):
 		return self.__buffer
 
 	def resetBuffer(self, sz=None, buf=None, policy=MemoryPolicy.OBSERVE):
-		"""
-		Use a variant of the copy-and-swap trick for assignment operators.
-		This is sub-optimal in terms of performance for two reasons:
-		1/ The constructing and swapping of the (small) values
-		  in the temporary object takes some time, and is not necessary.
-		2/ If policy == COPY, we allocate the new buffer before
-		  freeing the old one, precluding the possibility of
-		  reusing that memory.
-		I doubt that either of these problems could be optimized away,
-		but the second is probably no a common case, and the first is minor.
-		I don't expect resetBuffer to be a common operation, so I'm willing to
-		bite the performance bullet to make the method this simple.
-		"""
 		if buf is None:
-			if sz is None:
-				self.__rBase = 0
-				self.__rBound = 0
-				self.__wBase = 0
-				# It isn't safe to write into a buffer we don't own.
-				if self.__owner:
-					self.__wBound = self.__wBase
-					self.__bufferSize = ISharedMemoryBuffer.defaultSize
-					self.__buffer.seek(self.__wBase)
-					self.__buffer.resize(self.__bufferSize)
-			else:
-				# Construct the new buffer and move it into ourself
-				self._swap(ISharedMemoryBuffer(sz))
+			self.__rBase = 0
+			self.__wBase = 0
+			# It isn't safe to write into a buffer we don't own.
+			if self.__owner:
+				if sz is None:
+					self.setBufferSize(ISharedMemoryBuffer.defaultSize)
+				else:
+					self.setBufferSize(sz)
 		else:
-			self._swap(ISharedMemoryBuffer(sz))
+			self.__init__(sz, buf, policy)
 
 	def readEnd(self):
 		"""
 		return number of bytes read
 		"""
-		bytes_ = self.__rBase
-		if self.__rBase == self.__wBase:
-			self.resetBuffer()
-		return bytes_
+		return self.__rBase
 
 	def writeEnd(self):
 		"""
@@ -128,17 +109,7 @@ class ISharedMemoryBuffer(TTransportBase):
 		return self.__wBase - self.__rBase
 
 	def availableWrite(self):
-		return self.__wBound - self.__wBase
-
-	def getWritePtr(self, sz):
-		self._ensureCanWrite(sz)
-		return self.__wBase
-
-	def wroteBytes(self, sz):
-		avail = self.availableWrite()
-		if sz > avail:
-			raise TTransportException(message="Client wrote more bytes than size of buffer.")
-		self.__wBase += sz
+		return self.__bufferSize - self.__wBase
 
 	def getBufferSize(self):
 		return self.__bufferSize
@@ -153,45 +124,42 @@ class ISharedMemoryBuffer(TTransportBase):
 	def setBufferSize(self, new_size):
 		self.__buffer.resize(new_size)
 		self.__rBase = min(self.__rBase, new_size)
-		self.__rBound = min(self.__rBound, new_size)
 		self.__wBase = min(self.__wBase, new_size)
-		self.__wBound = new_size;
 		self.__bufferSize = new_size;
 
 	def read(self, sz):
-		"""
-		Fast-path read.
+		# Decide how much to give.
+		give = min(sz, self.availableRead())
 
-		When we have enough data buffered to fulfill the read, we can satisfy it
-		with a single memcpy, then adjust our internal pointers.  If the buffer
-		is empty, we call out to our slow path.
-		"""
-		new_rBase = self.__rBase + sz
-		if new_rBase <= self.__rBound:
-			self.__rBase = new_rBase
-			return self.__buffer[new_rBase - sz:new_rBase]
-		return self._readSlow(sz)
+		old_rBase = self.__rBase
+		new_rBase = old_rBase + give
+		self.__rBase = new_rBase
+		return self.__buffer[old_rBase:new_rBase]
+
+	def _computeRead(self, sz):
+		# Decide how much to give.
+		give = min(sz, self.availableRead())
+
+		# Preincrement rBase_ so the caller doesn't have to
+		self.__rBase += give
+
+		return (self.__rBase - give, give)
+
+	def _readSlow(self, sz):
+		start, give = self._computeRead(sz)
+		return self.__buffer[start: start + give]
 
 	def write(self, buf):
-		"""
-		Fast-path write.
-
-		When we have enough empty space in our buffer to accommodate the write, we
-		can satisfy it with a single copy, then adjust our internal pointers.
-		If the buffer is full, we call out to our slow path.
-		"""
+		self._ensureCanWrite(len(buf))
 		new_wBase = self.__wBase + len(buf)
-		if new_wBase <= self.__wBound:
-			self.__wBase = new_wBase
-			self.__buffer.write(buf)
-			return
-		self._writeSlow(buf)
+		self.__buffer[self.__wBase:new_wBase] = buf
+		self.__wBase = new_wBase
 
 	def consume(self, sz):
 		"""
 		Consume doesn't require a slow path.
 		"""
-		if sz <= self.__rBound - self.__rBase:
+		if sz <= self.__wBase - self.__rBase:
 			self.__rBase_ += len
 		else:
 			raise TTransportException(message="consumed more than available")
@@ -199,23 +167,17 @@ class ISharedMemoryBuffer(TTransportBase):
 	def flush(self):
 		pass
 
-	def setReadBuffer(self, buf, sz):
-		self.__rBase = buf
-		self.__rBound = buf + sz
+	def setReadBuffer(self, pos):
+		self.__rBase = pos
 
-	def setWriteBuffer(self, buf, sz):
-		self.__buffer.seek(self.__wBase)
-		self.__wBase = buf
-		self.__Bound = buf + sz
+	def setWriteBuffer(self, pos):
+		self.__wBase = pos
 
 	def _swap(self, that):
 		self.__buffer, that.__buffer = that.__buffer, self.__buffer
 		self.__bufferSize, that.__bufferSize = that.__bufferSize, self.__bufferSize
 		self.__rBase, that.__rBase = that.__rBase, self.__rBase
-		self.__rBound, that.__rBound = that.__rBound, self.__rBound
 		self.__wBase, that.__wBase = that.__wBase, self.__wBase
-		self.__wBound, that.__wBound = that.__wBound, self.__wBound
-
 		self.__owner, that.__owner = that.__owner, self.__owner
 
 	def _ensureCanWrite(self, sz):
@@ -238,27 +200,6 @@ class ISharedMemoryBuffer(TTransportBase):
 			avail = self.availableWrite() + (new_size - self.__bufferSize)
 		self.setBufferSize(new_size)
 
-	def _computeRead(self, sz):
-		# Correct rBound_ so we can use the fast path in the future.
-		self.__rBound = self.__wBase
-
-		# Decide how much to give.
-		give = min(sz, self.availableRead())
-
-		# Preincrement rBase_ so the caller doesn't have to
-		self.__rBase += give
-
-		return (self.__rBase - give, give)
-
-	def _readSlow(self, sz):
-		start, give = self._computeRead(sz)
-		return self.__buffer[start: start + give]
-
-	def _writeSlow(self, buf):
-		self._ensureCanWrite(len(buf))
-		self.__buffer.write(buf)
-		self.__wBase += len(buf)
-
 	def __initCommon(self, buf, size, owner, wPos):
 		self.__maxBufferSize = sys.maxsize
 
@@ -267,15 +208,35 @@ class ISharedMemoryBuffer(TTransportBase):
 			buf = mmap.mmap(fileno=-1, length=size, access=mmap.ACCESS_WRITE)
 		assert buf
 		self.__buffer = buf
-		self.__bufferSize = size
 
-		self.__rBase = 0
-		self.__rBound = wPos
-
-		self.__wBase = wPos
-		self.__wBound = self.__bufferSize
-
+		self.__bufferSize_ = Value(c_int64, size, lock=False)
+		self.__rBase_ = Value(c_int64, 0, lock=False)
+		self.__wBase_ = Value(c_int64, wPos, lock=False)
 		self.__owner = owner
 
 	def __getitem__(self, i):
 		return self.__buffer[i]
+
+	@property
+	def __bufferSize(self):
+		return self.__bufferSize_.value
+
+	@__bufferSize.setter
+	def __bufferSize(self, value):
+		self.__bufferSize_.value = value
+
+	@property
+	def __rBase(self):
+		return self.__rBase_.value
+
+	@__rBase.setter
+	def __rBase(self, value):
+		self.__rBase_.value = value
+
+	@property
+	def __wBase(self):
+		return self.__wBase_.value
+
+	@__wBase.setter
+	def __wBase(self, value):
+		self.__wBase_.value = value

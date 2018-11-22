@@ -5,15 +5,17 @@ from ..api.IContext import IContext
 class IExecutorData:
 
 	def __init__(self):
+		self.__loadedObject = None
 		self.__context = IContext()
 		self.__postBox = IPostBox()
 		self.__context = IContext()
 		self.__parser = IPropertyParser(self.__context.getProperties())
 
 	def loadObject(self, obj=None):
+		aux = self.__loadedObject
 		if obj:
 			self.__loadedObject = obj
-		return self.__loadedObject
+		return aux
 
 	def deleteLoadObject(self):
 		self.__loadedObject = None
@@ -28,4 +30,4 @@ class IExecutorData:
 		return self.__postBox
 
 	def getThreads(self):
-		return self.__threads
+		return self.__parser.getInt("ignis.executor.cores")

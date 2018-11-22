@@ -9,7 +9,7 @@ class INativeReader:
 			self.__trans = transport
 
 		def read(self, sz):
-			return self.__trans.read(sz)
+			return self.__trans.readAll(sz)
 
 		def readline(self):
 			buff = bytearray()

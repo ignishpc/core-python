@@ -24,7 +24,7 @@ class IObject:
 		pass
 
 	def moveTo(self, source):
-		source.moveTo(self)
+		source.moveFrom(self)
 
 	def getSize(self):
 		return len(self)
