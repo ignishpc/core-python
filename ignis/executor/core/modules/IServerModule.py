@@ -1,5 +1,5 @@
 from ignis.rpc.executor.server import IServerModule as IServerModuleRpc
-
+from thrift.server.TServer import TSimpleServer
 
 class IServerModule():
 

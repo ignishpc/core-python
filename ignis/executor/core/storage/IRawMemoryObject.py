@@ -9,7 +9,8 @@ class IRawMemoryObject(IRawObject):
 	def __init__(self, compression, manager, native=False, sz=50 * 1024 * 1024):
 		self.__readOnly = False
 		self.__rawMemory = ISharedMemoryBuffer(sz)
-		super().__init__(IZlibTransport(self.__rawMemory, compression), compression, manager, native)
+		self._compression = compression
+		super().__init__(IZlibTransport(self.__rawMemory, compression), manager, native)
 
 	def readIterator(self):
 		if not self.__readOnly:

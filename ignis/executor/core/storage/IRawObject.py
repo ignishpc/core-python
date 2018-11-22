@@ -8,9 +8,8 @@ from ignis.data.IObjectProtocol import IObjectProtocol
 class IRawObject(IObject):
 	TYPE = "raw"
 
-	def __init__(self, transport, compression, manager, native):
+	def __init__(self, transport, manager, native):
 		self._transport = transport
-		self._compression = compression
 		self._manager = manager
 		self._native = native
 		self._reader = None

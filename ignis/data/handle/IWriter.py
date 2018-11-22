@@ -105,8 +105,8 @@ class IWriter:
 			valueWriter.write(value, protocol)
 
 	def writePair(self, object, protocol):
-		if len(object):
-			raise NotImplementedError("IWriterType not implemented for len(tuple) > 2")
+		if len(object) != 2:
+			raise NotImplementedError("IWriterType not implemented for len(tuple) != 2")
 		firstReader = self.getWriter(object[0])
 		secondReader = self.getWriter(object[1])
 		firstReader.writeType(protocol)

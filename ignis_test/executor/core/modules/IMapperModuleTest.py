@@ -28,7 +28,7 @@ class IMapperModuleTest(unittest.TestCase):
 	def tearDown(self):
 		pass
 
-	def Dtest_mapper(self):
+	def test_sequentialMap(self):
 		self.__executorData.getContext()["ignis.executor.cores"] = "1"
 		path = os.path.abspath(__file__)
 		dir = os.path.dirname(path)
@@ -38,3 +38,88 @@ class IMapperModuleTest(unittest.TestCase):
 		reader = self.__executorData.loadObject().readIterator()
 		for elem in self.__input:
 			self.assertEqual(str(elem), reader.next())
+
+	def test_sequentialFlatmap(self):
+		self.__executorData.getContext()["ignis.executor.cores"] = "1"
+		path = os.path.abspath(__file__)
+		dir = os.path.dirname(path)
+		sf = ISource(name=dir + "/TestFunctions.py:FlatmapFunction")
+		self.__mapperModule.flatmap(sf)
+
+		reader = self.__executorData.loadObject().readIterator()
+		for elem in self.__input:
+			if elem % 2 == 0:
+				self.assertEqual(str(elem), reader.next())
+
+	def test_sequentialFilter(self):
+		self.__executorData.getContext()["ignis.executor.cores"] = "1"
+		path = os.path.abspath(__file__)
+		dir = os.path.dirname(path)
+		sf = ISource(name=dir + "/TestFunctions.py:FilterFunction")
+		self.__mapperModule.filter(sf)
+
+		reader = self.__executorData.loadObject().readIterator()
+		for elem in self.__input:
+			if elem % 2 == 0:
+				self.assertEqual(elem, reader.next())
+
+	def test_sequentialKeyBy(self):
+		self.__executorData.getContext()["ignis.executor.cores"] = "1"
+		path = os.path.abspath(__file__)
+		dir = os.path.dirname(path)
+		sf = ISource(name=dir + "/TestFunctions.py:MapFunction")
+		self.__mapperModule.keyBy(sf)
+
+		reader = self.__executorData.loadObject().readIterator()
+		for elem in self.__input:
+			tuple = reader.next()
+			self.assertEqual(elem, tuple[1])
+			self.assertEqual(str(elem), tuple[0])
+
+	def test_parallelMap(self):
+		self.__executorData.getContext()["ignis.executor.cores"] = "8"
+		path = os.path.abspath(__file__)
+		dir = os.path.dirname(path)
+		sf = ISource(name=dir + "/TestFunctions.py:MapFunction")
+		self.__mapperModule._map(sf)
+
+		reader = self.__executorData.loadObject().readIterator()
+		for elem in self.__input:
+			self.assertEqual(str(elem), reader.next())
+
+	def test_parallelFlatmap(self):
+		self.__executorData.getContext()["ignis.executor.cores"] = "8"
+		path = os.path.abspath(__file__)
+		dir = os.path.dirname(path)
+		sf = ISource(name=dir + "/TestFunctions.py:FlatmapFunction")
+		self.__mapperModule.flatmap(sf)
+
+		reader = self.__executorData.loadObject().readIterator()
+		for elem in self.__input:
+			if elem % 2 == 0:
+				self.assertEqual(str(elem), reader.next())
+
+	def test_parallelFilter(self):
+		self.__executorData.getContext()["ignis.executor.cores"] = "8"
+		path = os.path.abspath(__file__)
+		dir = os.path.dirname(path)
+		sf = ISource(name=dir + "/TestFunctions.py:FilterFunction")
+		self.__mapperModule.filter(sf)
+
+		reader = self.__executorData.loadObject().readIterator()
+		for elem in self.__input:
+			if elem % 2 == 0:
+				self.assertEqual(elem, reader.next())
+
+	def test_parallelKeyBy(self):
+		self.__executorData.getContext()["ignis.executor.cores"] = "8"
+		path = os.path.abspath(__file__)
+		dir = os.path.dirname(path)
+		sf = ISource(name=dir + "/TestFunctions.py:MapFunction")
+		self.__mapperModule.keyBy(sf)
+
+		reader = self.__executorData.loadObject().readIterator()
+		for elem in self.__input:
+			tuple = reader.next()
+			self.assertEqual(elem, tuple[1])
+			self.assertEqual(str(elem), tuple[0])

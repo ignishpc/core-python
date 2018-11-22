@@ -1,9 +1,10 @@
 from .IObject import IObject
-from ignis.data.ISharedMemoryBuffer import ISharedMemoryBuffer
+from ignis.data.ISharedMemoryBuffer import ISharedMemoryBuffer, Value
 from .iterator.ICoreIterator import readToWrite
 from .iterator.ISimpleIterator import ISimpleReadIterator, ISimpleWriteIterator
 from ignis.data.IZlibTransport import IZlibTransport
 from ignis.data.IObjectProtocol import IObjectProtocol
+from ctypes import c_int64, c_bool
 
 
 class IMemoryObject(IObject):
@@ -20,21 +21,23 @@ class IMemoryObject(IObject):
 				self.__shared.resetBuffer()
 
 		def __getitem__(self, i):
-			int.from_bytes(self.__shared[i * self.__bytes:(i + 1) * self.__bytes], byteorder='little')
+			return int.from_bytes(self.__shared[i * self.__bytes:(i + 1) * self.__bytes], byteorder='little')
 
 		def append(self, value):
 			self.__shared.write(value.to_bytes(self.__bytes, byteorder='little'))
 
 	def __init__(self, manager, native=False, elems=1000, sz=50 * 1024 * 1024):
+		self._type_id_ = Value(c_int64, lock=False)
+		self._native_ = Value(c_bool, native, lock=False)
+		self._elems_ = Value(c_int64, 0, lock=False)
 		self.__readOnly = False
 		self.__rawMemory = ISharedMemoryBuffer(int(sz / 10))
 		self.__index = IMemoryObject.__Index(elems)
 		self._manager = manager
-		self._native = native
 		self._reader = None
 		self._writer = None
+		self._type_id = None
 		self._protocol = None
-		self._elems = 0
 
 	def readIterator(self):
 		def hasNext(it):
@@ -46,33 +49,32 @@ class IMemoryObject(IObject):
 
 		def skip(it, n):
 			it._elems += n
-			it.setReadBuffer(self.__index[it._elems], self.__rawMemory.writeEnd())
+			self.__rawMemory.setReadBuffer(self.__index[it._elems])
 
 		if not self.__readOnly:
 			self.__rawMemory.flush()
+			self.__checkManager()
 			return self.__readObservation().readIterator()
 		return ISimpleReadIterator(next=next, hasNext=hasNext, skip=skip)
 
 	def writeIterator(self):
 		def write(it, obj):
 			self._elems += 1
-			if self._writer is None or self._reader is None:
-				if self._native:
-					self.__type = None
-					self._writer = self._manager.nativeWriter
-					self._reader = self._manager.nativeReader
-					self._protocol = self.__rawMemory
-				else:
-					self.__type = type(obj)
-					self._writer = self._manager.writer.getWriter(obj)
-					self._reader = self._manager.reader.getReader(self._writer.getId())
-					self._protocol = IObjectProtocol(self.__rawMemory)
-			elif self.__type and self.__type != type(obj):
+			if self._writer is None:
+				if not self._native:
+					new_id = self._manager.writer.getWriter(obj).getId()
+					if self._type_id and self._type_id != new_id:
+						raise ValueError("Current serialization does not support heterogeneous types")
+					self._type_id = new_id
+					it._type = type(obj)
+				self.__checkManager()
+			elif it._type and it._type != type(obj):
 				raise ValueError("Current serialization does not support heterogeneous types")
-			self.__index.append(self.__rawMemory.readEnd())
+			self.__index.append(self.__rawMemory.writeEnd())
 			self._writer.write(obj, self._protocol)
-
-		return ISimpleWriteIterator(write)
+		it = ISimpleWriteIterator(write)
+		it._type = None
+		return it
 
 	def read(self, trans):
 		self.clear()
@@ -114,6 +116,7 @@ class IMemoryObject(IObject):
 		if self.__rawMemory.availableWrite() != self.__rawMemory.getBufferSize():
 			self.__rawMemory.resetBuffer()
 		self._elems = 0
+		self._type_id = None
 		self.__index.clear()
 		self._writer = None
 		self._reader = None
@@ -126,14 +129,9 @@ class IMemoryObject(IObject):
 		else:
 			self._manager.reader.readTypeAux(headProto)
 		self._elems = self._manager.reader.readSizeAux(headProto)
-		if self._native:
-			self._reader = self._manager.nativeReader
-			self._writer = self._manager.nativeWriter
-			self._protocol = self.__rawMemory
-		else:
-			self._reader = self._manager.reader.getReader(self._manager.reader.readTypeAux(headProto))
-			self._writer = self._manager.writer.getWriterByType(self._reader.getId())
-			self._protocol = IObjectProtocol(self.__rawMemory)
+		if not self._native:
+			self._type_id = self._manager.reader.readTypeAux(headProto)
+		self.__checkManager()
 
 	def __writeHeader(self, transport):
 		headProto = IObjectProtocol(transport)
@@ -162,3 +160,44 @@ class IMemoryObject(IObject):
 		object.__readOnly = True
 		return object
 
+	def __checkManager(self):
+		if self._writer and not self._native:
+			self._type_id = self._writer.getId()
+		else:
+			if self._type_id:
+				self._reader = self._manager.reader.getReader(self._type_id)
+				self._writer = self._manager.writer.getWriterByType(self._reader.getId())
+				self._protocol = IObjectProtocol(self.__rawMemory)
+			else:
+				self._reader = self._manager.nativeReader
+				self._writer = self._manager.nativeWriter
+				self._protocol = self.__rawMemory
+
+	@property
+	def _elems(self):
+		return self._elems_.value
+
+	@_elems.setter
+	def _elems(self, value):
+		self._elems_.value = value
+
+	@property
+	def _type_id(self):
+		value = self._type_id_.value
+		if value == 0xFFFFF:
+			return None
+		return value
+
+	@_type_id.setter
+	def _type_id(self, value):
+		if value is None:
+			value = 0xFFFFF
+		self._type_id_.value = value
+
+	@property
+	def _native(self):
+		return self._native_.value
+
+	@_native.setter
+	def _native(self, value):
+		self._native_.value = value

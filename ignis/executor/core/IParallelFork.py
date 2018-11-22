@@ -16,7 +16,6 @@ class IParallelFork:
 
 	def __init__(self, workers=0):
 		self.__workers = workers - 1
-		self.__childs = list()
 		self.__id = 0
 		if self.__workers > 0:
 			self.__lock = multiprocessing.Lock()
@@ -44,6 +43,7 @@ class IParallelFork:
 		return self.__lock
 
 	def __enter__(self):
+		self.__childs = list()
 		for i in range(0, self.__workers):
 			childId = len(self.__childs) + 1
 			pid = os.fork()
@@ -56,7 +56,7 @@ class IParallelFork:
 
 	def __exit__(self, exc_type, exc_val, exc_tb):
 		if self.isWorker():
-			exit(0)
+			os._exit(0)
 		errors = 0
 		for child in self.__childs:
 			pid, code = os.waitpid(child, 0)
