@@ -67,7 +67,7 @@ class IObjectTest():
 			self.assertEqual(elem, reader.next())
 		self.assert_(not reader.hasNext())
 
-	def test_transNativeWriteItRead(self):#TODO remove D
+	def test_transNativeWriteItRead(self):
 		random.seed(0)
 		examples = [random.randint(0, 100) for i in range(0, 100)]
 		##########################################################################
@@ -108,7 +108,7 @@ class IObjectTest():
 		for i, j in zip(examples, result):
 			self.assertEqual(i, j)
 
-	def test_transNativeWriteTransRead(self):#TODO remove D
+	def test_transNativeWriteTransRead(self):
 		random.seed(0)
 		examples = [random.randint(0, 100) for i in range(0, 100)]
 		##########################################################################

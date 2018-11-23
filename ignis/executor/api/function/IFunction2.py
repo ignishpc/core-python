@@ -1,4 +1,4 @@
-class IFunction:
+class IFunction2:
 
 	def before(self, context):
 		pass

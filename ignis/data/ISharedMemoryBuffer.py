@@ -125,7 +125,7 @@ class ISharedMemoryBuffer(TTransportBase):
 		self.__buffer.resize(new_size)
 		self.__rBase = min(self.__rBase, new_size)
 		self.__wBase = min(self.__wBase, new_size)
-		self.__bufferSize = new_size;
+		self.__bufferSize = new_size
 
 	def read(self, sz):
 		# Decide how much to give.

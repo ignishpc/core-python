@@ -25,7 +25,6 @@ class IMapperModule(IModule, IMapperModuleRpc.Iface):
 
 			size = obj.getSize()
 			context = self._executorData.getContext()
-			reader = obj.readIterator()
 
 			f.before(context)
 			logger.info("IMapperModule creating " + str(threads) + " threads")
@@ -37,6 +36,7 @@ class IMapperModule(IModule, IMapperModuleRpc.Iface):
 				localSize = div + (1 if mod > t else 0)
 				skip = div * t + (t if mod > t else mod)
 
+				reader = obj.readIterator()
 				writer = objOut.writeIterator()
 				reader.skip(skip)
 				for i in range(0, localSize):

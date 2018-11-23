@@ -1,6 +1,6 @@
 from ignis.executor.api.function.IFunction import IFunction
 from ignis.executor.api.function.IFlatFunction import IFlatFunction
-
+from ignis.executor.api.function.IFunction2 import IFunction2
 
 class MapFunction(IFunction):
 
@@ -21,3 +21,9 @@ class FilterFunction(IFunction):
 
 	def call(self, elem, context):
 		return elem % 2 == 0
+
+
+class ReduceByKeyFunction(IFunction2):
+
+	def call(self, elem1, elem2, context):
+		return elem1 + elem2
