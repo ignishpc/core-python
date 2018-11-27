@@ -30,7 +30,7 @@ class IKeysModuleTest(unittest.TestCase):
 		reduction = dict()
 		writer = obj.writeIterator()
 		random.seed(0)
-		rands = [random.randint(0, 100) for i in range(0, 100)]
+		rands = [random.randint(0, 10) for i in range(0, 100)]
 		for elem in rands:
 			value = (elem, 1)
 			reduction[value[0]] = reduction.get(value[0], 0) + value[1]
@@ -67,11 +67,11 @@ class IKeysModuleTest(unittest.TestCase):
 					executorKeys[0].keys.append(hashes[i])
 					reduction2[value[0]] = reduction[value[0]]
 					if random.randint(0, 1) == 1:
-						value2 = (value[0], i)
+						value2 = (value[0], i + 1)
 						writer_rcva.write(value2)
 						reduction2[value[0]] += value2[1]
 					else:
-						value2 = (value[0], i)
+						value2 = (value[0], i + 1)
 						writer_rcvb.write(value2)
 						reduction2[value[0]] += value2[1]
 				else:
@@ -82,7 +82,7 @@ class IKeysModuleTest(unittest.TestCase):
 				else:
 					executorKeys[3].keys.append(hashes[i])
 		for i in range(0, len(executorKeys)):
-			executorKeys[i].msg_id = 1
+			executorKeys[i].msg_id = i
 			executorKeys[i].addr = "ip" + str(i + 1)
 		executorKeys[0].addr = "local"
 

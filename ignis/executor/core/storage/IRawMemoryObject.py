@@ -13,7 +13,7 @@ class IRawMemoryObject(IRawObject):
 		super().__init__(IZlibTransport(self.__rawMemory, compression), manager, native)
 
 	def readIterator(self):
-		if not self.__readOnly:
+		if not self.__readOnly and len(self) > 0:
 			self._transport.flush()
 			return self.__readObservation().readIterator()
 		return super().readIterator()

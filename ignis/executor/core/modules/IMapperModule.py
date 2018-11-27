@@ -1,7 +1,7 @@
 import logging
 from ignis.rpc.executor.mapper import IMapperModule as IMapperModuleRpc
 from .IModule import IModule
-from ignis.executor.core.IParallelFork import IParallelFork
+from ..IParallelFork import IParallelFork
 
 logger = logging.getLogger(__name__)
 

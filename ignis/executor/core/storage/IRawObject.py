@@ -1,6 +1,7 @@
 from .IObject import IObject
 from .iterator.ICoreIterator import readToWrite
 from .iterator.ISimpleIterator import ISimpleReadIterator, ISimpleWriteIterator
+from .iterator.EmptyIterator import IEmptyReadIterator
 from ignis.data.IZlibTransport import IZlibTransport
 from ignis.data.IObjectProtocol import IObjectProtocol
 
@@ -18,6 +19,8 @@ class IRawObject(IObject):
 		self._elems = 0
 
 	def readIterator(self):
+		if self._elems == 0:
+			return IEmptyReadIterator()
 		def hasNext(it):
 			return it._elems < self._elems
 

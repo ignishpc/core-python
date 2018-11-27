@@ -2,6 +2,7 @@ from .IObject import IObject
 from ignis.data.ISharedMemoryBuffer import ISharedMemoryBuffer, Value
 from .iterator.ICoreIterator import readToWrite
 from .iterator.ISimpleIterator import ISimpleReadIterator, ISimpleWriteIterator
+from .iterator.EmptyIterator import IEmptyReadIterator
 from ignis.data.IZlibTransport import IZlibTransport
 from ignis.data.IObjectProtocol import IObjectProtocol
 from ctypes import c_int64, c_bool
@@ -40,6 +41,8 @@ class IMemoryObject(IObject):
 		self._protocol = None
 
 	def readIterator(self):
+		if self._elems == 0:
+			return IEmptyReadIterator()
 		def hasNext(it):
 			return it._elems < self._elems
 
