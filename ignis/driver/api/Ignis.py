@@ -24,12 +24,15 @@ class Ignis:
 		try:
 			with Ignis.__lock:
 				if not Ignis._pool:
-					Ignis.__backend = subprocess.Popen(["ignis-backend"], stdout=subprocess.PIPE)
+					Ignis.__backend = subprocess.Popen(["ignis-backend"], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
 					port = Ignis.__backend.stdout.readline()
 					if port:
 						Ignis._pool = IClientPool("127.0.0.1", int(port))
 					else:
-						Ignis.__backend.kill()
+						try:
+							Ignis.__backend.kill()
+						except:
+							pass
 						Ignis.__backend = None
 						raise IDriverException("Backend error")
 		except Exception as ex:
@@ -43,11 +46,11 @@ class Ignis:
 					if Ignis.__backend:
 						try:
 							with Ignis._pool.client() as client:
-								client.getStopService().stop()
+								client.getIBackendService().stop()
 						except Exception:
 							pass
 						try:
-							Ignis.__backend.wait(timeout=10)
+							Ignis.__backend.wait(timeout=60)
 						except subprocess.TimeoutExpired:
 							Ignis.__backend.kill()
 						Ignis.__backend = None
