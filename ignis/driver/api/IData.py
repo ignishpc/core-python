@@ -1,6 +1,6 @@
 from ignis.driver.api.Ignis import Ignis
 from ignis.driver.api.IDriverException import IDriverException
-from ignis.rpc.source.ttypes import ISource
+import ignis.driver.core.SourceEncode as Se
 
 
 class IData:
@@ -18,49 +18,51 @@ class IData:
 	def map(self, fun):
 		try:
 			with Ignis._pool.client() as client:
-				return IData(client.getIDataService()._map(self._id, self.__enconde(fun)))
+				return IData(client.getIDataService()._map(self._id, Se.encode(fun, Se.IFunction)))
 		except Exception as ex:
 			raise IDriverException(ex) from None
 
 	def streamingMap(self, fun, ordered=True):
 		try:
 			with Ignis._pool.client() as client:
-				return IData(client.getIDataService().streamingMap(self._id, self.__enconde(fun), ordered))
+				return IData(client.getIDataService().streamingMap(self._id, Se.encode(fun, Se.IFunction), ordered))
 		except Exception as ex:
 			raise IDriverException(ex) from None
 
 	def flatmap(self, fun):
 		try:
 			with Ignis._pool.client() as client:
-				return IData(client.getIDataService().flatmap(self._id, self.__enconde(fun)))
+				return IData(client.getIDataService().flatmap(self._id, Se.encode(fun, Se.IFlatFunction)))
 		except Exception as ex:
 			raise IDriverException(ex) from None
 
 	def streamingFlatmap(self, fun, ordered=True):
 		try:
 			with Ignis._pool.client() as client:
-				return IData(client.getIDataService().streamingFlatmap(self._id, self.__enconde(fun), ordered))
+				return IData(
+					client.getIDataService().streamingFlatmap(self._id, Se.encode(fun, Se.IFlatFunction), ordered)
+				)
 		except Exception as ex:
 			raise IDriverException(ex) from None
 
 	def filter(self, fun):
 		try:
 			with Ignis._pool.client() as client:
-				return IData(client.getIDataService().filter(self._id, self.__enconde(fun)))
+				return IData(client.getIDataService().filter(self._id, Se.encode(fun, Se.IFunction)))
 		except Exception as ex:
 			raise IDriverException(ex) from None
 
 	def streamingFilter(self, fun, ordered=True):
 		try:
 			with Ignis._pool.client() as client:
-				return IData(client.getIDataService().streamingFilter(self._id, self.__enconde(fun), ordered))
+				return IData(client.getIDataService().streamingFilter(self._id, Se.encode(fun, Se.IFunction), ordered))
 		except Exception as ex:
 			raise IDriverException(ex) from None
 
 	def reduceByKey(self, fun):
 		try:
 			with Ignis._pool.client() as client:
-				return IData(client.getIDataService().reduceByKey(self._id, self.__enconde(fun)))
+				return IData(client.getIDataService().reduceByKey(self._id, Se.encode(fun, Se.IFunction2)))
 		except Exception as ex:
 			raise IDriverException(ex) from None
 
@@ -85,6 +87,3 @@ class IData:
 		except Exception as ex:
 			raise IDriverException(ex) from None
 
-	def __enconde(self, fun):
-		if isinstance(fun, str):
-			return ISource(name=fun)
