@@ -25,9 +25,9 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('')
     print('Functions:')
     print('  i64 count()')
-    print('  void cache(i64 id, string storage)')
+    print('  void cache(i64 id)')
     print('  void uncache(i64 id)')
-    print('  void restore(i64 id)')
+    print('  void loadCache(i64 id)')
     print('  void saveContext(i64 id)')
     print('  void loadContext(i64 id)')
     print('')
@@ -116,10 +116,10 @@ if cmd == 'count':
     pp.pprint(client.count())
 
 elif cmd == 'cache':
-    if len(args) != 2:
-        print('cache requires 2 args')
+    if len(args) != 1:
+        print('cache requires 1 args')
         sys.exit(1)
-    pp.pprint(client.cache(eval(args[0]), args[1],))
+    pp.pprint(client.cache(eval(args[0]),))
 
 elif cmd == 'uncache':
     if len(args) != 1:
@@ -127,11 +127,11 @@ elif cmd == 'uncache':
         sys.exit(1)
     pp.pprint(client.uncache(eval(args[0]),))
 
-elif cmd == 'restore':
+elif cmd == 'loadCache':
     if len(args) != 1:
-        print('restore requires 1 args')
+        print('loadCache requires 1 args')
         sys.exit(1)
-    pp.pprint(client.restore(eval(args[0]),))
+    pp.pprint(client.loadCache(eval(args[0]),))
 
 elif cmd == 'saveContext':
     if len(args) != 1:

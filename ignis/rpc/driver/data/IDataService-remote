@@ -24,7 +24,6 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('Usage: ' + sys.argv[0] + ' [-h host[:port]] [-u url] [-f[ramed]] [-s[sl]] [-novalidate] [-ca_certs certs] [-keyfile keyfile] [-certfile certfile] function [arg1 [arg2...]]')
     print('')
     print('Functions:')
-    print('  void keep(IDataId data, i8 level)')
     print('  void setName(IDataId data, string name)')
     print('  IDataId _map(IDataId data, ISource _function)')
     print('  IDataId flatmap(IDataId data, ISource _function)')
@@ -33,9 +32,16 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  IDataId streamingFlatmap(IDataId data, ISource _function, bool ordered)')
     print('  IDataId streamingFilter(IDataId data, ISource _function, bool ordered)')
     print('  IDataId reduceByKey(IDataId data, ISource _function)')
+    print('  IDataId values(IDataId data)')
     print('  IDataId shuffle(IDataId data)')
+    print('  IDataId parallelize()')
+    print('  string take(IDataId data, i64 n, bool light)')
+    print('  string takeSample(IDataId data, i64 n, bool withRemplacement, i32 seed, bool randomSeed, bool light)')
+    print('  string collect(IDataId data, bool light)')
     print('  void saveAsTextFile(IDataId data, string path, bool join)')
     print('  void saveAsJsonFile(IDataId data, string path, bool join)')
+    print('  void cache(IDataId data)')
+    print('  void uncache(IDataId data)')
     print('')
     sys.exit(0)
 
@@ -115,13 +121,7 @@ protocol = TBinaryProtocol(transport)
 client = IDataService.Client(protocol)
 transport.open()
 
-if cmd == 'keep':
-    if len(args) != 2:
-        print('keep requires 2 args')
-        sys.exit(1)
-    pp.pprint(client.keep(eval(args[0]), eval(args[1]),))
-
-elif cmd == 'setName':
+if cmd == 'setName':
     if len(args) != 2:
         print('setName requires 2 args')
         sys.exit(1)
@@ -169,11 +169,41 @@ elif cmd == 'reduceByKey':
         sys.exit(1)
     pp.pprint(client.reduceByKey(eval(args[0]), eval(args[1]),))
 
+elif cmd == 'values':
+    if len(args) != 1:
+        print('values requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.values(eval(args[0]),))
+
 elif cmd == 'shuffle':
     if len(args) != 1:
         print('shuffle requires 1 args')
         sys.exit(1)
     pp.pprint(client.shuffle(eval(args[0]),))
+
+elif cmd == 'parallelize':
+    if len(args) != 0:
+        print('parallelize requires 0 args')
+        sys.exit(1)
+    pp.pprint(client.parallelize())
+
+elif cmd == 'take':
+    if len(args) != 3:
+        print('take requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.take(eval(args[0]), eval(args[1]), eval(args[2]),))
+
+elif cmd == 'takeSample':
+    if len(args) != 6:
+        print('takeSample requires 6 args')
+        sys.exit(1)
+    pp.pprint(client.takeSample(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]), eval(args[4]), eval(args[5]),))
+
+elif cmd == 'collect':
+    if len(args) != 2:
+        print('collect requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.collect(eval(args[0]), eval(args[1]),))
 
 elif cmd == 'saveAsTextFile':
     if len(args) != 3:
@@ -186,6 +216,18 @@ elif cmd == 'saveAsJsonFile':
         print('saveAsJsonFile requires 3 args')
         sys.exit(1)
     pp.pprint(client.saveAsJsonFile(eval(args[0]), args[1], eval(args[2]),))
+
+elif cmd == 'cache':
+    if len(args) != 1:
+        print('cache requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.cache(eval(args[0]),))
+
+elif cmd == 'uncache':
+    if len(args) != 1:
+        print('uncache requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.uncache(eval(args[0]),))
 
 else:
     print('Unrecognized method %s' % cmd)

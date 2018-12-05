@@ -1,6 +1,7 @@
 from ignis.driver.api.Ignis import Ignis
 from ignis.driver.api.IDriverException import IDriverException
 import ignis.driver.core.SourceEncode as Se
+import ignis.driver.core.IDataServer as IDataServer
 
 
 class IData:
@@ -66,12 +67,81 @@ class IData:
 		except Exception as ex:
 			raise IDriverException(ex) from None
 
+	def values(self):
+		try:
+			with Ignis._pool.client() as client:
+				return IData(client.getIDataService().values(self._id))
+		except Exception as ex:
+			raise IDriverException(ex) from None
+
 	def shuffle(self):
 		try:
 			with Ignis._pool.client() as client:
 				return IData(client.getIDataService().shuffle(self._id))
 		except Exception as ex:
 			raise IDriverException(ex) from None
+
+	def parallelize(self):
+		raise NotImplementedError()
+
+	def first(self, light=False, manager=IDataServer.IManager()):
+		return self.take(1, light, manager)[0]
+
+	def take(self, n, light=False, manager=IDataServer.IManager()):
+		try:
+			if light:
+				with Ignis._pool.client() as client:
+					binary = client.getIDataService().take(self._id, n, True)
+					return IDataServer.parseBinary(binary, manager)
+			else:
+				with IDataServer.IDataServer(manager) as ds:
+					with Ignis._pool.client() as client:
+						client.getIDataService().take(n, False)
+						return ds.getResult()
+		except Exception as ex:
+			raise IDriverException(ex) from None
+
+	def takeSample(self, n, withRemplacement=False, seed=None, light=False, manager=IDataServer.IManager()):
+		try:
+			randomSeed = False
+			if seed is None:
+				seed = 0
+				randomSeed = True
+
+			if light:
+				with Ignis._pool.client() as client:
+					binary = client.getIDataService().takeSample(self._id, n, withRemplacement, seed, randomSeed, True)
+					return IDataServer.parseBinary(binary, manager)
+			else:
+				with IDataServer.IDataServer(manager) as ds:
+					with Ignis._pool.client() as client:
+						client.getIDataService().takeSample(self._id, n, withRemplacement, seed, randomSeed, False)
+						return ds.getResult()
+		except Exception as ex:
+			raise IDriverException(ex) from None
+
+	def collect(self, light=False, manager=IDataServer.IManager()):
+		try:
+			if light:
+				with Ignis._pool.client() as client:
+					binary = client.getIDataService().take(self._id, True)
+					return IDataServer.parseBinary(binary, manager)
+			else:
+				with IDataServer.IDataServer(manager) as ds:
+					with Ignis._pool.client() as client:
+						client.getIDataService().take(False)
+						return ds.getResult()
+		except Exception as ex:
+			raise IDriverException(ex) from None
+
+	def collectAsMap(self, light=False, manager=IDataServer.IManager()):
+		result = dict()
+		data = self.collect(light, manager)
+		size = len(data)
+		for i in range(0, size):
+			pair = data.pop()
+			result[pair[0]] = pair[1]
+		return result
 
 	def saveAsTextFile(self, path, join):
 		try:
@@ -87,3 +157,18 @@ class IData:
 		except Exception as ex:
 			raise IDriverException(ex) from None
 
+	def cache(self):
+		try:
+			with Ignis._pool.client() as client:
+				return client.getIDataService().cache(self._id)
+			return self
+		except Exception as ex:
+			raise IDriverException(ex) from None
+
+	def uncache(self):
+		try:
+			with Ignis._pool.client() as client:
+				return client.getIDataService().uncache(self._id)
+			return self
+		except Exception as ex:
+			raise IDriverException(ex) from None

@@ -22,11 +22,10 @@ class Iface(object):
     def count(self):
         pass
 
-    def cache(self, id, storage):
+    def cache(self, id):
         """
         Parameters:
          - id
-         - storage
         """
         pass
 
@@ -37,7 +36,7 @@ class Iface(object):
         """
         pass
 
-    def restore(self, id):
+    def loadCache(self, id):
         """
         Parameters:
          - id
@@ -94,20 +93,18 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "count failed: unknown result")
 
-    def cache(self, id, storage):
+    def cache(self, id):
         """
         Parameters:
          - id
-         - storage
         """
-        self.send_cache(id, storage)
+        self.send_cache(id)
         self.recv_cache()
 
-    def send_cache(self, id, storage):
+    def send_cache(self, id):
         self._oprot.writeMessageBegin('cache', TMessageType.CALL, self._seqid)
         args = cache_args()
         args.id = id
-        args.storage = storage
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -158,23 +155,23 @@ class Client(Iface):
             raise result.ex
         return
 
-    def restore(self, id):
+    def loadCache(self, id):
         """
         Parameters:
          - id
         """
-        self.send_restore(id)
-        self.recv_restore()
+        self.send_loadCache(id)
+        self.recv_loadCache()
 
-    def send_restore(self, id):
-        self._oprot.writeMessageBegin('restore', TMessageType.CALL, self._seqid)
-        args = restore_args()
+    def send_loadCache(self, id):
+        self._oprot.writeMessageBegin('loadCache', TMessageType.CALL, self._seqid)
+        args = loadCache_args()
         args.id = id
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_restore(self):
+    def recv_loadCache(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -182,7 +179,7 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = restore_result()
+        result = loadCache_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.ex is not None:
@@ -259,7 +256,7 @@ class Processor(Iface, TProcessor):
         self._processMap["count"] = Processor.process_count
         self._processMap["cache"] = Processor.process_cache
         self._processMap["uncache"] = Processor.process_uncache
-        self._processMap["restore"] = Processor.process_restore
+        self._processMap["loadCache"] = Processor.process_loadCache
         self._processMap["saveContext"] = Processor.process_saveContext
         self._processMap["loadContext"] = Processor.process_loadContext
 
@@ -310,7 +307,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = cache_result()
         try:
-            self._handler.cache(args.id, args.storage)
+            self._handler.cache(args.id)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -356,13 +353,13 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_restore(self, seqid, iprot, oprot):
-        args = restore_args()
+    def process_loadCache(self, seqid, iprot, oprot):
+        args = loadCache_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = restore_result()
+        result = loadCache_result()
         try:
-            self._handler.restore(args.id)
+            self._handler.loadCache(args.id)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -377,7 +374,7 @@ class Processor(Iface, TProcessor):
             logging.exception('Unexpected exception in handler')
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("restore", msg_type, seqid)
+        oprot.writeMessageBegin("loadCache", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -557,13 +554,11 @@ class cache_args(object):
     """
     Attributes:
      - id
-     - storage
     """
 
 
-    def __init__(self, id=None, storage=None,):
+    def __init__(self, id=None,):
         self.id = id
-        self.storage = storage
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -579,11 +574,6 @@ class cache_args(object):
                     self.id = iprot.readI64()
                 else:
                     iprot.skip(ftype)
-            elif fid == 2:
-                if ftype == TType.STRING:
-                    self.storage = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -597,10 +587,6 @@ class cache_args(object):
         if self.id is not None:
             oprot.writeFieldBegin('id', TType.I64, 1)
             oprot.writeI64(self.id)
-            oprot.writeFieldEnd()
-        if self.storage is not None:
-            oprot.writeFieldBegin('storage', TType.STRING, 2)
-            oprot.writeString(self.storage.encode('utf-8') if sys.version_info[0] == 2 else self.storage)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -622,7 +608,6 @@ all_structs.append(cache_args)
 cache_args.thrift_spec = (
     None,  # 0
     (1, TType.I64, 'id', None, None, ),  # 1
-    (2, TType.STRING, 'storage', 'UTF8', None, ),  # 2
 )
 
 
@@ -811,7 +796,7 @@ uncache_result.thrift_spec = (
 )
 
 
-class restore_args(object):
+class loadCache_args(object):
     """
     Attributes:
      - id
@@ -844,7 +829,7 @@ class restore_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('restore_args')
+        oprot.writeStructBegin('loadCache_args')
         if self.id is not None:
             oprot.writeFieldBegin('id', TType.I64, 1)
             oprot.writeI64(self.id)
@@ -865,14 +850,14 @@ class restore_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(restore_args)
-restore_args.thrift_spec = (
+all_structs.append(loadCache_args)
+loadCache_args.thrift_spec = (
     None,  # 0
     (1, TType.I64, 'id', None, None, ),  # 1
 )
 
 
-class restore_result(object):
+class loadCache_result(object):
     """
     Attributes:
      - ex
@@ -906,7 +891,7 @@ class restore_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('restore_result')
+        oprot.writeStructBegin('loadCache_result')
         if self.ex is not None:
             oprot.writeFieldBegin('ex', TType.STRUCT, 1)
             self.ex.write(oprot)
@@ -927,8 +912,8 @@ class restore_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(restore_result)
-restore_result.thrift_spec = (
+all_structs.append(loadCache_result)
+loadCache_result.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.exception.ttypes.IRemoteException, None], None, ),  # 1
 )
