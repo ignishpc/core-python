@@ -58,3 +58,12 @@ class IStorageModule(IModule, IStorageModuleRpc.Iface):
 			del self.__objectsContext[id]
 		except Exception as ex:
 			self.raiseRemote(ex)
+
+	def take(self, n, light):
+		pass  # TODO
+
+	def takeSample(self, n, withRemplacement, seed, light):
+		pass  # TODO
+
+	def collect(self, light):
+		pass  # TODO

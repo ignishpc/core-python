@@ -60,6 +60,20 @@ class IData:
 		except Exception as ex:
 			raise IDriverException(ex) from None
 
+	def keyBy(self, fun):
+		try:
+			with Ignis._pool.client() as client:
+				return IData(client.getIDataService().keyBy(self._id, Se.encode(fun, Se.IFunction)))
+		except Exception as ex:
+			raise IDriverException(ex) from None
+
+	def streamingKeyBy(self, fun, ordered=True):
+		try:
+			with Ignis._pool.client() as client:
+				return IData(client.getIDataService().streamingKeyBy(self._id, Se.encode(fun, Se.IFunction), ordered))
+		except Exception as ex:
+			raise IDriverException(ex) from None
+
 	def reduceByKey(self, fun):
 		try:
 			with Ignis._pool.client() as client:
@@ -103,19 +117,18 @@ class IData:
 
 	def takeSample(self, n, withRemplacement=False, seed=None, light=False, manager=IDataServer.IManager()):
 		try:
-			randomSeed = False
 			if seed is None:
-				seed = 0
-				randomSeed = True
-
+				import time
+				import random
+				seed = random.Random(time.time()).randrange(2**31-1)
 			if light:
 				with Ignis._pool.client() as client:
-					binary = client.getIDataService().takeSample(self._id, n, withRemplacement, seed, randomSeed, True)
+					binary = client.getIDataService().takeSample(self._id, n, withRemplacement, seed, True)
 					return IDataServer.parseBinary(binary, manager)
 			else:
 				with IDataServer.IDataServer(manager) as ds:
 					with Ignis._pool.client() as client:
-						client.getIDataService().takeSample(self._id, n, withRemplacement, seed, randomSeed, False)
+						client.getIDataService().takeSample(self._id, n, withRemplacement, seed, False)
 						return ds.getResult()
 		except Exception as ex:
 			raise IDriverException(ex) from None

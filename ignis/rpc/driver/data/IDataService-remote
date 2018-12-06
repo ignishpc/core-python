@@ -28,15 +28,17 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  IDataId _map(IDataId data, ISource _function)')
     print('  IDataId flatmap(IDataId data, ISource _function)')
     print('  IDataId filter(IDataId data, ISource _function)')
+    print('  IDataId keyBy(IDataId data, ISource _function)')
     print('  IDataId streamingMap(IDataId data, ISource _function, bool ordered)')
     print('  IDataId streamingFlatmap(IDataId data, ISource _function, bool ordered)')
     print('  IDataId streamingFilter(IDataId data, ISource _function, bool ordered)')
+    print('  IDataId streamingKeyBy(IDataId data, ISource _function, bool ordered)')
     print('  IDataId reduceByKey(IDataId data, ISource _function)')
     print('  IDataId values(IDataId data)')
     print('  IDataId shuffle(IDataId data)')
     print('  IDataId parallelize()')
     print('  string take(IDataId data, i64 n, bool light)')
-    print('  string takeSample(IDataId data, i64 n, bool withRemplacement, i32 seed, bool randomSeed, bool light)')
+    print('  string takeSample(IDataId data, i64 n, bool withRemplacement, i32 seed, bool light)')
     print('  string collect(IDataId data, bool light)')
     print('  void saveAsTextFile(IDataId data, string path, bool join)')
     print('  void saveAsJsonFile(IDataId data, string path, bool join)')
@@ -145,6 +147,12 @@ elif cmd == 'filter':
         sys.exit(1)
     pp.pprint(client.filter(eval(args[0]), eval(args[1]),))
 
+elif cmd == 'keyBy':
+    if len(args) != 2:
+        print('keyBy requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.keyBy(eval(args[0]), eval(args[1]),))
+
 elif cmd == 'streamingMap':
     if len(args) != 3:
         print('streamingMap requires 3 args')
@@ -162,6 +170,12 @@ elif cmd == 'streamingFilter':
         print('streamingFilter requires 3 args')
         sys.exit(1)
     pp.pprint(client.streamingFilter(eval(args[0]), eval(args[1]), eval(args[2]),))
+
+elif cmd == 'streamingKeyBy':
+    if len(args) != 3:
+        print('streamingKeyBy requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.streamingKeyBy(eval(args[0]), eval(args[1]), eval(args[2]),))
 
 elif cmd == 'reduceByKey':
     if len(args) != 2:
@@ -194,10 +208,10 @@ elif cmd == 'take':
     pp.pprint(client.take(eval(args[0]), eval(args[1]), eval(args[2]),))
 
 elif cmd == 'takeSample':
-    if len(args) != 6:
-        print('takeSample requires 6 args')
+    if len(args) != 5:
+        print('takeSample requires 5 args')
         sys.exit(1)
-    pp.pprint(client.takeSample(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]), eval(args[4]), eval(args[5]),))
+    pp.pprint(client.takeSample(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]), eval(args[4]),))
 
 elif cmd == 'collect':
     if len(args) != 2:

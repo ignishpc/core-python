@@ -51,6 +51,14 @@ class Iface(object):
         """
         pass
 
+    def keyBy(self, data, _function):
+        """
+        Parameters:
+         - data
+         - _function
+        """
+        pass
+
     def streamingMap(self, data, _function, ordered):
         """
         Parameters:
@@ -70,6 +78,15 @@ class Iface(object):
         pass
 
     def streamingFilter(self, data, _function, ordered):
+        """
+        Parameters:
+         - data
+         - _function
+         - ordered
+        """
+        pass
+
+    def streamingKeyBy(self, data, _function, ordered):
         """
         Parameters:
          - data
@@ -112,14 +129,13 @@ class Iface(object):
         """
         pass
 
-    def takeSample(self, data, n, withRemplacement, seed, randomSeed, light):
+    def takeSample(self, data, n, withRemplacement, seed, light):
         """
         Parameters:
          - data
          - n
          - withRemplacement
          - seed
-         - randomSeed
          - light
         """
         pass
@@ -310,6 +326,41 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "filter failed: unknown result")
 
+    def keyBy(self, data, _function):
+        """
+        Parameters:
+         - data
+         - _function
+        """
+        self.send_keyBy(data, _function)
+        return self.recv_keyBy()
+
+    def send_keyBy(self, data, _function):
+        self._oprot.writeMessageBegin('keyBy', TMessageType.CALL, self._seqid)
+        args = keyBy_args()
+        args.data = data
+        args._function = _function
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_keyBy(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = keyBy_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.ex is not None:
+            raise result.ex
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "keyBy failed: unknown result")
+
     def streamingMap(self, data, _function, ordered):
         """
         Parameters:
@@ -420,6 +471,43 @@ class Client(Iface):
         if result.ex is not None:
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "streamingFilter failed: unknown result")
+
+    def streamingKeyBy(self, data, _function, ordered):
+        """
+        Parameters:
+         - data
+         - _function
+         - ordered
+        """
+        self.send_streamingKeyBy(data, _function, ordered)
+        return self.recv_streamingKeyBy()
+
+    def send_streamingKeyBy(self, data, _function, ordered):
+        self._oprot.writeMessageBegin('streamingKeyBy', TMessageType.CALL, self._seqid)
+        args = streamingKeyBy_args()
+        args.data = data
+        args._function = _function
+        args.ordered = ordered
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_streamingKeyBy(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = streamingKeyBy_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.ex is not None:
+            raise result.ex
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "streamingKeyBy failed: unknown result")
 
     def reduceByKey(self, data, _function):
         """
@@ -587,27 +675,25 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "take failed: unknown result")
 
-    def takeSample(self, data, n, withRemplacement, seed, randomSeed, light):
+    def takeSample(self, data, n, withRemplacement, seed, light):
         """
         Parameters:
          - data
          - n
          - withRemplacement
          - seed
-         - randomSeed
          - light
         """
-        self.send_takeSample(data, n, withRemplacement, seed, randomSeed, light)
+        self.send_takeSample(data, n, withRemplacement, seed, light)
         return self.recv_takeSample()
 
-    def send_takeSample(self, data, n, withRemplacement, seed, randomSeed, light):
+    def send_takeSample(self, data, n, withRemplacement, seed, light):
         self._oprot.writeMessageBegin('takeSample', TMessageType.CALL, self._seqid)
         args = takeSample_args()
         args.data = data
         args.n = n
         args.withRemplacement = withRemplacement
         args.seed = seed
-        args.randomSeed = randomSeed
         args.light = light
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
@@ -806,9 +892,11 @@ class Processor(Iface, TProcessor):
         self._processMap["_map"] = Processor.process__map
         self._processMap["flatmap"] = Processor.process_flatmap
         self._processMap["filter"] = Processor.process_filter
+        self._processMap["keyBy"] = Processor.process_keyBy
         self._processMap["streamingMap"] = Processor.process_streamingMap
         self._processMap["streamingFlatmap"] = Processor.process_streamingFlatmap
         self._processMap["streamingFilter"] = Processor.process_streamingFilter
+        self._processMap["streamingKeyBy"] = Processor.process_streamingKeyBy
         self._processMap["reduceByKey"] = Processor.process_reduceByKey
         self._processMap["values"] = Processor.process_values
         self._processMap["shuffle"] = Processor.process_shuffle
@@ -940,6 +1028,32 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
+    def process_keyBy(self, seqid, iprot, oprot):
+        args = keyBy_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = keyBy_result()
+        try:
+            result.success = self._handler.keyBy(args.data, args._function)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.exception.ttypes.IRemoteException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("keyBy", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
     def process_streamingMap(self, seqid, iprot, oprot):
         args = streamingMap_args()
         args.read(iprot)
@@ -1014,6 +1128,32 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
         oprot.writeMessageBegin("streamingFilter", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_streamingKeyBy(self, seqid, iprot, oprot):
+        args = streamingKeyBy_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = streamingKeyBy_result()
+        try:
+            result.success = self._handler.streamingKeyBy(args.data, args._function, args.ordered)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.exception.ttypes.IRemoteException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("streamingKeyBy", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -1154,7 +1294,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = takeSample_result()
         try:
-            result.success = self._handler.takeSample(args.data, args.n, args.withRemplacement, args.seed, args.randomSeed, args.light)
+            result.success = self._handler.takeSample(args.data, args.n, args.withRemplacement, args.seed, args.light)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -1890,6 +2030,155 @@ filter_result.thrift_spec = (
 )
 
 
+class keyBy_args(object):
+    """
+    Attributes:
+     - data
+     - _function
+    """
+
+
+    def __init__(self, data=None, _function=None,):
+        self.data = data
+        self._function = _function
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.data = IDataId()
+                    self.data.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self._function = ignis.rpc.source.ttypes.ISource()
+                    self._function.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('keyBy_args')
+        if self.data is not None:
+            oprot.writeFieldBegin('data', TType.STRUCT, 1)
+            self.data.write(oprot)
+            oprot.writeFieldEnd()
+        if self._function is not None:
+            oprot.writeFieldBegin('_function', TType.STRUCT, 2)
+            self._function.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(keyBy_args)
+keyBy_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'data', [IDataId, None], None, ),  # 1
+    (2, TType.STRUCT, '_function', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 2
+)
+
+
+class keyBy_result(object):
+    """
+    Attributes:
+     - success
+     - ex
+    """
+
+
+    def __init__(self, success=None, ex=None,):
+        self.success = success
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = IDataId()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.exception.ttypes.IRemoteException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('keyBy_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(keyBy_result)
+keyBy_result.thrift_spec = (
+    (0, TType.STRUCT, 'success', [IDataId, None], None, ),  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.exception.ttypes.IRemoteException, None], None, ),  # 1
+)
+
+
 class streamingMap_args(object):
     """
     Attributes:
@@ -2368,6 +2657,167 @@ class streamingFilter_result(object):
         return not (self == other)
 all_structs.append(streamingFilter_result)
 streamingFilter_result.thrift_spec = (
+    (0, TType.STRUCT, 'success', [IDataId, None], None, ),  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.exception.ttypes.IRemoteException, None], None, ),  # 1
+)
+
+
+class streamingKeyBy_args(object):
+    """
+    Attributes:
+     - data
+     - _function
+     - ordered
+    """
+
+
+    def __init__(self, data=None, _function=None, ordered=None,):
+        self.data = data
+        self._function = _function
+        self.ordered = ordered
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.data = IDataId()
+                    self.data.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self._function = ignis.rpc.source.ttypes.ISource()
+                    self._function.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.BOOL:
+                    self.ordered = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('streamingKeyBy_args')
+        if self.data is not None:
+            oprot.writeFieldBegin('data', TType.STRUCT, 1)
+            self.data.write(oprot)
+            oprot.writeFieldEnd()
+        if self._function is not None:
+            oprot.writeFieldBegin('_function', TType.STRUCT, 2)
+            self._function.write(oprot)
+            oprot.writeFieldEnd()
+        if self.ordered is not None:
+            oprot.writeFieldBegin('ordered', TType.BOOL, 3)
+            oprot.writeBool(self.ordered)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(streamingKeyBy_args)
+streamingKeyBy_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'data', [IDataId, None], None, ),  # 1
+    (2, TType.STRUCT, '_function', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 2
+    (3, TType.BOOL, 'ordered', None, None, ),  # 3
+)
+
+
+class streamingKeyBy_result(object):
+    """
+    Attributes:
+     - success
+     - ex
+    """
+
+
+    def __init__(self, success=None, ex=None,):
+        self.success = success
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = IDataId()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.exception.ttypes.IRemoteException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('streamingKeyBy_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(streamingKeyBy_result)
+streamingKeyBy_result.thrift_spec = (
     (0, TType.STRUCT, 'success', [IDataId, None], None, ),  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.exception.ttypes.IRemoteException, None], None, ),  # 1
 )
@@ -3077,17 +3527,15 @@ class takeSample_args(object):
      - n
      - withRemplacement
      - seed
-     - randomSeed
      - light
     """
 
 
-    def __init__(self, data=None, n=None, withRemplacement=None, seed=None, randomSeed=None, light=None,):
+    def __init__(self, data=None, n=None, withRemplacement=None, seed=None, light=None,):
         self.data = data
         self.n = n
         self.withRemplacement = withRemplacement
         self.seed = seed
-        self.randomSeed = randomSeed
         self.light = light
 
     def read(self, iprot):
@@ -3122,11 +3570,6 @@ class takeSample_args(object):
                     iprot.skip(ftype)
             elif fid == 5:
                 if ftype == TType.BOOL:
-                    self.randomSeed = iprot.readBool()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 6:
-                if ftype == TType.BOOL:
                     self.light = iprot.readBool()
                 else:
                     iprot.skip(ftype)
@@ -3156,12 +3599,8 @@ class takeSample_args(object):
             oprot.writeFieldBegin('seed', TType.I32, 4)
             oprot.writeI32(self.seed)
             oprot.writeFieldEnd()
-        if self.randomSeed is not None:
-            oprot.writeFieldBegin('randomSeed', TType.BOOL, 5)
-            oprot.writeBool(self.randomSeed)
-            oprot.writeFieldEnd()
         if self.light is not None:
-            oprot.writeFieldBegin('light', TType.BOOL, 6)
+            oprot.writeFieldBegin('light', TType.BOOL, 5)
             oprot.writeBool(self.light)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -3187,8 +3626,7 @@ takeSample_args.thrift_spec = (
     (2, TType.I64, 'n', None, None, ),  # 2
     (3, TType.BOOL, 'withRemplacement', None, None, ),  # 3
     (4, TType.I32, 'seed', None, None, ),  # 4
-    (5, TType.BOOL, 'randomSeed', None, None, ),  # 5
-    (6, TType.BOOL, 'light', None, None, ),  # 6
+    (5, TType.BOOL, 'light', None, None, ),  # 5
 )
 
 

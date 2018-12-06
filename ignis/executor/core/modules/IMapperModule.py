@@ -91,14 +91,17 @@ class IMapperModule(IModule, IMapperModuleRpc.Iface):
 
 		self.__pipe(sf, action)
 
+	def values(self):
+		pass  # TODO
+
 	def streamingMap(self, sf, ordered):
-		self._map(sf)  # TODO
+		pass  # TODO
 
 	def streamingFlatmap(self, sf, ordered):
-		self.flatmap(sf)  # TODO
+		pass  # TODO
 
 	def streamingFilter(self, sf, ordered):
-		self.filter(sf)  # TODO
+		pass  # TODO
 
 	def streamingKeyBy(self, sf, ordered):
-		self.keyBy(sf)  # TODO
+		pass  # TODO

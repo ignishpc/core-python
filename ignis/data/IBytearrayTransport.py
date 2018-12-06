@@ -12,6 +12,9 @@ class IBytearrayTransport(TTransportBase):
 	def resetRead(self, read=0):
 		self.__read = read
 
+	def available(self):
+		return len(self.__array) - self.__read
+
 	def clear(self):
 		array = bytearray()
 		self.__read = 0
