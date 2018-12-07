@@ -30,9 +30,9 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  void loadCache(i64 id)')
     print('  void saveContext(i64 id)')
     print('  void loadContext(i64 id)')
-    print('  string take(i64 n, bool light)')
-    print('  string takeSample(i64 n, bool withRemplacement, i32 seed, bool light)')
-    print('  string collect(bool light)')
+    print('  string take(i64 msg_id, string addr, i64 n, bool light)')
+    print('  string takeSample(i64 msg_id, string addr, i64 n, bool withRemplacement, i32 seed, bool light)')
+    print('  string collect(i64 msg_id, string addr, bool light)')
     print('')
     sys.exit(0)
 
@@ -149,22 +149,22 @@ elif cmd == 'loadContext':
     pp.pprint(client.loadContext(eval(args[0]),))
 
 elif cmd == 'take':
-    if len(args) != 2:
-        print('take requires 2 args')
+    if len(args) != 4:
+        print('take requires 4 args')
         sys.exit(1)
-    pp.pprint(client.take(eval(args[0]), eval(args[1]),))
+    pp.pprint(client.take(eval(args[0]), args[1], eval(args[2]), eval(args[3]),))
 
 elif cmd == 'takeSample':
-    if len(args) != 4:
-        print('takeSample requires 4 args')
+    if len(args) != 6:
+        print('takeSample requires 6 args')
         sys.exit(1)
-    pp.pprint(client.takeSample(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
+    pp.pprint(client.takeSample(eval(args[0]), args[1], eval(args[2]), eval(args[3]), eval(args[4]), eval(args[5]),))
 
 elif cmd == 'collect':
-    if len(args) != 1:
-        print('collect requires 1 args')
+    if len(args) != 3:
+        print('collect requires 3 args')
         sys.exit(1)
-    pp.pprint(client.collect(eval(args[0]),))
+    pp.pprint(client.collect(eval(args[0]), args[1], eval(args[2]),))
 
 else:
     print('Unrecognized method %s' % cmd)

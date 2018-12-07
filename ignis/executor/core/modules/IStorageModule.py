@@ -1,6 +1,9 @@
 import logging
 from ignis.rpc.executor.storage import IStorageModule as IStorageModuleRpc
 from .IModule import IModule
+from ..IMessage import IMessage
+from ..storage.iterator.ICoreIterator import readToWrite
+from ignis.data.IBytearrayTransport import IBytearrayTransport
 
 logger = logging.getLogger(__name__)
 
@@ -59,11 +62,66 @@ class IStorageModule(IModule, IStorageModuleRpc.Iface):
 		except Exception as ex:
 			self.raiseRemote(ex)
 
-	def take(self, n, light):
-		pass  # TODO
+	def take(self, msg_id, addr, n, light):
+		try:
+			logger.info("IStorageModule starting take, msg_id: " + str(msg_id)
+			            + ", addr: " + str(addr)
+			            + ", n: " + str(n)
+			            + ", light " + str(light))
+			loaded = self._executorData.loadObject()
+			self._executorData.deleteLoadObject(n)
+			object = self.getIObject()
+			readToWrite(loaded.readIterator(), object.writeIterator(), n)
 
-	def takeSample(self, n, withRemplacement, seed, light):
-		pass  # TODO
+			_return = bytearray()
+			if light:
+				buffer = IBytearrayTransport(_return)
+				object.write(buffer)
+			else:
+				self._executorData.getPostBox().newOutMessage(msg_id, IMessage(addr, object))
+			logger.info("IStorageModule take done")
+			return _return
+		except Exception as ex:
+			self.raiseRemote(ex)
 
-	def collect(self, light):
-		pass  # TODO
+	def takeSample(self, msg_id, addr, n, withRemplacement, seed, light):
+		try:
+			logger.info("IStorageModule starting takeSample, msg_id: " + str(msg_id)
+			            + ", addr: " + str(addr)
+			            + ", n: " + str(n)
+			            + ", withRemplacement: " + str(withRemplacement)
+			            + ", seed: " + str(seed)
+			            + ", light " + str(light))
+			loaded = self._executorData.loadObject()
+			self._executorData.deleteLoadObject(n)
+			object = self.getIObject()
+			# TODO
+
+			_return = bytearray()
+			if light:
+				buffer = IBytearrayTransport(_return)
+				object.write(buffer)
+			else:
+				self._executorData.getPostBox().newOutMessage(msg_id, IMessage(addr, object))
+			logger.info("IStorageModule takeSample done")
+			return _return
+		except Exception as ex:
+			self.raiseRemote(ex)
+
+	def collect(self, msg_id, addr, light):
+		logger.info("IStorageModule starting collect, msg_id: " + str(msg_id)
+		            + ", addr: " + str(addr)
+		            + ", light " + str(light))
+		try:
+			object = self._executorData.loadObject()
+			self._executorData.deleteLoadObject()
+			_return = bytearray()
+			if light:
+				buffer = IBytearrayTransport(_return)
+				object.write(buffer)
+			else:
+				self._executorData.getPostBox().newOutMessage(msg_id, IMessage(addr, object))
+			logger.info("IStorageModule collect done")
+			return _return
+		except Exception as ex:
+			self.raiseRemote(ex)

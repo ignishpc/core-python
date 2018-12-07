@@ -57,17 +57,21 @@ class Iface(object):
         """
         pass
 
-    def take(self, n, light):
+    def take(self, msg_id, addr, n, light):
         """
         Parameters:
+         - msg_id
+         - addr
          - n
          - light
         """
         pass
 
-    def takeSample(self, n, withRemplacement, seed, light):
+    def takeSample(self, msg_id, addr, n, withRemplacement, seed, light):
         """
         Parameters:
+         - msg_id
+         - addr
          - n
          - withRemplacement
          - seed
@@ -75,9 +79,11 @@ class Iface(object):
         """
         pass
 
-    def collect(self, light):
+    def collect(self, msg_id, addr, light):
         """
         Parameters:
+         - msg_id
+         - addr
          - light
         """
         pass
@@ -273,18 +279,22 @@ class Client(Iface):
             raise result.ex
         return
 
-    def take(self, n, light):
+    def take(self, msg_id, addr, n, light):
         """
         Parameters:
+         - msg_id
+         - addr
          - n
          - light
         """
-        self.send_take(n, light)
+        self.send_take(msg_id, addr, n, light)
         return self.recv_take()
 
-    def send_take(self, n, light):
+    def send_take(self, msg_id, addr, n, light):
         self._oprot.writeMessageBegin('take', TMessageType.CALL, self._seqid)
         args = take_args()
+        args.msg_id = msg_id
+        args.addr = addr
         args.n = n
         args.light = light
         args.write(self._oprot)
@@ -308,20 +318,24 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "take failed: unknown result")
 
-    def takeSample(self, n, withRemplacement, seed, light):
+    def takeSample(self, msg_id, addr, n, withRemplacement, seed, light):
         """
         Parameters:
+         - msg_id
+         - addr
          - n
          - withRemplacement
          - seed
          - light
         """
-        self.send_takeSample(n, withRemplacement, seed, light)
+        self.send_takeSample(msg_id, addr, n, withRemplacement, seed, light)
         return self.recv_takeSample()
 
-    def send_takeSample(self, n, withRemplacement, seed, light):
+    def send_takeSample(self, msg_id, addr, n, withRemplacement, seed, light):
         self._oprot.writeMessageBegin('takeSample', TMessageType.CALL, self._seqid)
         args = takeSample_args()
+        args.msg_id = msg_id
+        args.addr = addr
         args.n = n
         args.withRemplacement = withRemplacement
         args.seed = seed
@@ -347,17 +361,21 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "takeSample failed: unknown result")
 
-    def collect(self, light):
+    def collect(self, msg_id, addr, light):
         """
         Parameters:
+         - msg_id
+         - addr
          - light
         """
-        self.send_collect(light)
+        self.send_collect(msg_id, addr, light)
         return self.recv_collect()
 
-    def send_collect(self, light):
+    def send_collect(self, msg_id, addr, light):
         self._oprot.writeMessageBegin('collect', TMessageType.CALL, self._seqid)
         args = collect_args()
+        args.msg_id = msg_id
+        args.addr = addr
         args.light = light
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
@@ -572,7 +590,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = take_result()
         try:
-            result.success = self._handler.take(args.n, args.light)
+            result.success = self._handler.take(args.msg_id, args.addr, args.n, args.light)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -598,7 +616,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = takeSample_result()
         try:
-            result.success = self._handler.takeSample(args.n, args.withRemplacement, args.seed, args.light)
+            result.success = self._handler.takeSample(args.msg_id, args.addr, args.n, args.withRemplacement, args.seed, args.light)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -624,7 +642,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = collect_result()
         try:
-            result.success = self._handler.collect(args.light)
+            result.success = self._handler.collect(args.msg_id, args.addr, args.light)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -1381,12 +1399,16 @@ loadContext_result.thrift_spec = (
 class take_args(object):
     """
     Attributes:
+     - msg_id
+     - addr
      - n
      - light
     """
 
 
-    def __init__(self, n=None, light=None,):
+    def __init__(self, msg_id=None, addr=None, n=None, light=None,):
+        self.msg_id = msg_id
+        self.addr = addr
         self.n = n
         self.light = light
 
@@ -1401,10 +1423,20 @@ class take_args(object):
                 break
             if fid == 1:
                 if ftype == TType.I64:
-                    self.n = iprot.readI64()
+                    self.msg_id = iprot.readI64()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
+                if ftype == TType.STRING:
+                    self.addr = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I64:
+                    self.n = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
                 if ftype == TType.BOOL:
                     self.light = iprot.readBool()
                 else:
@@ -1419,12 +1451,20 @@ class take_args(object):
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
         oprot.writeStructBegin('take_args')
+        if self.msg_id is not None:
+            oprot.writeFieldBegin('msg_id', TType.I64, 1)
+            oprot.writeI64(self.msg_id)
+            oprot.writeFieldEnd()
+        if self.addr is not None:
+            oprot.writeFieldBegin('addr', TType.STRING, 2)
+            oprot.writeString(self.addr.encode('utf-8') if sys.version_info[0] == 2 else self.addr)
+            oprot.writeFieldEnd()
         if self.n is not None:
-            oprot.writeFieldBegin('n', TType.I64, 1)
+            oprot.writeFieldBegin('n', TType.I64, 3)
             oprot.writeI64(self.n)
             oprot.writeFieldEnd()
         if self.light is not None:
-            oprot.writeFieldBegin('light', TType.BOOL, 2)
+            oprot.writeFieldBegin('light', TType.BOOL, 4)
             oprot.writeBool(self.light)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -1446,8 +1486,10 @@ class take_args(object):
 all_structs.append(take_args)
 take_args.thrift_spec = (
     None,  # 0
-    (1, TType.I64, 'n', None, None, ),  # 1
-    (2, TType.BOOL, 'light', None, None, ),  # 2
+    (1, TType.I64, 'msg_id', None, None, ),  # 1
+    (2, TType.STRING, 'addr', 'UTF8', None, ),  # 2
+    (3, TType.I64, 'n', None, None, ),  # 3
+    (4, TType.BOOL, 'light', None, None, ),  # 4
 )
 
 
@@ -1527,6 +1569,8 @@ take_result.thrift_spec = (
 class takeSample_args(object):
     """
     Attributes:
+     - msg_id
+     - addr
      - n
      - withRemplacement
      - seed
@@ -1534,7 +1578,9 @@ class takeSample_args(object):
     """
 
 
-    def __init__(self, n=None, withRemplacement=None, seed=None, light=None,):
+    def __init__(self, msg_id=None, addr=None, n=None, withRemplacement=None, seed=None, light=None,):
+        self.msg_id = msg_id
+        self.addr = addr
         self.n = n
         self.withRemplacement = withRemplacement
         self.seed = seed
@@ -1551,20 +1597,30 @@ class takeSample_args(object):
                 break
             if fid == 1:
                 if ftype == TType.I64:
-                    self.n = iprot.readI64()
+                    self.msg_id = iprot.readI64()
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
+                if ftype == TType.STRING:
+                    self.addr = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I64:
+                    self.n = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
                 if ftype == TType.BOOL:
                     self.withRemplacement = iprot.readBool()
                 else:
                     iprot.skip(ftype)
-            elif fid == 3:
+            elif fid == 5:
                 if ftype == TType.I32:
                     self.seed = iprot.readI32()
                 else:
                     iprot.skip(ftype)
-            elif fid == 4:
+            elif fid == 6:
                 if ftype == TType.BOOL:
                     self.light = iprot.readBool()
                 else:
@@ -1579,20 +1635,28 @@ class takeSample_args(object):
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
         oprot.writeStructBegin('takeSample_args')
+        if self.msg_id is not None:
+            oprot.writeFieldBegin('msg_id', TType.I64, 1)
+            oprot.writeI64(self.msg_id)
+            oprot.writeFieldEnd()
+        if self.addr is not None:
+            oprot.writeFieldBegin('addr', TType.STRING, 2)
+            oprot.writeString(self.addr.encode('utf-8') if sys.version_info[0] == 2 else self.addr)
+            oprot.writeFieldEnd()
         if self.n is not None:
-            oprot.writeFieldBegin('n', TType.I64, 1)
+            oprot.writeFieldBegin('n', TType.I64, 3)
             oprot.writeI64(self.n)
             oprot.writeFieldEnd()
         if self.withRemplacement is not None:
-            oprot.writeFieldBegin('withRemplacement', TType.BOOL, 2)
+            oprot.writeFieldBegin('withRemplacement', TType.BOOL, 4)
             oprot.writeBool(self.withRemplacement)
             oprot.writeFieldEnd()
         if self.seed is not None:
-            oprot.writeFieldBegin('seed', TType.I32, 3)
+            oprot.writeFieldBegin('seed', TType.I32, 5)
             oprot.writeI32(self.seed)
             oprot.writeFieldEnd()
         if self.light is not None:
-            oprot.writeFieldBegin('light', TType.BOOL, 4)
+            oprot.writeFieldBegin('light', TType.BOOL, 6)
             oprot.writeBool(self.light)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -1614,10 +1678,12 @@ class takeSample_args(object):
 all_structs.append(takeSample_args)
 takeSample_args.thrift_spec = (
     None,  # 0
-    (1, TType.I64, 'n', None, None, ),  # 1
-    (2, TType.BOOL, 'withRemplacement', None, None, ),  # 2
-    (3, TType.I32, 'seed', None, None, ),  # 3
-    (4, TType.BOOL, 'light', None, None, ),  # 4
+    (1, TType.I64, 'msg_id', None, None, ),  # 1
+    (2, TType.STRING, 'addr', 'UTF8', None, ),  # 2
+    (3, TType.I64, 'n', None, None, ),  # 3
+    (4, TType.BOOL, 'withRemplacement', None, None, ),  # 4
+    (5, TType.I32, 'seed', None, None, ),  # 5
+    (6, TType.BOOL, 'light', None, None, ),  # 6
 )
 
 
@@ -1697,11 +1763,15 @@ takeSample_result.thrift_spec = (
 class collect_args(object):
     """
     Attributes:
+     - msg_id
+     - addr
      - light
     """
 
 
-    def __init__(self, light=None,):
+    def __init__(self, msg_id=None, addr=None, light=None,):
+        self.msg_id = msg_id
+        self.addr = addr
         self.light = light
 
     def read(self, iprot):
@@ -1714,6 +1784,16 @@ class collect_args(object):
             if ftype == TType.STOP:
                 break
             if fid == 1:
+                if ftype == TType.I64:
+                    self.msg_id = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.addr = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
                 if ftype == TType.BOOL:
                     self.light = iprot.readBool()
                 else:
@@ -1728,8 +1808,16 @@ class collect_args(object):
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
         oprot.writeStructBegin('collect_args')
+        if self.msg_id is not None:
+            oprot.writeFieldBegin('msg_id', TType.I64, 1)
+            oprot.writeI64(self.msg_id)
+            oprot.writeFieldEnd()
+        if self.addr is not None:
+            oprot.writeFieldBegin('addr', TType.STRING, 2)
+            oprot.writeString(self.addr.encode('utf-8') if sys.version_info[0] == 2 else self.addr)
+            oprot.writeFieldEnd()
         if self.light is not None:
-            oprot.writeFieldBegin('light', TType.BOOL, 1)
+            oprot.writeFieldBegin('light', TType.BOOL, 3)
             oprot.writeBool(self.light)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -1751,7 +1839,9 @@ class collect_args(object):
 all_structs.append(collect_args)
 collect_args.thrift_spec = (
     None,  # 0
-    (1, TType.BOOL, 'light', None, None, ),  # 1
+    (1, TType.I64, 'msg_id', None, None, ),  # 1
+    (2, TType.STRING, 'addr', 'UTF8', None, ),  # 2
+    (3, TType.BOOL, 'light', None, None, ),  # 3
 )
 
 

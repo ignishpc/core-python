@@ -92,7 +92,21 @@ class IMapperModule(IModule, IMapperModuleRpc.Iface):
 		self.__pipe(sf, action)
 
 	def values(self):
-		pass  # TODO
+		try:
+			logging.info("MapperModule starting values")
+			object_in = self._executorData.loadObject()
+			size = len(object_in)
+			object_out = self.getIObject(size)
+
+			reader = object_in.readIterator()
+			writer = object_out.writeIterator()
+			for i in range(0,size):
+				writer.write(reader.read()[1])
+
+			self._executorData.loadObject(object_out)
+			logging.info("IMapperModule finished")
+		except Exception as ex:
+			self.raiseRemote(ex)
 
 	def streamingMap(self, sf, ordered):
 		pass  # TODO
