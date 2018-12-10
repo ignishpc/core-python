@@ -30,7 +30,7 @@ class IBytearrayTransport(TTransportBase):
 
 	def read(self, sz):
 		if self.__read + sz > len(self.__array):
-			raise EOFError()
+			sz = len(self.__array) - self.__read
 		oldRead = self.__read
 		self.__read += sz
 		return self.__array[oldRead:self.__read]
@@ -39,7 +39,7 @@ class IBytearrayTransport(TTransportBase):
 		return self.read(sz)
 
 	def write(self, buf):
-		self.__array.append(buf)
+		self.__array.extend(buf)
 
 	def flush(self):
 		pass

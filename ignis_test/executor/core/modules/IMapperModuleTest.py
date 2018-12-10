@@ -123,3 +123,15 @@ class IMapperModuleTest(unittest.TestCase):
 			tuple = reader.next()
 			self.assertEqual(elem, tuple[1])
 			self.assertEqual(str(elem), tuple[0])
+
+	def test_values(self):
+		obj = self.__mapperModule.getIObject()
+		writer = obj.writeIterator()
+		for elem in self.__input:
+			writer.write((elem, elem))
+		self.__executorData.loadObject(obj)
+		self.__mapperModule.values()
+
+		reader = self.__executorData.loadObject().readIterator()
+		for elem in self.__input:
+			self.assertEqual(elem, reader.next())

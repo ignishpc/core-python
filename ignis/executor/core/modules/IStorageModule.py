@@ -1,4 +1,5 @@
 import logging
+import random
 from ignis.rpc.executor.storage import IStorageModule as IStorageModuleRpc
 from .IModule import IModule
 from ..IMessage import IMessage
@@ -69,14 +70,14 @@ class IStorageModule(IModule, IStorageModuleRpc.Iface):
 			            + ", n: " + str(n)
 			            + ", light " + str(light))
 			loaded = self._executorData.loadObject()
-			self._executorData.deleteLoadObject(n)
+			self._executorData.deleteLoadObject()
 			object = self.getIObject()
 			readToWrite(loaded.readIterator(), object.writeIterator(), n)
 
 			_return = bytearray()
 			if light:
 				buffer = IBytearrayTransport(_return)
-				object.write(buffer)
+				object.write(buffer, 0)
 			else:
 				self._executorData.getPostBox().newOutMessage(msg_id, IMessage(addr, object))
 			logger.info("IStorageModule take done")
@@ -93,14 +94,41 @@ class IStorageModule(IModule, IStorageModuleRpc.Iface):
 			            + ", seed: " + str(seed)
 			            + ", light " + str(light))
 			loaded = self._executorData.loadObject()
-			self._executorData.deleteLoadObject(n)
+			self._executorData.deleteLoadObject()
 			object = self.getIObject()
-			# TODO
+			size = len(loaded)
+
+			reader = loaded.readIterator()
+			writer = object.writeIterator()
+			random.seed(seed)
+			if withRemplacement:
+				index = []
+				for i in range(0, n):
+					for j in range(0, n):
+						prob = n / (size - j)
+						if random.random() < prob:
+							index.append(j)
+							break
+				index.sort()
+				last = 0
+				for i in index:
+					reader.skip(i - last)
+					writer.write(reader.next())
+					last = i
+			else:
+				picked = 0
+				for i in range(0, size):
+					prob = (n - picked) / (size - i)
+					if random.random() < prob:
+						writer.write(reader.next())
+						picked += 1
+					else:
+						reader.skip(1)
 
 			_return = bytearray()
 			if light:
 				buffer = IBytearrayTransport(_return)
-				object.write(buffer)
+				object.write(buffer, 0)
 			else:
 				self._executorData.getPostBox().newOutMessage(msg_id, IMessage(addr, object))
 			logger.info("IStorageModule takeSample done")
@@ -118,7 +146,7 @@ class IStorageModule(IModule, IStorageModuleRpc.Iface):
 			_return = bytearray()
 			if light:
 				buffer = IBytearrayTransport(_return)
-				object.write(buffer)
+				object.write(buffer, 0)
 			else:
 				self._executorData.getPostBox().newOutMessage(msg_id, IMessage(addr, object))
 			logger.info("IStorageModule collect done")

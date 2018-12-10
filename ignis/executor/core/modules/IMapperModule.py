@@ -101,7 +101,7 @@ class IMapperModule(IModule, IMapperModuleRpc.Iface):
 			reader = object_in.readIterator()
 			writer = object_out.writeIterator()
 			for i in range(0,size):
-				writer.write(reader.read()[1])
+				writer.write(reader.next()[1])
 
 			self._executorData.loadObject(object_out)
 			logging.info("IMapperModule finished")
