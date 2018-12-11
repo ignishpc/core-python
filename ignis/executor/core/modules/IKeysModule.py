@@ -1,3 +1,4 @@
+import logging
 from ignis.rpc.executor.keys import IKeysModule as IKeysModuleRpc
 from .IModule import IModule
 from ..IMessage import IMessage
@@ -6,7 +7,7 @@ from ignis.data.handle.IHash import IHash
 from multiprocessing.sharedctypes import Value
 import ctypes
 
-import logging
+logger = logging.getLogger(__name__)
 
 
 class IKeysModule(IModule, IKeysModuleRpc.Iface):
@@ -16,14 +17,14 @@ class IKeysModule(IModule, IKeysModuleRpc.Iface):
 
 	def getKeys(self):
 		try:
-			logging.info("IKeysModule starting getKeys")
+			logger.info("IKeysModule starting getKeys")
 			obj = self._executorData.loadObject()
 			reader = obj.readIterator()
 			self.__hashes = list()
 			while reader.hasNext():
 				self.__hashes.append(IHash.hash(reader.next()[0]))
 			return self.__hashes
-			logging.info("IKeysModule keys ready")
+			logger.info("IKeysModule keys ready")
 		except Exception as ex:
 			self.raiseRemote(ex)
 
@@ -35,7 +36,7 @@ class IKeysModule(IModule, IKeysModuleRpc.Iface):
 
 	def collectKeys(self):
 		try:
-			logging.info("IKeysModule collecting keys")
+			logger.info("IKeysModule collecting keys")
 			msgs = self._executorData.getPostBox().popInBox()
 
 			objectOut = self.getIObject()
@@ -44,13 +45,13 @@ class IKeysModule(IModule, IKeysModuleRpc.Iface):
 				msg.getObj().moveTo(objectOut)
 
 			self._executorData.loadObject(objectOut)
-			logging.info("IKeysModule keys collected")
+			logger.info("IKeysModule keys collected")
 		except Exception as ex:
 			self.raiseRemote(ex)
 
 	def prepareKeys(self, executorKeys):
 		try:
-			logging.info("IKeysModule preparing keys")
+			logger.info("IKeysModule preparing keys")
 			obj = self._executorData.loadObject()
 			hashWriter = dict()
 			size = obj.getSize()
@@ -66,13 +67,13 @@ class IKeysModule(IModule, IKeysModuleRpc.Iface):
 			for i in range(0, size):
 				hashWriter[self.__hashes[i]].write(reader.next())
 			self.__hashes = None
-			logging.info("IKeysModule keys prepared")
+			logger.info("IKeysModule keys prepared")
 		except Exception as ex:
 			self.raiseRemote(ex)
 
 	def reduceByKey(self, funct):
 		try:
-			logging.info("IKeysModule reduceByKey starting")
+			logger.info("IKeysModule reduceByKey starting")
 			f = self.loadSource(funct)
 			obj = self._executorData.loadObject()
 			threads = self._executorData.getThreads()
@@ -135,6 +136,6 @@ class IKeysModule(IModule, IKeysModuleRpc.Iface):
 
 			self._executorData.loadObject(objOut)
 
-			logging.info("IKeysModule reduceByKey ready")
+			logger.info("IKeysModule reduceByKey ready")
 		except Exception as ex:
 			self.raiseRemote(ex)

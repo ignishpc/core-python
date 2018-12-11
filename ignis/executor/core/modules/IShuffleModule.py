@@ -1,6 +1,8 @@
+import logging
 from ignis.rpc.executor.shuffle import IShuffleModule as IShuffleModuleRpc
 from .IModule import IModule
 
+logger = logging.getLogger(__name__)
 
 class IShuffleModule(IModule, IShuffleModuleRpc.Iface):
 

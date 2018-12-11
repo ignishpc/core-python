@@ -21,21 +21,21 @@ class IStorageModule(IModule, IStorageModuleRpc.Iface):
 
 	def cache(self, id):
 		try:
-			logger.info("IStorageModule loading cache object " + str(id))
+			logger.info(f"IStorageModule loading cache object {id}")
 			self.__objectsCache[id] = self._executorData.loadObject()
 		except Exception as ex:
 			self.raiseRemote(ex)
 
 	def uncache(self, id):
 		try:
-			logger.info("IStorageModule deleting cache object " + str(id))
+			logger.info(f"IStorageModule deleting cache object {id}")
 			del self.__objectsCache[id]
 		except Exception as ex:
 			self.raiseRemote(ex)
 
 	def loadCache(self, id):
 		try:
-			logger.info("IStorageModule loading cache object " + str(id))
+			logger.info(f"IStorageModule loading cache object {id}")
 			if id not in self.__objectsCache:
 				raise ValueError("IStorageModule cache object not found")
 			self._executorData.loadObject(self.__objectsCache[id])
@@ -45,7 +45,7 @@ class IStorageModule(IModule, IStorageModuleRpc.Iface):
 	def saveContext(self, id):
 		try:
 			self.__objectsContext[id] = self._executorData.loadObject()
-			logger.info("IStorageModule context " + str(id) + " saved")
+			logger.info(f"IStorageModule context {id} saved")
 		except Exception as ex:
 			self.raiseRemote(ex)
 
@@ -58,17 +58,14 @@ class IStorageModule(IModule, IStorageModuleRpc.Iface):
 
 			if not alreadyLoaded:
 				self._executorData.loadObject(self.__objectsContext[id])
-				logger.info("IStorageModule context " + str(id) + " loaded")
+				logger.info(f"IStorageModule context {id} loaded")
 			del self.__objectsContext[id]
 		except Exception as ex:
 			self.raiseRemote(ex)
 
 	def take(self, msg_id, addr, n, light):
 		try:
-			logger.info("IStorageModule starting take, msg_id: " + str(msg_id)
-			            + ", addr: " + str(addr)
-			            + ", n: " + str(n)
-			            + ", light " + str(light))
+			logger.info(f"IStorageModule starting take, msg_id: {msg_id}, addr: {addr}, n: {n}, light: {light}")
 			loaded = self._executorData.loadObject()
 			self._executorData.deleteLoadObject()
 			object = self.getIObject()
@@ -87,12 +84,8 @@ class IStorageModule(IModule, IStorageModuleRpc.Iface):
 
 	def takeSample(self, msg_id, addr, n, withRemplacement, seed, light):
 		try:
-			logger.info("IStorageModule starting takeSample, msg_id: " + str(msg_id)
-			            + ", addr: " + str(addr)
-			            + ", n: " + str(n)
-			            + ", withRemplacement: " + str(withRemplacement)
-			            + ", seed: " + str(seed)
-			            + ", light " + str(light))
+			logger.info(f"IStorageModule starting takeSample, msg_id: {msg_id}, addr: {addr}, n: {n}" +
+			            + f", withRemplacement: {withRemplacement}, seed: {seed}, light: {light}")
 			loaded = self._executorData.loadObject()
 			self._executorData.deleteLoadObject()
 			object = self.getIObject()
@@ -137,9 +130,7 @@ class IStorageModule(IModule, IStorageModuleRpc.Iface):
 			self.raiseRemote(ex)
 
 	def collect(self, msg_id, addr, light):
-		logger.info("IStorageModule starting collect, msg_id: " + str(msg_id)
-		            + ", addr: " + str(addr)
-		            + ", light " + str(light))
+		logger.info(f"IStorageModule starting collect, msg_id: {msg_id}, addr: {addr}, light: {light}")
 		try:
 			object = self._executorData.loadObject()
 			self._executorData.deleteLoadObject()

@@ -34,38 +34,38 @@ class IPostmanModule(IPostmanModuleRpc.Iface, IModule):
 				buffer2 = addrpath + "/buffer2"
 				transport = IFileTransport(buffer1, buffer2, transport)
 			else:
-				raise ValueError("IPostmanModule id " + str(id) + " mode " + addrMode + " unknown")
+				raise ValueError(f"IPostmanModule id {id} mode {addrMode} unknown")
 			try:
 				buffer = TBufferedTransport(transport)
 				object = self.getIObject()
-				logging.info("IPostmanModule id " + str(id) + " receiving" + " mode: " + addrMode)
+				logger.info(f"IPostmanModule id {id} receiving" + " mode: {addrMode}")
 				object.read(buffer)
 				msg = IMessage("local", object)
 				self._executorData.getPostBox().newInMessage(id, msg)
-				logging.info("IPostmanModule id " + str(id) + " received OK")
+				logger.info(f"IPostmanModule id {id} received OK")
 				object.fit()
 			except Exception as ex:
-				logging.warning("IPostmanModule id " + str(id) + " received FAILS " + str(ex))
+				logger.warning(f"IPostmanModule id {id} received FAILS {ex}")
 
 		except Exception as ex:
-			logging.warning("IPostmanModule connection exception " + str(ex))
+			logger.warning(f"IPostmanModule connection exception {ex}")
 
 	def __threadServer(self, server):
-		logging.info("IPostmanModule started")
+		logger.info("IPostmanModule started")
 		threads = list()
 		server.listen()
-		logging.info("IPostmanModule listening on port " + str(server.port))
+		logger.info(f"IPostmanModule listening on port {server.port}")
 		while self.__started:
 			try:
 				connection = server.accept()
-				logging.info("IPostmanModule connection accepted")
+				logger.info("IPostmanModule connection accepted")
 				thread = threading.Thread(target=self.__threadAccept, args=(connection,))
 				threads.append(thread)
 				thread.start()
 			except Exception as ex:
 				if not self.__started:
 					break
-				logging.warning("IPostmanModule accept exception " + str(ex))
+				logger.warning(f"IPostmanModule accept exception {ex}")
 		for thread in threads:
 			thread.join()
 
@@ -73,7 +73,7 @@ class IPostmanModule(IPostmanModuleRpc.Iface, IModule):
 		try:
 			if not self.__started:
 				self.__started = True
-				logging.info("IPostmanModule starting")
+				logger.info("IPostmanModule starting")
 				port = self._executorData.getParser().getInt("ignis.executor.transport.port")
 				self.__server = IServerSocket(port=port)
 				self.__threadServer = threading.Thread(target=self.__threadServer, args=(self.__server,))
@@ -82,7 +82,7 @@ class IPostmanModule(IPostmanModuleRpc.Iface, IModule):
 			self.raiseRemote(ex)
 
 	def stop(self):
-		logging.info("IPostmanModule stopping")
+		logger.info("IPostmanModule stopping")
 		try:
 			if self.__started:
 				self.__started = False
@@ -103,7 +103,7 @@ class IPostmanModule(IPostmanModuleRpc.Iface, IModule):
 
 			addrHost = addrl[1]
 			addrPort = int(addrl[2])
-			logging.info("IPostmanModule id " + str(id) + " connecting to " + addrHost + ":" + str(addrPort))
+			logger.info(f"IPostmanModule id {id} connecting to {addrHost}:{addrPort}")
 			transport = ISocket(host=addrHost, port=addrPort)
 			for i in range(0, 10):
 				try:
@@ -128,16 +128,16 @@ class IPostmanModule(IPostmanModuleRpc.Iface, IModule):
 				buffer2 = addrpath + "/buffer2"
 				transport = IFileTransport(buffer1, buffer2, transport, addrBlockSize)
 			else:
-				raise ValueError("IPostmanModule id " + str(id) + " mode " + addrMode + " unknown")
+				raise ValueError(f"IPostmanModule id {id} mode: {addrMode} unknown")
 			buffer = TBufferedTransport(transport)
 			try:
 				msg.getObj().write(buffer, compression)
 			finally:
 				transport.close()
-			logging.info("IPostmanModule id " + str(id) + " sent OK")
+			logger.info(f"IPostmanModule id {id} sent OK")
 			return 0
 		except Exception as ex:
-			logging.error("IPostmanModule id " + str(id) + " sent FAILS " + str(ex))
+			logger.error(f"IPostmanModule id {id} sent FAILS {ex}")
 			return 1
 
 	def __sendTry(self, id, msg, compression, tries):
@@ -165,8 +165,8 @@ class IPostmanModule(IPostmanModuleRpc.Iface, IModule):
 				for future in futures:
 					errors += future.result()
 			if errors > 0:
-				logging.error("IPostmanModule fail to send " + str(errors) + " messages")
-				raise RuntimeError("IPostmanModule fail to send " + str(errors) + " messages");
+				logger.error(f"IPostmanModule fail to send {errors} messages")
+				raise RuntimeError(f"IPostmanModule fail to send {errors} messages");
 
 		except Exception as ex:
 			self.raiseRemote(ex)
