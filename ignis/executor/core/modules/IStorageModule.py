@@ -85,7 +85,7 @@ class IStorageModule(IModule, IStorageModuleRpc.Iface):
 	def takeSample(self, msg_id, addr, n, withRemplacement, seed, light):
 		try:
 			logger.info(f"IStorageModule starting takeSample, msg_id: {msg_id}, addr: {addr}, n: {n}" +
-			            + f", withRemplacement: {withRemplacement}, seed: {seed}, light: {light}")
+			            f", withRemplacement: {withRemplacement}, seed: {seed}, light: {light}")
 			loaded = self._executorData.loadObject()
 			self._executorData.deleteLoadObject()
 			object = self.getIObject()
