@@ -17,7 +17,7 @@ class IFilesModule(IModule, IFilesModuleRpc.Iface):
 			logger.info(f"IFileModule reading, path: {path}, offset: {offset}, len: {length}, lines: {lines}")
 			writer = obj.writeIterator()
 			with open(path) as file:
-				file.seek(offset=offset)
+				file.seek(offset)
 				for i in range(0, lines):
 					writer.write(file.readline())
 			obj.fit()
