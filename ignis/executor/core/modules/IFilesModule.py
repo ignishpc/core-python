@@ -22,6 +22,7 @@ class IFilesModule(IModule, IFilesModuleRpc.Iface):
 					writer.write(file.readline())
 			obj.fit()
 			self._executorData.loadObject(obj)
+			logger.info(f"IFileModule read")
 		except Exception as ex:
 			self.raiseRemote(ex)
 
@@ -47,6 +48,7 @@ class IFilesModule(IModule, IFilesModuleRpc.Iface):
 
 				if new_line:
 					file.write("\n")
+			logger.info(f"IFileModule saved")
 		except Exception as ex:
 			self.raiseRemote(ex)
 
@@ -76,6 +78,6 @@ class IFilesModule(IModule, IFilesModuleRpc.Iface):
 
 				if array_end:
 					file.write("]")
-
+			logger.info(f"IFileModule saved")
 		except Exception as ex:
 			self.raiseRemote(ex)
