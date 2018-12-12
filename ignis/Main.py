@@ -1,17 +1,17 @@
 import sys
 import logging
 from thrift.TMultiplexedProcessor import TMultiplexedProcessor
-from .executor.core import ILog
-from .executor.core.IExecutorData import IExecutorData
-from .executor.core.modules.IFilesModule import IFilesModule, IFilesModuleRpc
-from .executor.core.modules.IKeysModule import IKeysModule, IKeysModuleRpc
-from .executor.core.modules.IMapperModule import IMapperModule, IMapperModuleRpc
-from .executor.core.modules.IPostmanModule import IPostmanModule, IPostmanModuleRpc
-from .executor.core.modules.IReducerModule import IReducerModule, IReducerModuleRpc
-from .executor.core.modules.IServerModule import IServerModule, IServerModuleRpc
-from .executor.core.modules.IShuffleModule import IShuffleModule, IShuffleModuleRpc
-from .executor.core.modules.ISortModule import ISortModule, ISortModuleRpc
-from .executor.core.modules.IStorageModule import IStorageModule, IStorageModuleRpc
+from ignis.executor.core import ILog
+from ignis.executor.core.IExecutorData import IExecutorData
+from ignis.executor.core.modules.IFilesModule import IFilesModule, IFilesModuleRpc
+from ignis.executor.core.modules.IKeysModule import IKeysModule, IKeysModuleRpc
+from ignis.executor.core.modules.IMapperModule import IMapperModule, IMapperModuleRpc
+from ignis.executor.core.modules.IPostmanModule import IPostmanModule, IPostmanModuleRpc
+from ignis.executor.core.modules.IReducerModule import IReducerModule, IReducerModuleRpc
+from ignis.executor.core.modules.IServerModule import IServerModule, IServerModuleRpc
+from ignis.executor.core.modules.IShuffleModule import IShuffleModule, IShuffleModuleRpc
+from ignis.executor.core.modules.ISortModule import ISortModule, ISortModuleRpc
+from ignis.executor.core.modules.IStorageModule import IStorageModule, IStorageModuleRpc
 
 logger = logging.getLogger(__name__)
 
