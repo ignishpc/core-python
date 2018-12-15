@@ -1,9 +1,8 @@
 from .IObject import IObject
-from .iterator.ICoreIterator import readToWrite
-from .iterator.ISimpleIterator import ISimpleReadIterator, ISimpleWriteIterator
-from .iterator.EmptyIterator import IEmptyReadIterator
+from .iterator.IRawIterator import readToWrite, IRawReadIterator, IRawWriteIterator
 from ignis.data.IZlibTransport import IZlibTransport
 from ignis.data.IObjectProtocol import IObjectProtocol
+from ignis.data.IBytearrayTransport import IBytearrayTransport
 
 
 class IRawObject(IObject):
@@ -19,36 +18,11 @@ class IRawObject(IObject):
 		self._elems = 0
 
 	def readIterator(self):
-		if self._elems == 0:
-			return IEmptyReadIterator()
-		def hasNext(it):
-			return it._elems < self._elems
-
-		def next(it):
-			it._elems += 1
-			return self._reader.read(self._protocol)
-
-		return ISimpleReadIterator(next=next, hasNext=hasNext)
+		self._flush()
+		return IRawReadIterator(self)
 
 	def writeIterator(self):
-		def write(it, obj):
-			self._elems += 1
-			if self._writer is None or self._reader is None:
-				if self._native:
-					self.__type = None
-					self._writer = self._manager.nativeWriter
-					self._reader = self._manager.nativeReader
-					self._protocol = self._transport
-				else:
-					self.__type = type(obj)
-					self._writer = self._manager.writer.getWriter(obj)
-					self._reader = self._manager.reader.getReader(self._writer.getId())
-					self._protocol = IObjectProtocol(self._transport)
-			elif self.__type and self.__type != type(obj):
-				raise ValueError("Current serialization does not support heterogeneous types")
-			self._writer.write(obj, self._protocol)
-
-		return ISimpleWriteIterator(write)
+		return IRawWriteIterator(self)
 
 	def read(self, trans):
 		self.clear()
@@ -59,9 +33,9 @@ class IRawObject(IObject):
 			if not buffer:
 				break
 			self._transport.write(buffer)
-		self._transport.flush()
 
 	def write(self, trans, compression):
+		self._flush()
 		dataTransport = IZlibTransport(trans)
 		self.__writeHeader(dataTransport)
 		while True:
@@ -71,17 +45,38 @@ class IRawObject(IObject):
 			dataTransport.write(buffer)
 		dataTransport.flush()
 
+	def copyTo(self, target):
+		if isinstance(target, IRawObject) and target._native == self._native and target._manager == self._manager:
+			self._flush()
+			if len(target) == 0:
+				aux = IBytearrayTransport()
+				self.__writeHeader(aux)
+				target.__readHeader(aux)
+			else:
+				target._elems += self._elems
+			while True:
+				buffer = self._transport.read(256)
+				if not buffer:
+					break
+				target._transport.write(buffer)
+		else:
+			readToWrite(self.readIterator(), target.writeIterator())
+
 	def copyFrom(self, source):
-		readToWrite(source.readIterator(), self.writeIterator())
+		if isinstance(source, IRawObject):
+			source.copyTo(self)
+		else:
+			readToWrite(source.readIterator(), self.writeIterator())
 
 	def moveFrom(self, source):
-		self.copyFrom(source)
+		source.copyTo(self)
 		source.clear()
 
 	def __len__(self):
 		return self._elems
 
 	def clear(self):
+		self._flush()
 		self._elems = 0
 		self._writer = None
 		self._reader = None
@@ -113,3 +108,6 @@ class IRawObject(IObject):
 		self._manager.writer.writeSizeAux(self._elems, headProto)
 		if not self._native:
 			self._writer.writeType(headProto)
+
+	def _flush(self):
+		self._transport.flush()

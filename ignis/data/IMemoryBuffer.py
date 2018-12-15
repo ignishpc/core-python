@@ -2,11 +2,72 @@ from thrift.transport.TTransport import TTransportBase, TTransportException
 from enum import Enum
 import sys
 import mmap
-from multiprocessing.sharedctypes import Value
-from ctypes import c_int64
+import cffi
+import os
+import uuid
 
 
-class ISharedMemoryBuffer(TTransportBase):
+class IMemory:
+
+	def __init__(self, size):
+		self.__array = bytearray(size)
+
+	def __getitem__(self, i):
+		return self.__array[i]
+
+	def __setitem__(self, i, value):
+		self.__array[i] = value
+
+	def resize(self, size):
+		if len(self.__array) > size:
+			self.__array = self.__array[0:size]
+
+	def __len__(self):
+		return len(self.__array)
+
+
+class ISharedMemory:
+	__ffi = cffi.FFI()
+	__ffi.cdef("int shm_open(const char *name, int oflag, int mode);")
+	__shm = __ffi.verify("#include <sys/mman.h>", libraries=["rt"])
+
+	def __initMemory(self, name, size, create):
+		self.__name = name
+		self.__size = size
+		char_name = bytes(self.__name, 'ascii')
+		fd = self.__shm.shm_open(char_name, os.O_RDWR | os.O_CREAT | (os.O_EXCL if create else 0), 0o600)
+		if fd < 0:
+			errno = self.__ffi.errno
+			raise OSError(errno, os.strerror(errno))
+		os.ftruncate(fd, size)
+		self.__mmap = mmap.mmap(fd, self.__size, access=mmap.ACCESS_WRITE)
+		os.close(fd)
+
+	def __init__(self, size):
+		name = '/' + str(uuid.uuid4())
+		self.__initMemory(name, size, True)
+
+	def __getitem__(self, i):
+		return self.__mmap[i]
+
+	def __setitem__(self, i, value):
+		self.__mmap[i] = value
+
+	def resize(self, sz):
+		self.__mmap.resize(sz)
+
+	def __setstate__(self, st):
+		name, size = st
+		self.__initMemory(name, size, False)
+
+	def __getstate__(self):
+		return self.__name, self.__size
+
+	def __len__(self):
+		return self.__size
+
+
+class IMemoryBuffer(TTransportBase):
 	"""
 	A shared memory buffer is a transport that simply reads from and writes to an
 	in memory buffer. Anytime you call write on it, the data is simply placed
@@ -42,7 +103,7 @@ class ISharedMemoryBuffer(TTransportBase):
 		COPY = 2
 		TAKE_OWNERSHIP = 3
 
-	def __init__(self, sz=None, buf=None, policy=MemoryPolicy.OBSERVE):
+	def __init__(self, sz=None, buf=None, policy=MemoryPolicy.OBSERVE, shared=False):
 		"""
 		Construct a ISharedMemoryBuffer
 
@@ -53,14 +114,14 @@ class ISharedMemoryBuffer(TTransportBase):
 		"""
 		if buf is None:
 			if sz is None:
-				self.__initCommon(None, ISharedMemoryBuffer.defaultSize, True, 0)
+				self.__initCommon(None, IMemoryBuffer.defaultSize, True, 0, shared)
 			else:
-				self.__initCommon(None, sz, True, 0)
+				self.__initCommon(None, sz, True, 0, shared)
 		else:
-			if policy == ISharedMemoryBuffer.MemoryPolicy.OBSERVE or ISharedMemoryBuffer.MemoryPolicy.TAKE_OWNERSHIP:
-				self.__initCommon(buf, sz, policy == ISharedMemoryBuffer.MemoryPolicy.TAKE_OWNERSHIP, sz)
-			elif policy == ISharedMemoryBuffer.MemoryPolicy.COPY:
-				self.__initCommon(None, sz, True, 0)
+			if policy == IMemoryBuffer.MemoryPolicy.OBSERVE or IMemoryBuffer.MemoryPolicy.TAKE_OWNERSHIP:
+				self.__initCommon(buf, sz, policy == IMemoryBuffer.MemoryPolicy.TAKE_OWNERSHIP, sz, shared)
+			elif policy == IMemoryBuffer.MemoryPolicy.COPY:
+				self.__initCommon(None, sz, True, 0, shared)
 				self.write(buf, sz)
 			else:
 				raise TTransportException(message="Invalid MemoryPolicy for ISharedMemoryBuffer")
@@ -87,7 +148,7 @@ class ISharedMemoryBuffer(TTransportBase):
 			# It isn't safe to write into a buffer we don't own.
 			if self.__owner:
 				if sz is None:
-					self.setBufferSize(ISharedMemoryBuffer.defaultSize)
+					self.setBufferSize(IMemoryBuffer.defaultSize)
 				else:
 					self.setBufferSize(sz)
 		else:
@@ -109,23 +170,25 @@ class ISharedMemoryBuffer(TTransportBase):
 		return self.__wBase - self.__rBase
 
 	def availableWrite(self):
-		return self.__bufferSize - self.__wBase
+		return len(self) - self.__wBase
 
 	def getBufferSize(self):
-		return self.__bufferSize
+		return len(self)
+
+	def __len__(self):
+		return len(self.__buffer)
 
 	def getMaxBufferSize(self):
 		return self.__maxBufferSize
 
 	def setMaxBufferSize(self, maxSize):
-		if maxSize < self.__bufferSize:
+		if maxSize < len(self):
 			raise TTransportException(message="Maximum buffer size would be less than current buffer size")
 
 	def setBufferSize(self, new_size):
 		self.__buffer.resize(new_size)
 		self.__rBase = min(self.__rBase, new_size)
 		self.__wBase = min(self.__wBase, new_size)
-		self.__bufferSize = new_size
 
 	def read(self, sz):
 		# Decide how much to give.
@@ -173,13 +236,6 @@ class ISharedMemoryBuffer(TTransportBase):
 	def setWriteBuffer(self, pos):
 		self.__wBase = pos
 
-	def _swap(self, that):
-		self.__buffer, that.__buffer = that.__buffer, self.__buffer
-		self.__bufferSize, that.__bufferSize = that.__bufferSize, self.__bufferSize
-		self.__rBase, that.__rBase = that.__rBase, self.__rBase
-		self.__wBase, that.__wBase = that.__wBase, self.__wBase
-		self.__owner, that.__owner = that.__owner, self.__owner
-
 	def _ensureCanWrite(self, sz):
 		# Check available space
 		avail = self.availableWrite()
@@ -190,53 +246,31 @@ class ISharedMemoryBuffer(TTransportBase):
 			raise TTransportException(message="Insufficient space in external MemoryBuffer")
 
 		# Grow the buffer as necessary.
-		new_size = self.__bufferSize
+		new_size = len(self)
 		while sz > avail:
 			if new_size > self.__maxBufferSize / 2:
-				if self.availableWrite() + self.__maxBufferSize - self.__bufferSize < sz:
+				if self.availableWrite() + self.__maxBufferSize - len(self) < sz:
 					raise TTransportException(message="Internal buffer size overflow")
 				new_size = self.__maxBufferSize
 			new_size = new_size * 2 if new_size > 0 else 1
-			avail = self.availableWrite() + (new_size - self.__bufferSize)
+			avail = self.availableWrite() + (new_size - len(self))
 		self.setBufferSize(new_size)
 
-	def __initCommon(self, buf, size, owner, wPos):
+	def __initCommon(self, buf, size, owner, wPos, shared):
 		self.__maxBufferSize = sys.maxsize
 
 		if buf is None and size != 0:
 			assert owner
-			buf = mmap.mmap(fileno=-1, length=size, access=mmap.ACCESS_WRITE)
+			if shared:
+				buf = ISharedMemory(size)
+			else:
+				buf = IMemory(size)
 		assert buf
 		self.__buffer = buf
 
-		self.__bufferSize_ = Value(c_int64, size, lock=False)
-		self.__rBase_ = Value(c_int64, 0, lock=False)
-		self.__wBase_ = Value(c_int64, wPos, lock=False)
+		self.__rBase = 0
+		self.__wBase = wPos
 		self.__owner = owner
 
 	def __getitem__(self, i):
 		return self.__buffer[i]
-
-	@property
-	def __bufferSize(self):
-		return self.__bufferSize_.value
-
-	@__bufferSize.setter
-	def __bufferSize(self, value):
-		self.__bufferSize_.value = value
-
-	@property
-	def __rBase(self):
-		return self.__rBase_.value
-
-	@__rBase.setter
-	def __rBase(self, value):
-		self.__rBase_.value = value
-
-	@property
-	def __wBase(self):
-		return self.__wBase_.value
-
-	@__wBase.setter
-	def __wBase(self, value):
-		self.__wBase_.value = value

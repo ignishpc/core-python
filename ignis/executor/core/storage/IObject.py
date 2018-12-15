@@ -1,5 +1,3 @@
-
-
 class IObject:
 
 	def readIterator(self):
@@ -17,14 +15,14 @@ class IObject:
 	def copyFrom(self, source):
 		pass
 
-	def copyTo(self, source):
-		source.copyFrom(self)
+	def copyTo(self, target):
+		target.copyFrom(self)
 
 	def moveFrom(self, source):
 		pass
 
-	def moveTo(self, source):
-		source.moveFrom(self)
+	def moveTo(self, target):
+		target.moveFrom(self)
 
 	def getSize(self):
 		return len(self)
@@ -37,3 +35,4 @@ class IObject:
 
 	def fit(self):
 		pass
+

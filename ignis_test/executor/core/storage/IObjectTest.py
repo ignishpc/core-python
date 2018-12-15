@@ -1,7 +1,7 @@
 import random
 from ignis.data.IZlibTransport import IZlibTransport
 from ignis.data.IObjectProtocol import IObjectProtocol
-from ignis.data.ISharedMemoryBuffer import ISharedMemoryBuffer
+from ignis.data.IMemoryBuffer import IMemoryBuffer
 from ignis.executor.api.IManager import IManager
 
 
@@ -38,7 +38,7 @@ class IObjectTest():
 			writer.write(elem)
 		self.assertEqual(len(examples), self._object.getSize())
 		##########################################################################
-		wBuffer = ISharedMemoryBuffer()
+		wBuffer = IMemoryBuffer()
 		self._object.write(wBuffer, 6)
 
 		wTransport = IZlibTransport(wBuffer)
@@ -53,7 +53,7 @@ class IObjectTest():
 		random.seed(0)
 		examples = [random.randint(0, 100) for i in range(0, 100)]
 		##########################################################################
-		rBuffer = ISharedMemoryBuffer()
+		rBuffer = IMemoryBuffer()
 		rTransport = IZlibTransport(rBuffer, 6)
 		rProtocol = IObjectProtocol(rTransport)
 		rProtocol.writeObject(examples, self._manager, native=False)
@@ -71,7 +71,7 @@ class IObjectTest():
 		random.seed(0)
 		examples = [random.randint(0, 100) for i in range(0, 100)]
 		##########################################################################
-		rBuffer = ISharedMemoryBuffer()
+		rBuffer = IMemoryBuffer()
 		rTransport = IZlibTransport(rBuffer, 6)
 		rProtocol = IObjectProtocol(rTransport)
 		rProtocol.writeObject(examples, self._manager, native=True, listHeader=True)
@@ -89,7 +89,7 @@ class IObjectTest():
 		random.seed(0)
 		examples = [random.randint(0, 100) for i in range(0, 100)]
 		##########################################################################
-		rBuffer = ISharedMemoryBuffer()
+		rBuffer = IMemoryBuffer()
 		rTransport = IZlibTransport(rBuffer, 6)
 		rProtocol = IObjectProtocol(rTransport)
 		rProtocol.writeObject(examples, self._manager, native=False)
@@ -97,7 +97,7 @@ class IObjectTest():
 		self._object.read(rBuffer)
 		self.assertEqual(len(examples), self._object.getSize())
 		##########################################################################
-		wBuffer = ISharedMemoryBuffer()
+		wBuffer = IMemoryBuffer()
 		self._object.write(wBuffer, 6)
 
 		wTransport = IZlibTransport(wBuffer)
@@ -112,7 +112,7 @@ class IObjectTest():
 		random.seed(0)
 		examples = [random.randint(0, 100) for i in range(0, 100)]
 		##########################################################################
-		rBuffer = ISharedMemoryBuffer()
+		rBuffer = IMemoryBuffer()
 		rTransport = IZlibTransport(rBuffer, 6)
 		rProtocol = IObjectProtocol(rTransport)
 		rProtocol.writeObject(examples, self._manager, native=True, listHeader=True)
@@ -120,7 +120,7 @@ class IObjectTest():
 		self._object.read(rBuffer)
 		self.assertEqual(len(examples), self._object.getSize())
 		##########################################################################
-		wBuffer = ISharedMemoryBuffer()
+		wBuffer = IMemoryBuffer()
 		self._object.write(wBuffer, 6)
 
 		wTransport = IZlibTransport(wBuffer)
@@ -176,8 +176,9 @@ class IObjectTest():
 		##########################################################################
 		copy = self.getObject(100, 10 * 1024)
 		copy.copyFrom(self._object)
+		copy.copyFrom(self._object)
 		self.assertEqual(len(examples), self._object.getSize())
-		self.assertEqual(len(examples), copy.getSize())
+		self.assertEqual(len(examples) * 2, copy.getSize())
 		##########################################################################
 		reader = self._object.readIterator()
 		readerCopy = copy.readIterator()
@@ -186,9 +187,12 @@ class IObjectTest():
 			self.assert_(readerCopy.hasNext())
 			self.assertEqual(elem, reader.next())
 			self.assertEqual(elem, readerCopy.next())
+		for elem in examples:
+			self.assert_(readerCopy.hasNext())
+			self.assertEqual(elem, readerCopy.next())
+
 		self.assert_(not reader.hasNext())
 		self.assert_(not readerCopy.hasNext())
-
 
 	def test_move(self):
 		random.seed(0)
@@ -207,6 +211,23 @@ class IObjectTest():
 		##########################################################################
 		reader = self._object.readIterator()
 		for elem in examples:
+			self.assert_(reader.hasNext())
+			self.assertEqual(elem, reader.next())
+		self.assert_(not reader.hasNext())
+
+	def test_skip(self):
+		random.seed(0)
+		examples = [random.randint(0, 100) for i in range(0, 100)]
+		##########################################################################
+		writer = self._object.writeIterator()
+		for elem in examples:
+			writer.write(elem)
+		self.assertEqual(len(examples), self._object.getSize())
+		##########################################################################
+		reader = self._object.readIterator()
+		skipped = int(len(self._object) / 2)
+		reader.skip(skipped)
+		for elem in examples[skipped:100]:
 			self.assert_(reader.hasNext())
 			self.assertEqual(elem, reader.next())
 		self.assert_(not reader.hasNext())
