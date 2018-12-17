@@ -3,9 +3,11 @@ import zlib
 
 class IZlibTransport(TZlibTransport):
 
-	def __init__(self, trans, compresslevel=9):
+	def __init__(self, trans, compresslevel=9, skipHeader=False):
 		super().__init__(trans, compresslevel)
 		self.__trans = trans
+		if skipHeader:
+			self._zcomp_write.flush(zlib.Z_SYNC_FLUSH)
 
 	def readComp(self, sz):
 		old = self.bytes_in

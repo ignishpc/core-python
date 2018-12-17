@@ -1,7 +1,7 @@
 import logging
 from ignis.rpc.executor.mapper import IMapperModule as IMapperModuleRpc
+from ..IProcessPoolExecutor import IProcessPoolExecutor
 from .IModule import IModule
-from ..IParallelFork import IParallelFork
 
 logger = logging.getLogger(__name__)
 
@@ -14,42 +14,41 @@ class IMapperModule(IModule, IMapperModuleRpc.Iface):
 	def __pipe(self, sf, action):
 		try:
 			f = self.loadSource(sf)
-			threads = self._executorData.getThreads()
+			workers = self._executorData.getWorkers()
 			obj = self._executorData.loadObject()
-			if threads > 1:
-				obj = self.memoryObject(obj)
-				self._executorData.loadObject(obj)
-				objOutl = [self.memoryObject() for i in range(0, threads)]
-			else:
-				objOutl = (self.getIObject(),)
-
+			obj = self.memoryObject(obj) if workers > 1 else obj
 			size = obj.getSize()
 			context = self._executorData.getContext()
 
-			f.before(context)
-			logger.info("IMapperModule creating " + str(threads) + " threads")
-			with IParallelFork(workers=threads) as p:
-				t = p.getId()
-				objOut = objOutl[t]
-				div = int(size / threads)
-				mod = size % threads
-				localSize = div + (1 if mod > t else 0)
-				skip = div * t + (t if mod > t else mod)
+			def work(i):
+				div = int(size / workers)
+				mod = size % workers
+				localSize = div + (1 if mod > i else 0)
+				skip = div * i + (i if mod > i else mod)
+				localObj = IMapperModule.getIObjectStatic(context, elems=localSize)
 
 				reader = obj.readIterator()
-				writer = objOut.writeIterator()
+				writer = localObj.writeIterator()
 				reader.skip(skip)
 				for i in range(0, localSize):
 					elem = reader.next()
 					result = f.call(elem, context)
 					action(elem, result, writer)
-			f.after(context)
+				return localObj
 
-			objOut = objOutl[0]
-			if threads > 1:
-				objOut = self.getIObject()
-				for obj in objOutl:
-					obj.moveTo(objOut)
+			logger.info("IMapperModule creating " + str(workers) + " threads")
+			results = list()
+			f.before(context)
+			if workers > 1:
+				with IProcessPoolExecutor(workers - 1) as pool:
+					for i in range(1, workers):
+						results.append(pool.submit(work, i))
+					objOut = work(0)
+			else:
+				objOut = work(0)
+			f.after(context)
+			for i in range(0, workers - 1):
+				results[i].result().moveTo(objOut)
 
 			self._executorData.loadObject(objOut)
 			logger.info("IMapperModule finished")
@@ -100,7 +99,7 @@ class IMapperModule(IModule, IMapperModuleRpc.Iface):
 
 			reader = object_in.readIterator()
 			writer = object_out.writeIterator()
-			for i in range(0,size):
+			for i in range(0, size):
 				writer.write(reader.next()[1])
 
 			self._executorData.loadObject(object_out)

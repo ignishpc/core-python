@@ -42,6 +42,9 @@ class IMemoryObject(IRawObject):
 			return
 		super().copyTo(target)
 
+	def copyFrom(self, source):
+		readToWrite(source.readIterator(), self.writeIterator())
+
 	def read(self, trans):
 		super().read(trans)
 
@@ -66,6 +69,7 @@ class IMemoryObject(IRawObject):
 			self._protocol = IObjectProtocol(self._transport)
 
 	def __getstate__(self):
+		self._flush()
 		st = self.__dict__.copy()
 		del st["_protocol"]
 		del st["_transport"]

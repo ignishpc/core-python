@@ -47,13 +47,14 @@ class IRawMemoryObject(IRawObject):
 
 	def __setstate__(self, st):
 		self.__dict__.update(st)
-		self._transport = IZlibTransport(self._rawMemory, self._compression)
+		self._transport = IZlibTransport(self._rawMemory, self._compression, skipHeader =True)
 		if self._native:
 			self._protocol = self._transport
 		else:
 			self._protocol = IObjectProtocol(self._transport)
 
 	def __getstate__(self):
+		self._flush()
 		st = self.__dict__.copy()
 		del st["_protocol"]
 		del st["_transport"]

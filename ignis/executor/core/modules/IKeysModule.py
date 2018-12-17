@@ -2,10 +2,8 @@ import logging
 from ignis.rpc.executor.keys import IKeysModule as IKeysModuleRpc
 from .IModule import IModule
 from ..IMessage import IMessage
-from ..IParallelFork import IParallelFork
+from ..IProcessPoolExecutor import IProcessPoolExecutor
 from ignis.data.handle.IHash import IHash
-from multiprocessing.sharedctypes import Value
-import ctypes
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +74,7 @@ class IKeysModule(IModule, IKeysModuleRpc.Iface):
 			logger.info("IKeysModule reduceByKey starting")
 			f = self.loadSource(funct)
 			obj = self._executorData.loadObject()
-			threads = self._executorData.getThreads()
+			workers = self._executorData.getWorkers()
 			context = self._executorData.getContext()
 			keysAndValues = list()
 			writers = dict()
@@ -86,56 +84,49 @@ class IKeysModule(IModule, IKeysModuleRpc.Iface):
 				tuple = reader.next()
 				key = tuple[0]
 				value = tuple[1]
-				writer = writers.get(key, None)
+				writer = writers.get(IHash(key), None)
 				if writer is None:
-					aux = self.memoryObject()
+					aux = self.getIObject()
 					keysAndValues.append((key, aux))
 					writer = aux.writeIterator()
-					writers[key] = writer
+					writers[IHash(key)] = writer
 				writer.write(value)
 			del writers
 			del obj
 			self._executorData.deleteLoadObject()
 
-			if threads > 1:
-				buckets = [self.memoryObject() for i in range(0, threads)]
-			else:
-				buckets = [self.getIObject()]
-			size = len(keysAndValues)
-			chunkSize = int(size * (0.1 / threads)) + 1
-			ready = Value(ctypes.c_int64, chunkSize * threads, lock=False)
+			def work(init, end):
+				localObj = IKeysModule.getIObjectStatic(context, elems=end - init)
+				locaWriter = localObj.writeIterator()
+				for k in range(init, end):
+					selObj = keysAndValues[k]
+					key = selObj[0]
+					values = selObj[1].readIterator()
+					result = values.next()
+
+					while values.hasNext():
+						result = f.call(result, values.next(), context)
+					locaWriter.write((key, result))
+				return localObj
+
+			logger.info("IKeysModule creating " + str(workers) + " threads")
+			results = list()
+
 			f.before(context)
-			with IParallelFork(workers=threads) as p:
-				t = p.getId()
-				resultWriter = buckets[t].writeIterator()
-				init = chunkSize * t
-				while init < size:
-					end = min(init + chunkSize, size)
-					for i in range(init, end):
-						selObj = keysAndValues[i]
-						key = selObj[0]
-						values = selObj[1].readIterator()
-						result = values.next()
-
-						while values.hasNext():
-							result = f.call(result, values.next(), context)
-
-						resultWriter.write((key, result))
-
-					with p.critical():
-						init = ready.value
-						if ready.value < size:
-							ready.value += chunkSize
+			size = len(keysAndValues)
+			if workers > 1:
+				chunkSize = int(size * (0.1 / workers)) + 1
+				with IProcessPoolExecutor(workers - 1) as pool:
+					for i in range(0, size + chunkSize, chunkSize):
+						results.append(pool.submit(work, i, min(i + chunkSize, size)))
+					objOut = results[0].result()
+					for i in range(1, len(results)):
+						results[i].result().moveTo(objOut)
+			else:
+				objOut = work(0, size)
 			f.after(context)
 
-			objOut = buckets[0]
-			if threads > 1:
-				objOut = self.getIObject()
-				for obj in buckets:
-					obj.moveTo(objOut)
-
 			self._executorData.loadObject(objOut)
-
 			logger.info("IKeysModule reduceByKey ready")
 		except Exception as ex:
 			self.raiseRemote(ex)

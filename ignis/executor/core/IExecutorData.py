@@ -29,5 +29,8 @@ class IExecutorData:
 	def getPostBox(self):
 		return self.__postBox
 
-	def getThreads(self):
+	def getWorkers(self):
 		return self.__parser.getInt("ignis.executor.cores")
+
+	def __getstate__(self):
+		raise ValueError("This object can never be serialized")

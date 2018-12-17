@@ -4,6 +4,7 @@ from ignis.rpc.exception.ttypes import IRemoteException
 from ..storage.IMemoryObject import IMemoryObject
 from ..storage.IRawMemoryObject import IRawMemoryObject
 from ..IObjectLoader import IObjectLoader
+from ..IPropertyParser import IPropertyParser
 
 logger = logging.getLogger(__name__)
 
@@ -16,17 +17,24 @@ class IModule:
 	def raiseRemote(self, ex):
 		raise IRemoteException(message=str(ex), stack=traceback.format_exc())
 
-	def getIObject(self, elems=1000, bytes=50 * 1024 * 1024, storage=None):
+	@staticmethod
+	def getIObjectStatic(context, elems=1000, bytes=50 * 1024 * 1024, storage=None, shared=None):
+		parser = IPropertyParser(context.getProperties())
 		if storage is None:
-			storage = self._executorData.getParser().getString("ignis.executor.storage")
-		manager = self._executorData.getContext().getManager()
-		serialization = self._executorData.getParser().getString("ignis.transport.serialization")
+			storage = parser.getString("ignis.executor.storage")
+		if shared is None:
+			shared = parser.getInt("ignis.executor.cores") > 1
+		manager = context.getManager()
+		serialization = parser.getString("ignis.transport.serialization")
 		native = serialization == 'native'
 		if storage == IRawMemoryObject.TYPE:
-			compression = self._executorData.getParser().getInt("ignis.executor.storage.compression")
-			return IRawMemoryObject(compression, manager, native, bytes)
+			compression = parser.getInt("ignis.executor.storage.compression")
+			return IRawMemoryObject(compression, manager, native, bytes, shared)
 		else:
-			return IMemoryObject(manager, native, elems, bytes)
+			return IMemoryObject(manager, native, elems, bytes, shared)
+
+	def getIObject(self, *args, **kwargs):
+		return self.getIObjectStatic(self._executorData.getContext(), *args, **kwargs)
 
 	@staticmethod
 	def loadSource(source):
@@ -39,11 +47,11 @@ class IModule:
 		logging.info("IModule function loaded")
 		return result
 
-	def memoryObject(self, obj=None):
+	def memoryObject(self, obj=None, shared=None):
 		if obj is None:
-			return self.getIObject(storage="memory")
+			return self.getIObject(storage="memory", shared=shared)
 		if type(obj) != IMemoryObject:
-			menObj = self.getIObject(obj.getSize(), storage="memory")
+			menObj = self.getIObject(obj.getSize(), storage="memory", shared=shared)
 			obj.moveTo(menObj)
 			obj = menObj
 		return obj

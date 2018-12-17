@@ -12,6 +12,7 @@ class IPostmanModuleTest(unittest.TestCase):
 		self.__postmanModule = IPostmanModule(self.__executorData)
 
 		self.__executorData.getContext()["ignis.executor.storage"] = "raw memory"
+		self.__executorData.getContext()["ignis.executor.cores"] = "1"
 		self.__executorData.getContext()["ignis.transport.serialization"] = "ignis"
 		self.__executorData.getContext()["ignis.executor.storage.compression"] = "6"
 		self.__executorData.getContext()["ignis.executor.transport.port"] = "54321"

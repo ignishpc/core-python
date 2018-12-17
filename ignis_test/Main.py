@@ -22,12 +22,6 @@ def main():
 		cov.report(file=sys.stderr)
 		cov.html_report(directory=covdir)
 
-from ignis_test.executor.core.storage.IRawMemoryObjectTest import IRawMemoryObjectTest
-
 if __name__ == '__main__':
-	test = IRawMemoryObjectTest()
-	test.setUp()
-	test.test_append()
-
 	Ilog.enable(False)
 	main()

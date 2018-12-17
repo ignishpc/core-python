@@ -46,7 +46,7 @@ class IRawObject(IObject):
 		dataTransport.flush()
 
 	def copyTo(self, target):
-		if isinstance(target, IRawObject) and target._native == self._native and target._manager == self._manager:
+		if isinstance(target, IRawObject) and target._native == self._native:
 			self._flush()
 			if len(target) == 0:
 				aux = IBytearrayTransport()
@@ -69,7 +69,7 @@ class IRawObject(IObject):
 			readToWrite(source.readIterator(), self.writeIterator())
 
 	def moveFrom(self, source):
-		source.copyTo(self)
+		self.copyFrom(source)
 		source.clear()
 
 	def __len__(self):
@@ -110,4 +110,5 @@ class IRawObject(IObject):
 			self._writer.writeType(headProto)
 
 	def _flush(self):
-		self._transport.flush()
+		if self._elems > 0:
+			self._transport.flush()
