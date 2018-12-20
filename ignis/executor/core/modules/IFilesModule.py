@@ -16,7 +16,7 @@ class IFilesModule(IModule, IFilesModuleRpc.Iface):
 			obj = self.getIObject(elems=lines, bytes=length)
 			logger.info(f"IFileModule reading, path: {path}, offset: {offset}, len: {length}, lines: {lines}")
 			writer = obj.writeIterator()
-			with open(path) as file:
+			with open(path, encoding="utf-8") as file:
 				file.seek(offset)
 				for i in range(0, lines):
 					writer.write(file.readline())
@@ -38,7 +38,7 @@ class IFilesModule(IModule, IFilesModuleRpc.Iface):
 			else:
 				mode = "a"
 			reader = obj.readIterator()
-			with open(path, mode) as file:
+			with open(path, mode, "utf-8") as file:
 				if reader.hasNext():
 					file.write(str(reader.next()))
 
@@ -65,7 +65,7 @@ class IFilesModule(IModule, IFilesModuleRpc.Iface):
 				mode = "w"
 
 			reader = obj.readIterator()
-			with open(path, mode) as file:
+			with open(path, mode, "utf-8") as file:
 				if array_start:
 					file.write("[\n")
 
