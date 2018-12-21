@@ -11,6 +11,7 @@ class IMemory:
 
 	def __init__(self, size):
 		self.__array = bytearray(size)
+		self.__size = size
 
 	def __getitem__(self, i):
 		return self.__array[i]
@@ -19,11 +20,12 @@ class IMemory:
 		self.__array[i] = value
 
 	def resize(self, size):
-		if len(self.__array) > size:
+		self.__size = size
+		if self.__size > size:
 			self.__array = self.__array[0:size]
 
 	def __len__(self):
-		return len(self.__array)
+		return self.__size
 
 
 class ISharedMemory:
