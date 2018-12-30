@@ -46,12 +46,3 @@ class IModule:
 			result = loader.load(source.bytes)
 		logging.info("IModule function loaded")
 		return result
-
-	def memoryObject(self, obj=None, shared=None):
-		if obj is None:
-			return self.getIObject(storage="memory", shared=shared)
-		if type(obj) != IMemoryObject:
-			menObj = self.getIObject(obj.getSize(), storage="memory", shared=shared)
-			obj.moveTo(menObj)
-			obj = menObj
-		return obj
