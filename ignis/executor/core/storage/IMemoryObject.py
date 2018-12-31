@@ -1,89 +1,53 @@
-from .IRawObject import IRawObject
-from .iterator.IMemoryIterator import readToWrite, IMemoryReadIterator, IMemoryWriteIterator, IObjectProtocol
-from ignis.data.IMemoryBuffer import IMemoryBuffer
+from .IObject import IObject
+from .iterator.IMemoryIterator import readToWrite, IMemoryReadIterator, IMemoryWriteIterator
+from ignis.data.IObjectProtocol import IObjectProtocol
+from ignis.data.IZlibTransport import IZlibTransport
 
-
-class IMemoryObject(IRawObject):
+class IMemoryObject(IObject):
 	TYPE = "memory"
 
-	class __Index:
-
-		def __init__(self, elems, shared):
-			self.__bytes = 5
-			self.__shared = IMemoryBuffer(elems * self.__bytes, shared=shared)
-
-		def clear(self):
-			self.__shared.setWriteBuffer(0)
-			self.__shared.setReadBuffer(0)
-
-		def __getitem__(self, i):
-			return int.from_bytes(self.__shared[i * self.__bytes:(i + 1) * self.__bytes], byteorder='little')
-
-		def append(self, value):
-			self.__shared.write(value.to_bytes(self.__bytes, byteorder='little'))
-
-	def __init__(self, manager, native=False, elems=1000, sz=50 * 1024 * 1024, shared=False):
-		self._readOnly = False
-		self._rawMemory = IMemoryBuffer(sz, shared=shared)
-		self._index = IMemoryObject.__Index(elems, shared)
-		super().__init__(self._rawMemory, manager, native)
+	def __init__(self, manager, native):
+		self.__manager = manager
+		self.__native = native
+		self._elems = 0
+		self._data = list()
 
 	def readIterator(self):
-		if not self._readOnly:
-			return self.__readObservation().readIterator()
 		return IMemoryReadIterator(self)
 
 	def writeIterator(self):
 		return IMemoryWriteIterator(self)
 
-	def copyTo(self, target):
-		if not self._readOnly:
-			self.__readObservation().copyTo(target)
-			return
-		super().copyTo(target)
+	def read(self, trans):
+		self.clear()
+		ctrans = IZlibTransport(trans)
+		proto = IObjectProtocol(ctrans)
+		self._data = proto.readObject(self.__manager)
+		self._elems = len(self._data)
+
+	def write(self, trans, compression):
+		ctrans = IZlibTransport(trans, compression)
+		proto = IObjectProtocol(ctrans)
+		proto.writeObject(self._data, self.__manager, self.__native, self.__native)
+		ctrans.flush()
 
 	def copyFrom(self, source):
 		readToWrite(source.readIterator(), self.writeIterator())
 
-	def read(self, trans):
-		super().read(trans)
-
-	def write(self, trans, compression):
-		if not self._readOnly:
-			self.__readObservation().write(trans, compression)
-			return
-		super().write(trans, compression)
+	def moveFrom(self, source):
+		if self._elems == 0 and type(self) == type(source):
+			self._data, source._data = source._data, self._data
+			self._elems, source._elems = source._elems, self._elems
+		else:
+			self.copyFrom(source)
+		source.clear()
 
 	def clear(self):
-		super().clear()
-		self._index.clear()
-		self._rawMemory.setWriteBuffer(0)
-		self._rawMemory.setReadBuffer(0)
+		self._elems = 0
+		self._data.clear()
 
-	def __setstate__(self, st):
-		self.__dict__.update(st)
-		self._transport = self._rawMemory
-		if self._native:
-			self._protocol = self._transport
-		else:
-			self._protocol = IObjectProtocol(self._transport)
+	def __len__(self):
+		return self._elems
 
 	def __getstate__(self):
-		self._flush()
-		st = self.__dict__.copy()
-		del st["_protocol"]
-		del st["_transport"]
-		return st
-
-	def __readObservation(self):
-		self._flush()
-		obs = IMemoryObject.__new__(IMemoryObject)
-		st = self.__getstate__()
-		st["_readOnly"] = True
-		st["_rawMemory"] = IMemoryBuffer(buf=self._rawMemory.getBuffer(), sz=self._rawMemory.availableRead())
-		obs.__setstate__(st)
-		return obs
-
-	def _flush(self):
-		if not self._readOnly:
-			super()._flush()
+		raise ValueError("This object can never be serialized")

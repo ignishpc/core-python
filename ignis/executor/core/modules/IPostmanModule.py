@@ -27,7 +27,10 @@ class IPostmanModule(IPostmanModuleRpc.Iface, IModule):
 			if addrMode == "socket":
 				pass  # o nothing else
 			elif addrMode == "unixSocket":
-				pass
+				name = protocol.readString()
+				transport.close()
+				transport = ISocket(unix_socket=name)
+				transport.open()
 			elif addrMode == "memoryBuffer":
 				addrpath = protocol.readString()
 				buffer1 = addrpath + "/buffer1"
@@ -119,7 +122,13 @@ class IPostmanModule(IPostmanModuleRpc.Iface, IModule):
 			if addrMode == "socket":
 				pass  # o nothing else
 			elif addrMode == "unixSocket":
-				pass
+				ss = IServerSocket(unix_socket=addrl[3])
+				ss.listen()
+				protocol.writeString(addrl[3])
+				transport.close()
+				ss.handle.settimeout(10)
+				transport = ss.accept()
+				ss.close()
 			elif addrMode == "memoryBuffer":
 				addrpath = addrl[3]
 				addrBlockSize = int(addrl[4])

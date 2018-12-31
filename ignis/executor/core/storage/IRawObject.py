@@ -36,7 +36,7 @@ class IRawObject(IObject):
 
 	def write(self, trans, compression):
 		self._flush()
-		dataTransport = IZlibTransport(trans)
+		dataTransport = IZlibTransport(trans, compression)
 		self.__writeHeader(dataTransport)
 		while True:
 			buffer = self._transport.read(256)

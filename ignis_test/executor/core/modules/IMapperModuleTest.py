@@ -12,7 +12,7 @@ class IMapperModuleTest(unittest.TestCase):
 		self.__executorData = IExecutorData()
 		self.__mapperModule = IMapperModule(self.__executorData)
 
-		self.__executorData.getContext()["ignis.executor.storage"] = "raw memory"
+		self.__executorData.getContext()["ignis.executor.storage"] = "rawMemory"
 		self.__executorData.getContext()["ignis.executor.cores"] = "1"
 		self.__executorData.getContext()["ignis.transport.serialization"] = "ignis"
 		self.__executorData.getContext()["ignis.executor.storage.compression"] = "6"

@@ -55,7 +55,7 @@ class IKeysModule(IModule, IKeysModuleRpc.Iface):
 			size = obj.getSize()
 
 			for entry in executorKeys:
-				msgObject = self.getIObject(elems=obj.getSize() / len(executorKeys))
+				msgObject = self.getIObject(elems=int(obj.getSize() / len(executorKeys))+1)
 				self._executorData.getPostBox().newOutMessage(entry.msg_id, IMessage(entry.addr, msgObject))
 				writer = msgObject.writeIterator()
 				for id in entry.keys:
@@ -117,7 +117,7 @@ class IKeysModule(IModule, IKeysModuleRpc.Iface):
 			if workers > 1:
 				chunkSize = int(size * (0.1 / workers)) + 1
 				with IProcessPoolExecutor(workers - 1) as pool:
-					for i in range(0, size + chunkSize, chunkSize):
+					for i in range(0, size + chunkSize - 1, chunkSize):
 						results.append(pool.submit(work, i, min(i + chunkSize, size)))
 					objOut = results[0].result()
 					for i in range(1, len(results)):

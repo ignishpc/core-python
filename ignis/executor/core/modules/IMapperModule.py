@@ -1,6 +1,8 @@
 import logging
 from ignis.rpc.executor.mapper import IMapperModule as IMapperModuleRpc
 from ..IProcessPoolExecutor import IProcessPoolExecutor
+from ..storage.iterator.ICoreIterator import readToWrite
+from ..storage.IRawIndexMemoryObject import IRawIndexMemoryObject
 from .IModule import IModule
 
 logger = logging.getLogger(__name__)
@@ -16,20 +18,31 @@ class IMapperModule(IModule, IMapperModuleRpc.Iface):
 			f = self.loadSource(sf)
 			workers = self._executorData.getWorkers()
 			obj = self._executorData.loadObject()
-			obj = self.memoryObject(obj) if workers > 1 else obj
+			self._executorData.deleteLoadObject()
 			size = obj.getSize()
 			context = self._executorData.getContext()
 
-			def work(i):
-				div = int(size / workers)
-				mod = size % workers
-				localSize = div + (1 if mod > i else 0)
-				skip = div * i + (i if mod > i else mod)
-				localObj = IMapperModule.getIObjectStatic(context, elems=localSize)
+			reader = obj.readIterator()
+			div = int(size / workers)
+			mod = size % workers
+			parts = list()
+			if workers == 1 or type(obj) == IRawIndexMemoryObject:
+				for t in range(0, workers):
+					parts.append((obj, t * div + (t if t < mod else mod)))
+			else:
+				for t in range(0, workers):
+					partObj = self.getIObject(div + 1)
+					readToWrite(reader, partObj.writeIterator(), div + (1 if t < mod else 0))
+					parts.append((partObj, 0))
+				obj = parts[0][0]
 
-				reader = obj.readIterator()
-				writer = localObj.writeIterator()
+			def work(t, partObj, skip):
+				reader = partObj.readIterator()
 				reader.skip(skip)
+				localSize = div + (1 if mod > t else 0)
+				localObj = IMapperModule.getIObjectStatic(context, elems=localSize)
+				writer = localObj.writeIterator()
+
 				for i in range(0, localSize):
 					elem = reader.next()
 					result = f.call(elem, context)
@@ -42,10 +55,10 @@ class IMapperModule(IModule, IMapperModuleRpc.Iface):
 			if workers > 1:
 				with IProcessPoolExecutor(workers - 1) as pool:
 					for i in range(1, workers):
-						results.append(pool.submit(work, i))
-					objOut = work(0)
+						results.append(pool.submit(work, i, parts[i][0], parts[i][1]))
+					objOut = work(0, parts[0][0], parts[0][1])
 			else:
-				objOut = work(0)
+				objOut = work(0, parts[0][0], parts[0][1])
 			f.after(context)
 			for i in range(0, workers - 1):
 				results[i].result().moveTo(objOut)

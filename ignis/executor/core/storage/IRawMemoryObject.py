@@ -4,7 +4,7 @@ from ignis.data.IZlibTransport import IZlibTransport
 
 
 class IRawMemoryObject(IRawObject):
-	TYPE = "raw memory"
+	TYPE = "rawMemory"
 
 	def __init__(self, compression, manager, native=False, sz=50 * 1024 * 1024, shared=False):
 		self._readOnly = False

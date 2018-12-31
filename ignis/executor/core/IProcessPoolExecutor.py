@@ -1,14 +1,13 @@
 import cloudpickle
 import concurrent.futures as futures
-import multiprocessing
 
 
-def _wrapper_send(fn):
-	return cloudpickle.dumps(fn)
+def _wrapper_send(fn, *args, **kwargs):
+	return cloudpickle.dumps((fn, args, kwargs))
 
 
-def _wrapper_rcv(bfn, *args, **kwargs):
-	fn = cloudpickle.loads(bfn)
+def _wrapper_rcv(bfn):
+	fn, args, kwargs = cloudpickle.loads(bfn)
 	result = fn(*args, **kwargs)
 	if result is not None:
 		return cloudpickle.dumps(result)
@@ -33,7 +32,7 @@ class IProcessPoolExecutor(futures.ProcessPoolExecutor):
 		return f
 
 	def submit(self, fn, *args, **kwargs):
-		return self.__pathFuture(super().submit(_wrapper_rcv, _wrapper_send(fn), *args, **kwargs))
+		return self.__pathFuture(super().submit(_wrapper_rcv, _wrapper_send(fn, *args, **kwargs)))
 
 	def map(self, fn, *args, **kwargs):
-		return self.__pathFuture(super().map(_wrapper_rcv, _wrapper_send(fn), *args, **kwargs))
+		return self.__pathFuture(super().map(_wrapper_rcv, _wrapper_send(fn, *args, **kwargs)))
