@@ -40,6 +40,8 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  string take(IDataId data, i64 n, bool light)')
     print('  string takeSample(IDataId data, i64 n, bool withRemplacement, i32 seed, bool light)')
     print('  string collect(IDataId data, bool light)')
+    print('  IDataId sortBy(IDataId data, ISource funct, bool ascending)')
+    print('  IDataId sort(IDataId data, bool ascending)')
     print('  void saveAsTextFile(IDataId data, string path, bool join)')
     print('  void saveAsJsonFile(IDataId data, string path, bool join)')
     print('  void cache(IDataId data)')
@@ -218,6 +220,18 @@ elif cmd == 'collect':
         print('collect requires 2 args')
         sys.exit(1)
     pp.pprint(client.collect(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'sortBy':
+    if len(args) != 3:
+        print('sortBy requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.sortBy(eval(args[0]), eval(args[1]), eval(args[2]),))
+
+elif cmd == 'sort':
+    if len(args) != 2:
+        print('sort requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.sort(eval(args[0]), eval(args[1]),))
 
 elif cmd == 'saveAsTextFile':
     if len(args) != 3:

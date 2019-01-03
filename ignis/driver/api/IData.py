@@ -147,6 +147,20 @@ class IData:
 		except Exception as ex:
 			raise IDriverException(ex) from None
 
+	def sort(self):
+		try:
+			with Ignis._pool.client() as client:
+				return IData(client.getIDataService().sort(self._id))
+		except Exception as ex:
+			raise IDriverException(ex) from None
+
+	def sortBy(self, fun):
+		try:
+			with Ignis._pool.client() as client:
+				return IData(client.getIDataService().sortBy(self._id, Se.encode(fun, Se.IFunction)))
+		except Exception as ex:
+			raise IDriverException(ex) from None
+
 	def collectAsMap(self, light=False, manager=IDataServer.IManager()):
 		result = dict()
 		data = self.collect(light, manager)
