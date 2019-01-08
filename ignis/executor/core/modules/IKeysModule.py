@@ -1,6 +1,7 @@
 import logging
 from ignis.rpc.executor.keys import IKeysModule as IKeysModuleRpc
-from .IModule import IModule
+from .IModule import IModule, IRawIndexMemoryObject
+from ..storage.iterator.ICoreIterator import readToWrite
 from ..IMessage import IMessage
 from ..IProcessPoolExecutor import IProcessPoolExecutor
 from ignis.data.handle.IHash import IHash
@@ -55,7 +56,7 @@ class IKeysModule(IModule, IKeysModuleRpc.Iface):
 			size = obj.getSize()
 
 			for entry in executorKeys:
-				msgObject = self.getIObject(elems=int(obj.getSize() / len(executorKeys))+1)
+				msgObject = self.getIObject(elems=int(obj.getSize() / len(executorKeys)) + 1)
 				self._executorData.getPostBox().newOutMessage(entry.msg_id, IMessage(entry.addr, msgObject))
 				writer = msgObject.writeIterator()
 				for id in entry.keys:
@@ -76,54 +77,85 @@ class IKeysModule(IModule, IKeysModuleRpc.Iface):
 			obj = self._executorData.loadObject()
 			workers = self._executorData.getWorkers()
 			context = self._executorData.getContext()
-			keysAndValues = list()
-			writers = dict()
+			size = obj.getSize()
 
 			reader = obj.readIterator()
-			while reader.hasNext():
-				tuple = reader.next()
-				key = tuple[0]
-				value = tuple[1]
-				writer = writers.get(IHash(key), None)
-				if writer is None:
-					aux = self.getIObject()
-					keysAndValues.append((key, aux))
-					writer = aux.writeIterator()
-					writers[IHash(key)] = writer
-				writer.write(value)
-			del writers
-			del obj
-			self._executorData.deleteLoadObject()
+			parts = list()
+			div = int(size / workers)
+			mod = size % workers
+			if workers == 1 or type(obj) == IRawIndexMemoryObject:
+				for t in range(0, workers):
+					parts.append((obj, t * div + (t if t < mod else mod)))
+			else:
+				for t in range(0, workers):
+					partObj = self.getIObject(div + 1)
+					readToWrite(reader, partObj.writeIterator(), div + (1 if t < mod else 0))
+					parts.append((partObj, 0))
+				obj = parts[0][0]
 
-			def work(init, end):
-				localObj = IKeysModule.getIObjectStatic(context, elems=end - init)
-				locaWriter = localObj.writeIterator()
-				for k in range(init, end):
-					selObj = keysAndValues[k]
-					key = selObj[0]
-					values = selObj[1].readIterator()
-					result = values.next()
+			def keySplit(t, partObj, skip):
+				objs = dict()
+				writers = dict()
+				reader = partObj.readIterator()
+				reader.skip(skip)
+				localSize = div + (1 if mod > t else 0)
 
-					while values.hasNext():
-						result = f.call(result, values.next(), context)
-					locaWriter.write((key, result))
-				return localObj
+				for i in range(0, localSize):
+					tuple = reader.next()
+					key = tuple[0]
+					value = tuple[1]
+					hash = IHash(key)
+					writer = writers.get(hash, None)
+					if writer is None:
+						aux = IKeysModule.getIObjectStatic(context)
+						objs[hash] = aux
+						writer = aux.writeIterator()
+						writers[hash] = writer
+					writer.write(value)
+				return objs
+
+			def mergeSplits(d1, d2):
+				result = d1
+				for key in d2:
+					if key in result:
+						d2[key].moveTo(result[key])
+					else:
+						result[key] = d2[key]
+				return result
+
+			def reduce(key, values):
+				reader = values.readIterator()
+				result = reader.next()
+				while reader.hasNext():
+					result = f.call(result, reader.next(), context)
+				values.clear()
+				values.writeIterator().write((key, result))
+				return values
 
 			logger.info("IKeysModule creating " + str(workers) + " threads")
-			results = list()
 
 			f.before(context)
-			size = len(keysAndValues)
 			if workers > 1:
-				chunkSize = int(size * (0.1 / workers)) + 1
 				with IProcessPoolExecutor(workers - 1) as pool:
-					for i in range(0, size + chunkSize - 1, chunkSize):
-						results.append(pool.submit(work, i, min(i + chunkSize, size)))
+					results = list()
+					for i in range(0, workers):
+						results.append(pool.submit(keySplit, i, parts[i][0], parts[i][1]))
+					while len(results) > 1:
+						results.append(pool.submit(mergeSplits, results.pop().result(), results.pop().result()))
+
+					objs = results.pop().result()
+					for key, values in objs.items():
+						results.append(pool.submit(reduce, key.obj, values))
+
 					objOut = results[0].result()
 					for i in range(1, len(results)):
 						results[i].result().moveTo(objOut)
 			else:
-				objOut = work(0, size)
+				objs = keySplit(0, obj, 0)
+				keys = len(objs)
+				objOut = self.getIObject(elems=keys)
+				for key, values in objs.items():
+					reduce(key.obj, values).moveTo(objOut)
 			f.after(context)
 
 			self._executorData.loadObject(objOut)

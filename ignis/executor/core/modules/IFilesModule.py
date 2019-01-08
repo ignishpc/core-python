@@ -38,7 +38,7 @@ class IFilesModule(IModule, IFilesModuleRpc.Iface):
 			else:
 				mode = "a"
 			reader = obj.readIterator()
-			with open(path, mode, "utf-8") as file:
+			with open(path, mode, encoding="utf-8") as file:
 				if reader.hasNext():
 					file.write(str(reader.next()))
 
@@ -65,7 +65,7 @@ class IFilesModule(IModule, IFilesModuleRpc.Iface):
 				mode = "w"
 
 			reader = obj.readIterator()
-			with open(path, mode, "utf-8") as file:
+			with open(path, mode, encoding="utf-8") as file:
 				if array_start:
 					file.write("[\n")
 
