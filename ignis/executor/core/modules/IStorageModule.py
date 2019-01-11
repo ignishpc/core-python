@@ -39,6 +39,16 @@ class IStorageModule(IModule, IStorageModuleRpc.Iface):
 			if id not in self.__objectsCache:
 				raise ValueError("IStorageModule cache object not found")
 			self._executorData.loadObject(self.__objectsCache[id])
+			del self.__objectsCache[id]
+		except Exception as ex:
+			self.raiseRemote(ex)
+
+	def removeContext(self, id):
+		try:
+			logger.info(f"IStorageModule loading cache object {id}")
+			if id not in self.__objectsCache:
+				raise ValueError("IStorageModule cache object not found")
+			del self.__objectsCache[id]
 		except Exception as ex:
 			self.raiseRemote(ex)
 

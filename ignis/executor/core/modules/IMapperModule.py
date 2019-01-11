@@ -131,3 +131,10 @@ class IMapperModule(IModule, IMapperModuleRpc.Iface):
 
 	def streamingKeyBy(self, sf, ordered):
 		pass  # TODO
+
+	def mapPartition(self, funct):
+		pass # TODO
+
+
+	def mapPartitionWithIndex(self, idx, funct):
+		pass # TODO

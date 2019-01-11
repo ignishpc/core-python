@@ -1,6 +1,7 @@
 import logging
 from ignis.rpc.executor.sort import ISortModule as ISortModuleRpc
 from .IModule import IModule, IRawIndexMemoryObject
+from ..IMessage import IMessage
 from ..storage.iterator.ICoreIterator import readToWrite
 from ..IProcessPoolExecutor import IProcessPoolExecutor
 from ...api.function.IFunction2 import IFunction2
@@ -162,3 +163,109 @@ class ISortModule(IModule, ISortModuleRpc.Iface):
 		less.after(context)
 		self._executorData.loadObject(merges[0])
 		logger.info("ISortModule sorted")
+
+	def sampling(self, sampleSize, idx, master):
+		try:
+			logger.info("ISortModule sampling")
+			object_in = self._executorData.loadObject()
+			pivots = self.getIObject(elems=sampleSize, storage="memory")
+			reader = object_in.readIterator()
+			writer = pivots.writeIterator()
+			size = object_in.getSize()
+			div = int((size - sampleSize) / (sampleSize + 1))
+			mod = (size - sampleSize) % (sampleSize + 1)
+
+			for i in range(0, sampleSize):
+				reader.skip(div + (1 if i < mod else 0))
+				writer.write(reader.next())
+			self._executorData.getPostBox().newOutMessage(idx, IMessage(master, pivots));
+			logger.info("ISortModule sampled")
+		except Exception as ex:
+			self.raiseRemote(ex)
+
+	def getPivots(self):
+		try:
+			logger.info("ISortModule getting pivots")
+			msgs = self._executorData.getPostBox().popInBox()
+			pivots = self.getIObject(elems=len(msgs) * len(msgs), storage="memory")
+
+			for id, msg in msgs.items():
+				msg.getObj().moveTo(pivots)
+
+			self._executorData.loadObject(pivots)
+			logger.info("ISortModule pivots got")
+		except Exception as ex:
+			self.raiseRemote(ex)
+
+	def findPivots(self, nodes):
+		try:
+			logger.info("ISortModule finding pivots")
+			pivots = self._executorData.loadObject()
+			nodePivots = self.getIObject(elems=len(nodes), storage="memory")
+			reader = pivots.readIterator()
+			writer = nodePivots.writeIterator()
+			size = pivots.getSize()
+			np = len(nodes) - 1
+			div = int((size - np) / len(nodes))
+			mod = (size - np) % len(nodes)
+
+			for i in range(0, np):
+				reader.skip(div + (1 if i < mod else 0))
+				writer.write(reader.next())
+
+			for i in range(0, len(nodes)):
+				self._executorData.getPostBox().newOutMessage(i, IMessage(nodes[i], nodePivots))
+
+			logger.info("ISortModule pivots ready")
+		except Exception as ex:
+			self.raiseRemote(ex)
+
+	def exchangePartitions(self, idx, nodes):
+		try:
+			logger.info("ISortModule exchanging partitions")
+			msgs = self._executorData.getPostBox().popInBox()
+			object_in = self._executorData.loadObject()
+			size = len(object_in)
+			pivots = list()
+			obj_msg = msgs.popitem()[1].getObj()
+			reader_msg = obj_msg.readIterator()
+			while reader_msg.hasNext():
+				pivots.append(reader_msg.next())
+
+			partitions = [self.getIObject() for i in range(0, len(nodes))]
+			writers = [partitions[i].writeIterator() for i in range(0, len(nodes))]
+
+			reader = object_in.readIterator()
+			for i in range(0, size):
+				elem = reader.next()
+				init = 0
+				end = len(pivots)
+				while init < end:
+					if elem < pivots[int((end - init) / 2)]:
+						end = int((end - init) / 2)
+					else:
+						init = int((end - init) / 2 + 1)
+				writers[init].write(elem)
+
+			for i in range(0, len(pivots)):
+				if len(partitions[i]) > 0:
+					self._executorData.getPostBox().newOutMessage(idx * len(nodes) + i,
+					                                              IMessage(nodes[i], partitions[i]))
+
+			logger.info("ISortModule partitions exchanged")
+		except Exception as ex:
+			self.raiseRemote(ex)
+
+	def mergePartitions(self):
+		try:
+			logger.info("ISortModule merging partitions")
+			msgs = self._executorData.getPostBox().popInBox()
+			object_out = self.getIObject()
+
+			for id, msg in msgs.items():
+				msg.getObj().moveTo(object_out)
+
+			self._executorData.loadObject(object_out)
+			logger.info("ISortModule partitions merged")
+		except Exception as ex:
+			self.raiseRemote(ex)
