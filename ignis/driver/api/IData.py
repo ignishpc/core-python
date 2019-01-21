@@ -110,7 +110,7 @@ class IData:
 			else:
 				with IDataServer.IDataServer(manager) as ds:
 					with Ignis._pool.client() as client:
-						client.getIDataService().take(n, False)
+						client.getIDataService().take(self._id, n, False)
 						return ds.getResult()
 		except Exception as ex:
 			raise IDriverException(ex) from None
@@ -142,7 +142,7 @@ class IData:
 			else:
 				with IDataServer.IDataServer(manager) as ds:
 					with Ignis._pool.client() as client:
-						client.getIDataService().take(False)
+						client.getIDataService().take(self._id, False)
 						return ds.getResult()
 		except Exception as ex:
 			raise IDriverException(ex) from None
