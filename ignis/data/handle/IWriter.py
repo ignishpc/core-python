@@ -19,7 +19,7 @@ class IWriter:
 
 	def __init__(self) -> None:
 		self.__methods = dict()
-		self.__methods[None] = self.__IWriterType(IEnumTypes.I_VOID, self.writeVoid)
+		self.__methods[type(None)] = self.__IWriterType(IEnumTypes.I_VOID, self.writeVoid)
 		self.__methods[bool] = self.__IWriterType(IEnumTypes.I_BOOL, self.writeBool)
 		self.__methods[int] = self.__IWriterType(IEnumTypes.I_I64, self.writeI64)
 		self.__methods[float] = self.__IWriterType(IEnumTypes.I_DOUBLE, self.writeDouble)

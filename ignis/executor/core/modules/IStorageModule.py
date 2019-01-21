@@ -21,7 +21,7 @@ class IStorageModule(IModule, IStorageModuleRpc.Iface):
 
 	def cache(self, id):
 		try:
-			logger.info(f"IStorageModule loading cache object {id}")
+			logger.info(f"IStorageModule saving cache object {id}")
 			self.__objectsCache[id] = self._executorData.loadObject()
 		except Exception as ex:
 			self.raiseRemote(ex)

@@ -15,11 +15,11 @@ def __encodeIFunction(sc):
 	if args > 1:
 		class Wrapper(IFunction):
 			def call(self, elem, context):
-				sc(elem, context)
+				return sc(elem, context)
 	else:
 		class Wrapper(IFunction):
 			def call(self, elem, context):
-				sc(elem)
+				return sc(elem)
 	return __dump(Wrapper())
 
 
@@ -28,11 +28,11 @@ def __encodeIFlatFunction(sc):
 	if args > 1:
 		class Wrapper(IFlatFunction):
 			def call(self, elem, context):
-				sc(elem, context)
+				return sc(elem, context)
 	else:
 		class Wrapper(IFlatFunction):
 			def call(self, elem, context):
-				sc(elem)
+				return sc(elem)
 	return __dump(Wrapper())
 
 
@@ -41,11 +41,11 @@ def __encodeIFunction2(sc):
 	if args > 2:
 		class Wrapper(IFunction2):
 			def call(self, elem1, elem2, context):
-				sc(elem1, elem2, context)
+				return sc(elem1, elem2, context)
 	else:
 		class Wrapper(IFunction2):
 			def call(self, elem1, elem2, context):
-				sc(elem1, elem2)
+				return sc(elem1, elem2)
 	return __dump(Wrapper())
 
 

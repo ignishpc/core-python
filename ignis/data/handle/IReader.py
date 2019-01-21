@@ -15,7 +15,7 @@ class IReader:
 
 	def __init__(self) -> None:
 		self.__methods = dict()
-		self.__methods[IEnumTypes.I_VOID] = self.__IReaderType(None, self.readVoid)
+		self.__methods[IEnumTypes.I_VOID] = self.__IReaderType(type(None), self.readVoid)
 		self.__methods[IEnumTypes.I_BOOL] = self.__IReaderType(bool, self.readBool)
 		self.__methods[IEnumTypes.I_I08] = self.__IReaderType(int, self.readByte)
 		self.__methods[IEnumTypes.I_I16] = self.__IReaderType(int, self.readI16)
