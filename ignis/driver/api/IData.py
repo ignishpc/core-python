@@ -138,7 +138,7 @@ class IData:
 			if light:
 				with Ignis._pool.client() as client:
 					binary = client.getIDataService().collect(self._id, True)
-					return IDataServer.parseBinary(binary, manager)
+					return IDataServer.parseBinaryParts(binary, manager)
 			else:
 				with IDataServer.IDataServer(manager) as ds:
 					with Ignis._pool.client() as client:
