@@ -15,10 +15,10 @@ class IPostmanModuleTest(unittest.TestCase):
 		self.__executorData.getContext()["ignis.executor.cores"] = "1"
 		self.__executorData.getContext()["ignis.transport.serialization"] = "ignis"
 		self.__executorData.getContext()["ignis.executor.storage.compression"] = "6"
-		self.__executorData.getContext()["ignis.executor.transport.port"] = "54321"
-		self.__executorData.getContext()["ignis.executor.transport.threads"] = "4"
-		self.__executorData.getContext()["ignis.executor.transport.compression"] = "1"
-		self.__executorData.getContext()["ignis.executor.transport.reconnections"] = "0"
+		self.__executorData.getContext()["ignis.transport.port"] = "54321"
+		self.__executorData.getContext()["ignis.transport.threads"] = "4"
+		self.__executorData.getContext()["ignis.transport.compression"] = "1"
+		self.__executorData.getContext()["ignis.transport.reconnections"] = "0"
 
 	def tearDown(self):
 		pass
@@ -54,7 +54,7 @@ class IPostmanModuleTest(unittest.TestCase):
 		self.__test("local")
 
 	def test_socket(self):
-		self.__test("socket!localhost!" + self.__executorData.getContext()["ignis.executor.transport.port"])
+		self.__test("socket!localhost!" + self.__executorData.getContext()["ignis.transport.port"])
 
 	def test_memoryBuffer(self):
 		from tempfile import TemporaryDirectory
@@ -62,4 +62,4 @@ class IPostmanModuleTest(unittest.TestCase):
 			path = temp_dir
 			blockSize = str(10 * 1024)
 			self.__test("memoryBuffer!localhost!" + self.__executorData.getContext()[
-				"ignis.executor.transport.port"] + "!" + path + "!" + blockSize)
+				"ignis.transport.port"] + "!" + path + "!" + blockSize)

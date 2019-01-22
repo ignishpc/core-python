@@ -8,7 +8,7 @@ from thrift.transport.TTransport import TBufferedTransport
 from ..IMessage import IMessage
 from concurrent.futures.thread import ThreadPoolExecutor
 from ignis.data.IFileTransport import IFileTransport
-from ignis.data.ISocket import ISocket,IServerSocket
+from ignis.data.ISocket import ISocket, IServerSocket
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ class IPostmanModule(IPostmanModuleRpc.Iface, IModule):
 			try:
 				buffer = TBufferedTransport(transport)
 				object = self.getIObject()
-				logger.info(f"IPostmanModule id {id} receiving" + " mode: {addrMode}")
+				logger.info(f"IPostmanModule id {id} receiving mode: {addrMode}")
 				object.read(buffer)
 				msg = IMessage("local", object)
 				self._executorData.getPostBox().newInMessage(id, msg)
@@ -61,14 +61,17 @@ class IPostmanModule(IPostmanModuleRpc.Iface, IModule):
 		while self.__started:
 			try:
 				connection = server.accept()
+				# Conection to unlock thread
+				if not self.__started:
+					connection.close()
+					break
 				logger.info("IPostmanModule connection accepted")
 				thread = threading.Thread(target=self.__threadAccept, args=(connection,))
 				threads.append(thread)
 				thread.start()
 			except Exception as ex:
-				if not self.__started:
-					break
 				logger.warning(f"IPostmanModule accept exception {ex}")
+		self.__server.close()
 		for thread in threads:
 			thread.join()
 
@@ -89,7 +92,12 @@ class IPostmanModule(IPostmanModuleRpc.Iface, IModule):
 		try:
 			if self.__started:
 				self.__started = False
-				self.__server.close()
+				try:
+					aux = ISocket(host="localhost", port=self.__server.port)
+					aux.open()
+					aux.close()
+				except Exception as ex:
+					logger.warning("Fails to interrupt the server")
 				self.__threadServer.join()
 		except Exception as ex:
 			self.raiseRemote(ex)
