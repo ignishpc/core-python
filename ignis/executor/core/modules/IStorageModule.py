@@ -44,7 +44,6 @@ class IStorageModule(IModule, IStorageModuleRpc.Iface):
 
 	def removeContext(self, id):
 		try:
-			logger.info(f"IStorageModule loading cache object {id}")
 			if id not in self.__objectsCache:
 				raise ValueError("IStorageModule cache object not found")
 			del self.__objectsCache[id]
@@ -61,7 +60,7 @@ class IStorageModule(IModule, IStorageModuleRpc.Iface):
 	def loadContext(self, id):
 		try:
 			if id not in self.__objectsContext:
-				raise ValueError("IStorageModule cache object not found")
+				raise ValueError("IStorageModule context object not found")
 
 			alreadyLoaded = self.__objectsContext[id] == self._executorData.loadObject()
 

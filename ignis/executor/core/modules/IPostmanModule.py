@@ -77,7 +77,7 @@ class IPostmanModule(IPostmanModuleRpc.Iface, IModule):
 			if not self.__started:
 				self.__started = True
 				logger.info("IPostmanModule starting")
-				port = self._executorData.getParser().getInt("ignis.executor.transport.port")
+				port = self._executorData.getParser().getInt("ignis.transport.port")
 				self.__server = IServerSocket(port=port)
 				self.__threadServer = threading.Thread(target=self.__threadServer, args=(self.__server,))
 				self.__threadServer.start()
@@ -159,12 +159,12 @@ class IPostmanModule(IPostmanModuleRpc.Iface, IModule):
 	def sendAll(self):
 		try:
 			msgs = self._executorData.getPostBox().popOutBox()
-			if self._executorData.getParser().getString("ignis.executor.transport.threads") == "cores":
+			if self._executorData.getParser().getString("ignis.transport.threads") == "cores":
 				threads = self._executorData.getParser().getInt("ignis.executor.cores")
 			else:
-				threads = self._executorData.getParser().getInt("ignis.executor.transport.threads")
-			compression = self._executorData.getParser().getInt("ignis.executor.transport.compression")
-			reconnections = self._executorData.getParser().getInt("ignis.executor.transport.reconnections")
+				threads = self._executorData.getParser().getInt("ignis.transport.threads")
+			compression = self._executorData.getParser().getInt("ignis.transport.compression")
+			reconnections = self._executorData.getParser().getInt("ignis.transport.reconnections")
 			errors = 0
 			with ThreadPoolExecutor(max_workers=threads) as executor:
 				futures = list()
