@@ -137,12 +137,12 @@ class IData:
 		try:
 			if light:
 				with Ignis._pool.client() as client:
-					binary = client.getIDataService().take(self._id, True)
+					binary = client.getIDataService().collect(self._id, True)
 					return IDataServer.parseBinary(binary, manager)
 			else:
 				with IDataServer.IDataServer(manager) as ds:
 					with Ignis._pool.client() as client:
-						client.getIDataService().take(self._id, False)
+						client.getIDataService().collect(self._id, False)
 						return ds.getResult()
 		except Exception as ex:
 			raise IDriverException(ex) from None
