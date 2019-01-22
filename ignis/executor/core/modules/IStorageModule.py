@@ -45,7 +45,7 @@ class IStorageModule(IModule, IStorageModuleRpc.Iface):
 	def removeContext(self, id):
 		try:
 			if id not in self.__objectsCache:
-				raise ValueError("IStorageModule cache object not found")
+				raise ValueError("IStorageModule context object not found")
 			del self.__objectsCache[id]
 		except Exception as ex:
 			self.raiseRemote(ex)

@@ -82,8 +82,8 @@ class IPostmanModule(IPostmanModuleRpc.Iface, IModule):
 				logger.info("IPostmanModule starting")
 				port = self._executorData.getParser().getInt("ignis.transport.port")
 				self.__server = IServerSocket(port=port)
-				self.__threadServer = threading.Thread(target=self.__threadServer, args=(self.__server,))
-				self.__threadServer.start()
+				self.__thread= threading.Thread(target=self.__threadServer, args=(self.__server,))
+				self.__thread.start()
 		except Exception as ex:
 			self.raiseRemote(ex)
 
@@ -98,7 +98,7 @@ class IPostmanModule(IPostmanModuleRpc.Iface, IModule):
 					aux.close()
 				except Exception as ex:
 					logger.warning("Fails to interrupt the server")
-				self.__threadServer.join()
+				self.__thread.join()
 		except Exception as ex:
 			self.raiseRemote(ex)
 
