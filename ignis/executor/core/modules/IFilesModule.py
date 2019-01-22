@@ -19,7 +19,7 @@ class IFilesModule(IModule, IFilesModuleRpc.Iface):
 			with open(path, encoding="utf-8") as file:
 				file.seek(offset)
 				for i in range(0, lines):
-					writer.write(file.readline())
+					writer.write(file.readline().rstrip('\n'))
 			obj.fit()
 			self._executorData.loadObject(obj)
 			logger.info(f"IFileModule read")

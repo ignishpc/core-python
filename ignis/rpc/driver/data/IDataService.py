@@ -110,6 +110,13 @@ class Iface(object):
         """
         pass
 
+    def count(self, data):
+        """
+        Parameters:
+         - data
+        """
+        pass
+
     def shuffle(self, data):
         """
         Parameters:
@@ -594,6 +601,39 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "values failed: unknown result")
 
+    def count(self, data):
+        """
+        Parameters:
+         - data
+        """
+        self.send_count(data)
+        return self.recv_count()
+
+    def send_count(self, data):
+        self._oprot.writeMessageBegin('count', TMessageType.CALL, self._seqid)
+        args = count_args()
+        args.data = data
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_count(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = count_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.ex is not None:
+            raise result.ex
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "count failed: unknown result")
+
     def shuffle(self, data):
         """
         Parameters:
@@ -988,6 +1028,7 @@ class Processor(Iface, TProcessor):
         self._processMap["streamingKeyBy"] = Processor.process_streamingKeyBy
         self._processMap["reduceByKey"] = Processor.process_reduceByKey
         self._processMap["values"] = Processor.process_values
+        self._processMap["count"] = Processor.process_count
         self._processMap["shuffle"] = Processor.process_shuffle
         self._processMap["parallelize"] = Processor.process_parallelize
         self._processMap["take"] = Processor.process_take
@@ -1297,6 +1338,32 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
         oprot.writeMessageBegin("values", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_count(self, seqid, iprot, oprot):
+        args = count_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = count_result()
+        try:
+            result.success = self._handler.count(args.data)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.exception.ttypes.IRemoteException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("count", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -3247,6 +3314,141 @@ class values_result(object):
 all_structs.append(values_result)
 values_result.thrift_spec = (
     (0, TType.STRUCT, 'success', [IDataId, None], None, ),  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.exception.ttypes.IRemoteException, None], None, ),  # 1
+)
+
+
+class count_args(object):
+    """
+    Attributes:
+     - data
+    """
+
+
+    def __init__(self, data=None,):
+        self.data = data
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.data = IDataId()
+                    self.data.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('count_args')
+        if self.data is not None:
+            oprot.writeFieldBegin('data', TType.STRUCT, 1)
+            self.data.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(count_args)
+count_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'data', [IDataId, None], None, ),  # 1
+)
+
+
+class count_result(object):
+    """
+    Attributes:
+     - success
+     - ex
+    """
+
+
+    def __init__(self, success=None, ex=None,):
+        self.success = success
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.I64:
+                    self.success = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.exception.ttypes.IRemoteException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('count_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.I64, 0)
+            oprot.writeI64(self.success)
+            oprot.writeFieldEnd()
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(count_result)
+count_result.thrift_spec = (
+    (0, TType.I64, 'success', None, None, ),  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.exception.ttypes.IRemoteException, None], None, ),  # 1
 )
 

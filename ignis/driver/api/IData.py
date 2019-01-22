@@ -88,6 +88,13 @@ class IData:
 		except Exception as ex:
 			raise IDriverException(ex) from None
 
+	def count(self):
+		try:
+			with Ignis._pool.client() as client:
+				return client.getIDataService().count(self._id)
+		except Exception as ex:
+			raise IDriverException(ex) from None
+
 	def shuffle(self):
 		try:
 			with Ignis._pool.client() as client:
@@ -120,7 +127,7 @@ class IData:
 			if seed is None:
 				import time
 				import random
-				seed = random.Random(time.time()).randrange(2**31-1)
+				seed = random.Random(time.time()).randrange(2 ** 31 - 1)
 			if light:
 				with Ignis._pool.client() as client:
 					binary = client.getIDataService().takeSample(self._id, n, withRemplacement, seed, True)
@@ -147,17 +154,17 @@ class IData:
 		except Exception as ex:
 			raise IDriverException(ex) from None
 
-	def sort(self):
+	def sort(self, ascending=True):
 		try:
 			with Ignis._pool.client() as client:
-				return IData(client.getIDataService().sort(self._id))
+				return IData(client.getIDataService().sort(self._id, ascending))
 		except Exception as ex:
 			raise IDriverException(ex) from None
 
-	def sortBy(self, fun):
+	def sortBy(self, fun, ascending=True):
 		try:
 			with Ignis._pool.client() as client:
-				return IData(client.getIDataService().sortBy(self._id, Se.encode(fun, Se.IFunction)))
+				return IData(client.getIDataService().sortBy(self._id, Se.encode(fun, Se.IFunction), ascending))
 		except Exception as ex:
 			raise IDriverException(ex) from None
 

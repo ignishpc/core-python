@@ -35,6 +35,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  IDataId streamingKeyBy(IDataId data, ISource _function, bool ordered)')
     print('  IDataId reduceByKey(IDataId data, ISource _function)')
     print('  IDataId values(IDataId data)')
+    print('  i64 count(IDataId data)')
     print('  IDataId shuffle(IDataId data)')
     print('  IDataId parallelize()')
     print('   take(IDataId data, i64 n, bool light)')
@@ -190,6 +191,12 @@ elif cmd == 'values':
         print('values requires 1 args')
         sys.exit(1)
     pp.pprint(client.values(eval(args[0]),))
+
+elif cmd == 'count':
+    if len(args) != 1:
+        print('count requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.count(eval(args[0]),))
 
 elif cmd == 'shuffle':
     if len(args) != 1:
