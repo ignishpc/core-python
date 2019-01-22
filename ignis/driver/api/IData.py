@@ -106,7 +106,7 @@ class IData:
 			if light:
 				with Ignis._pool.client() as client:
 					binary = client.getIDataService().take(self._id, n, True)
-					return IDataServer.parseBinary(binary, manager)
+					return IDataServer.parseBinaryParts(binary, manager)
 			else:
 				with IDataServer.IDataServer(manager) as ds:
 					with Ignis._pool.client() as client:
@@ -124,7 +124,7 @@ class IData:
 			if light:
 				with Ignis._pool.client() as client:
 					binary = client.getIDataService().takeSample(self._id, n, withRemplacement, seed, True)
-					return IDataServer.parseBinary(binary, manager)
+					return IDataServer.parseBinaryParts(binary, manager)
 			else:
 				with IDataServer.IDataServer(manager) as ds:
 					with Ignis._pool.client() as client:

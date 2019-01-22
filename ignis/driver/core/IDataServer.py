@@ -5,10 +5,10 @@ from ignis.data.IBytearrayTransport import IBytearrayTransport
 from ignis.data.IZlibTransport import IZlibTransport
 
 
-def parseBinary(binary, manager):
+def parseBinaryParts(parts, manager):
 	result = list()
-	trans = IBytearrayTransport(binary)
-	while trans.available() > 0:
+	for buffer in parts:
+		trans = IBytearrayTransport(buffer)
 		ctrans = IZlibTransport(trans)
 		proto = IObjectProtocol(ctrans)
 		data = proto.readObject(manager)

@@ -3612,8 +3612,13 @@ class take_result(object):
             if ftype == TType.STOP:
                 break
             if fid == 0:
-                if ftype == TType.STRING:
-                    self.success = iprot.readBinary()
+                if ftype == TType.LIST:
+                    self.success = []
+                    (_etype3, _size0) = iprot.readListBegin()
+                    for _i4 in range(_size0):
+                        _elem5 = iprot.readBinary()
+                        self.success.append(_elem5)
+                    iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
             elif fid == 1:
@@ -3633,8 +3638,11 @@ class take_result(object):
             return
         oprot.writeStructBegin('take_result')
         if self.success is not None:
-            oprot.writeFieldBegin('success', TType.STRING, 0)
-            oprot.writeBinary(self.success)
+            oprot.writeFieldBegin('success', TType.LIST, 0)
+            oprot.writeListBegin(TType.STRING, len(self.success))
+            for iter6 in self.success:
+                oprot.writeBinary(iter6)
+            oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.ex is not None:
             oprot.writeFieldBegin('ex', TType.STRUCT, 1)
@@ -3658,7 +3666,7 @@ class take_result(object):
         return not (self == other)
 all_structs.append(take_result)
 take_result.thrift_spec = (
-    (0, TType.STRING, 'success', 'BINARY', None, ),  # 0
+    (0, TType.LIST, 'success', (TType.STRING, 'BINARY', False), None, ),  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.exception.ttypes.IRemoteException, None], None, ),  # 1
 )
 
@@ -3795,8 +3803,13 @@ class takeSample_result(object):
             if ftype == TType.STOP:
                 break
             if fid == 0:
-                if ftype == TType.STRING:
-                    self.success = iprot.readBinary()
+                if ftype == TType.LIST:
+                    self.success = []
+                    (_etype10, _size7) = iprot.readListBegin()
+                    for _i11 in range(_size7):
+                        _elem12 = iprot.readBinary()
+                        self.success.append(_elem12)
+                    iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
             elif fid == 1:
@@ -3816,8 +3829,11 @@ class takeSample_result(object):
             return
         oprot.writeStructBegin('takeSample_result')
         if self.success is not None:
-            oprot.writeFieldBegin('success', TType.STRING, 0)
-            oprot.writeBinary(self.success)
+            oprot.writeFieldBegin('success', TType.LIST, 0)
+            oprot.writeListBegin(TType.STRING, len(self.success))
+            for iter13 in self.success:
+                oprot.writeBinary(iter13)
+            oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.ex is not None:
             oprot.writeFieldBegin('ex', TType.STRUCT, 1)
@@ -3841,7 +3857,7 @@ class takeSample_result(object):
         return not (self == other)
 all_structs.append(takeSample_result)
 takeSample_result.thrift_spec = (
-    (0, TType.STRING, 'success', 'BINARY', None, ),  # 0
+    (0, TType.LIST, 'success', (TType.STRING, 'BINARY', False), None, ),  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.exception.ttypes.IRemoteException, None], None, ),  # 1
 )
 
@@ -3942,8 +3958,13 @@ class collect_result(object):
             if ftype == TType.STOP:
                 break
             if fid == 0:
-                if ftype == TType.STRING:
-                    self.success = iprot.readBinary()
+                if ftype == TType.LIST:
+                    self.success = []
+                    (_etype17, _size14) = iprot.readListBegin()
+                    for _i18 in range(_size14):
+                        _elem19 = iprot.readBinary()
+                        self.success.append(_elem19)
+                    iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
             elif fid == 1:
@@ -3963,8 +3984,11 @@ class collect_result(object):
             return
         oprot.writeStructBegin('collect_result')
         if self.success is not None:
-            oprot.writeFieldBegin('success', TType.STRING, 0)
-            oprot.writeBinary(self.success)
+            oprot.writeFieldBegin('success', TType.LIST, 0)
+            oprot.writeListBegin(TType.STRING, len(self.success))
+            for iter20 in self.success:
+                oprot.writeBinary(iter20)
+            oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.ex is not None:
             oprot.writeFieldBegin('ex', TType.STRUCT, 1)
@@ -3988,7 +4012,7 @@ class collect_result(object):
         return not (self == other)
 all_structs.append(collect_result)
 collect_result.thrift_spec = (
-    (0, TType.STRING, 'success', 'BINARY', None, ),  # 0
+    (0, TType.LIST, 'success', (TType.STRING, 'BINARY', False), None, ),  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.exception.ttypes.IRemoteException, None], None, ),  # 1
 )
 
