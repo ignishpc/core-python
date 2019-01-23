@@ -26,3 +26,12 @@ def readToWrite(reader, writer, n=None):
 	else:
 		while reader.hasNext():
 			writer.write(reader.next())
+
+
+def iteratorToStr(reader):
+	value = "["
+	while reader.hasNext():
+		value += reader.next()
+		if reader.hasNext():
+			value += ", "
+	return value + "]"
