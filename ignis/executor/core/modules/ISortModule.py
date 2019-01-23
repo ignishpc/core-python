@@ -2,7 +2,7 @@ import logging
 from ignis.rpc.executor.sort import ISortModule as ISortModuleRpc
 from .IModule import IModule, IRawIndexMemoryObject
 from ..IMessage import IMessage
-from ..storage.iterator.ICoreIterator import readToWrite
+from ..storage.iterator.ICoreIterator import readToWrite,iteratorToStr
 from ..IProcessPoolExecutor import IProcessPoolExecutor
 from ...api.function.IFunction2 import IFunction2
 
@@ -178,7 +178,9 @@ class ISortModule(IModule, ISortModuleRpc.Iface):
 			for i in range(0, sampleSize):
 				reader.skip(div + (1 if i < mod else 0))
 				writer.write(reader.next())
-			self._executorData.getPostBox().newOutMessage(idx, IMessage(master, pivots));
+			self._executorData.getPostBox().newOutMessage(idx, IMessage(master, pivots))
+			print("Pivots:")
+			print(iteratorToStr(pivots.readIterator()))
 			logger.info("ISortModule sampled")
 		except Exception as ex:
 			self.raiseRemote(ex)
@@ -190,8 +192,11 @@ class ISortModule(IModule, ISortModuleRpc.Iface):
 			pivots = self.getIObject(elems=len(msgs) * len(msgs), storage="memory")
 
 			for id, msg in msgs.items():
+				print("Pivots messages:")
+				print(iteratorToStr(msg.getObj().readIterator()))
 				msg.getObj().moveTo(pivots)
-
+			print("Pivots merged:")
+			print(iteratorToStr(pivots.readIterator()))
 			self._executorData.loadObject(pivots)
 			logger.info("ISortModule pivots got")
 		except Exception as ex:
@@ -213,6 +218,8 @@ class ISortModule(IModule, ISortModuleRpc.Iface):
 				reader.skip(div + (1 if i < mod else 0))
 				writer.write(reader.next())
 
+			print("Final Pivots:")
+			print(iteratorToStr(nodePivots.readIterator()))
 			for i in range(0, len(nodes)):
 				self._executorData.getPostBox().newOutMessage(i, IMessage(nodes[i], nodePivots))
 
@@ -248,6 +255,8 @@ class ISortModule(IModule, ISortModuleRpc.Iface):
 				writers[init].write(elem)
 
 			for i in range(0, len(pivots)):
+				print("Exchange Partitions: ")
+				print(iteratorToStr(partitions[i].readIterator()))
 				if len(partitions[i]) > 0:
 					self._executorData.getPostBox().newOutMessage(idx * len(nodes) + i,
 					                                              IMessage(nodes[i], partitions[i]))
@@ -263,8 +272,12 @@ class ISortModule(IModule, ISortModuleRpc.Iface):
 			object_out = self.getIObject()
 
 			for id, msg in msgs.items():
+				print("Partitions messages:")
+				print(iteratorToStr(msg.getObj().readIterator()))
 				msg.getObj().moveTo(object_out)
 
+			print("Partitions merged:")
+			print(iteratorToStr(object_out.readIterator()))
 			self._executorData.loadObject(object_out)
 			logger.info("ISortModule partitions merged")
 		except Exception as ex:
