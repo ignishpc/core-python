@@ -31,7 +31,7 @@ def readToWrite(reader, writer, n=None):
 def iteratorToStr(reader):
 	value = "["
 	while reader.hasNext():
-		value += reader.next()
+		value += str(reader.next())
 		if reader.hasNext():
 			value += ", "
 	return value + "]"

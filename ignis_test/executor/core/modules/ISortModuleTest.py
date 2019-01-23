@@ -66,15 +66,15 @@ class ISortModuleTest(unittest.TestCase):
 
 		for e in range(0, executors):
 			self.__executorData.loadObject(object[e])
-			self.__sortModule.sampling(executors, e, "addr0")
+			self.__sortModule.sampling(executors - 1, e, "addr0")
 			msgs[e] = self.__executorData.getPostBox().popOutBox()
-			self.assertEqual(executors, len(msgs[e][e].getObj()))
+			self.assertEqual(executors - 1, len(msgs[e][e].getObj()))
 
 		for e in range(0, executors):
 			self.__executorData.getPostBox().newInMessage(e, msgs[e][e])
 
 		self.__sortModule.getPivots()
-		self.assertEqual(executors * executors, len(self.__executorData.loadObject()))
+		self.assertEqual(executors * (executors - 1), len(self.__executorData.loadObject()))
 		self.__sortModule.localSort(True)
 		self.__sortModule.findPivots(nodes)
 
@@ -88,14 +88,14 @@ class ISortModuleTest(unittest.TestCase):
 			msgs[e] = self.__executorData.getPostBox().popOutBox()
 
 		for e in range(0, executors):
-			self.__executorData.loadObject(object[e]);
+			self.__executorData.loadObject(object[e])
 			for msgs_ex in msgs:
 				for msg in msgs_ex.items():
 					if msg[1].getAddr() == nodes[e]:
 						self.__executorData.getPostBox().newInMessage(msg[0], msg[1])
 			self.__sortModule.mergePartitions()
 			self.__sortModule.localSort(True)
-			self.__executorData.loadObject()
+			object[e] = self.__executorData.loadObject()
 
 		zero = 0
 		for e in range(0, executors):
@@ -104,8 +104,9 @@ class ISortModuleTest(unittest.TestCase):
 
 		last = object[0].readIterator().next()
 		for e in range(0, executors):
-			reader = object[0].readIterator()
+			reader = object[e].readIterator()
 			while reader.hasNext():
 				next = reader.next()
 				self.assertLessEqual(last, next)
+				last = next
 
