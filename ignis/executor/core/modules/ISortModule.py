@@ -1,6 +1,6 @@
 import logging
 from ignis.rpc.executor.sort import ISortModule as ISortModuleRpc
-from .IModule import IModule, IRawIndexMemoryObject
+from .IModule import IModule, IRawIndexMemoryObject, IMemoryObject
 from ..IMessage import IMessage
 from ..storage.iterator.ICoreIterator import readToWrite
 from ..IProcessPoolExecutor import IProcessPoolExecutor
@@ -70,7 +70,7 @@ class ISortModule(IModule, ISortModuleRpc.Iface):
 			while True:
 				while i < localSize and (len(stack) < 2 or len(stack[-1]) != len(stack[-2])):
 					if len(clears) == 0:
-						obj = ISortModule.getIObjectStatic(context, elems=localSize)
+						obj = ISortModule.getIObjectStatic(context, elems=localSize, shared=False)
 					else:
 						obj = clears.pop()
 					stack.append(obj)
@@ -83,7 +83,7 @@ class ISortModule(IModule, ISortModuleRpc.Iface):
 				r1 = stack[-1].readIterator()
 				r2 = stack[-2].readIterator()
 				if len(clears) == 0:
-					obj = ISortModule.getIObjectStatic(context, elems=localSize)
+					obj = ISortModule.getIObjectStatic(context, elems=localSize, shared=False)
 				else:
 					obj = clears.pop()
 				writer = obj.writeIterator()
@@ -112,6 +112,11 @@ class ISortModule(IModule, ISortModuleRpc.Iface):
 				clears.append(stack.pop())
 				clears[-1].clear()
 				stack.append(obj)
+			#Use internal memory object to improve perfomance in each worker
+			if type(stack[0]) == IMemoryObject and t > 0:
+				obj = ISortModule.getIObjectStatic(context, elems=len(stack[0]))
+				stack[0].moveTo(obj)
+				return obj
 			return stack[0]
 
 		def workerMerge(merge1, merge2):
