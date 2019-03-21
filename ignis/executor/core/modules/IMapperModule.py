@@ -15,12 +15,12 @@ class IMapperModule(IModule, IMapperModuleRpc.Iface):
 
 	def __pipe(self, sf, action):
 		try:
-			f = self.loadSource(sf)
+			context = self._executorData.getContext()
+			f = self.loadSource(sf, context)
 			workers = self._executorData.getWorkers()
 			obj = self._executorData.loadObject()
 			self._executorData.deleteLoadObject()
 			size = obj.getSize()
-			context = self._executorData.getContext()
 
 			reader = obj.readIterator()
 			div = int(size / workers)

@@ -2,6 +2,8 @@ from ignis.executor.api.function.IFunction import IFunction
 from ignis.executor.api.function.IFlatFunction import IFlatFunction
 from ignis.executor.api.function.IFunction2 import IFunction2
 from ignis.rpc.source.ttypes import ISource
+from ignis.data.IObjectProtocol import IObjectProtocol
+from ignis.data.IBytearrayTransport import IBytearrayTransport
 import cloudpickle
 import types
 
@@ -49,9 +51,21 @@ def __encodeIFunction2(sc):
 	return __dump(Wrapper())
 
 
+def __encodeArgs(args, manager):
+	result = dict()
+	for name, arg in args.items():
+		result[name] = bytearray()
+		trans = IBytearrayTransport(result[name])
+		proto = IObjectProtocol(trans)
+		proto.writeObject(arg, manager, native=False)
+	return result
+
 def encode(sc, iface):
+	from ignis.driver.api.IData import IData
 	if isinstance(sc, str):
 		return ISource(name=sc)
+	if isinstance(sc, IData.WithArgs):
+		return ISource(name=sc._func, _args=__encodeArgs(sc._args, sc._manager))
 	if isinstance(sc, types.FunctionType):
 		if iface == IFunction:
 			return __encodeIFunction(sc)

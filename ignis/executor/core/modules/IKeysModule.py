@@ -73,10 +73,10 @@ class IKeysModule(IModule, IKeysModuleRpc.Iface):
 	def reduceByKey(self, funct):
 		try:
 			logger.info("IKeysModule reduceByKey starting")
-			f = self.loadSource(funct)
 			obj = self._executorData.loadObject()
 			workers = self._executorData.getWorkers()
 			context = self._executorData.getContext()
+			f = self.loadSource(funct,context)
 			size = obj.getSize()
 
 			reader = obj.readIterator()

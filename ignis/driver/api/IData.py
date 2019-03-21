@@ -6,7 +6,7 @@ import ignis.driver.core.IDataServer as IDataServer
 
 class IData:
 
-	def __init__(self, _id=None):
+	def __init__(self, _id):
 		self._id = _id
 
 	def setName(self, name):
@@ -206,3 +206,15 @@ class IData:
 			return self
 		except Exception as ex:
 			raise IDriverException(ex) from None
+
+	class WithArgs:
+
+		def __init__(self, func, manager=IDataServer.IManager(), **kwargs):
+			self._func = func
+			self._manager = manager
+			self._args = kwargs
+
+		def add(self, name, arg):
+			self._args[name] = arg
+			return self
+

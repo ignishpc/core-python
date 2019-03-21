@@ -1,10 +1,12 @@
 from .IManager import IManager
 
+
 class IContext:
 
 	def __init__(self):
 		self.__properties = dict()
 		self.__manager = IManager()
+		self.__variables = dict()
 
 	def __getitem__(self, key):
 		return self.__properties[key]
@@ -23,3 +25,9 @@ class IContext:
 
 	def getManager(self):
 		return self.__manager
+
+	def getVariables(self):
+		return self.__variables
+
+	def getVariable(self, name):
+		return self.__variables[name]

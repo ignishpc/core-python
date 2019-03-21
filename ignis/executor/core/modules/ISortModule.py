@@ -16,7 +16,7 @@ class ISortModule(IModule, ISortModuleRpc.Iface):
 
 	def localCustomSort(self, sf, ascending):
 		try:
-			less = self.loadSource(sf)
+			less = self.loadSource(sf, self._executorData.getContext())
 			self.__mergeSort(less, ascending)
 		except Exception as ex:
 			self.raiseRemote(ex)

@@ -41,12 +41,12 @@ class IModule:
 		return self.getIObjectStatic(self._executorData.getContext(), *args, **kwargs)
 
 	@staticmethod
-	def loadSource(source):
+	def loadSource(source, context):
 		logging.info("IModule loading function")
 		loader = IObjectLoader()
 		if source.name:
-			result = loader.load(source.name)
+			result = loader.load(source.name, context)
 		else:
-			result = loader.load(source.bytes)
+			result = loader.load(source.bytes, context)
 		logging.info("IModule function loaded")
 		return result

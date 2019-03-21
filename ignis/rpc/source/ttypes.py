@@ -21,12 +21,14 @@ class ISource(object):
     Attributes:
      - name
      - bytes
+     - _args
     """
 
 
-    def __init__(self, name=None, bytes=None,):
+    def __init__(self, name=None, bytes=None, _args=None,):
         self.name = name
         self.bytes = bytes
+        self._args = _args
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -47,6 +49,17 @@ class ISource(object):
                     self.bytes = iprot.readBinary()
                 else:
                     iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.MAP:
+                    self._args = {}
+                    (_ktype1, _vtype2, _size0) = iprot.readMapBegin()
+                    for _i4 in range(_size0):
+                        _key5 = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
+                        _val6 = iprot.readBinary()
+                        self._args[_key5] = _val6
+                    iprot.readMapEnd()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -64,6 +77,14 @@ class ISource(object):
         if self.bytes is not None:
             oprot.writeFieldBegin('bytes', TType.STRING, 2)
             oprot.writeBinary(self.bytes)
+            oprot.writeFieldEnd()
+        if self._args is not None:
+            oprot.writeFieldBegin('_args', TType.MAP, 3)
+            oprot.writeMapBegin(TType.STRING, TType.STRING, len(self._args))
+            for kiter7, viter8 in self._args.items():
+                oprot.writeString(kiter7.encode('utf-8') if sys.version_info[0] == 2 else kiter7)
+                oprot.writeBinary(viter8)
+            oprot.writeMapEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -86,6 +107,7 @@ ISource.thrift_spec = (
     None,  # 0
     (1, TType.STRING, 'name', 'UTF8', None, ),  # 1
     (2, TType.STRING, 'bytes', 'BINARY', None, ),  # 2
+    (3, TType.MAP, '_args', (TType.STRING, 'UTF8', TType.STRING, 'BINARY', False), None, ),  # 3
 )
 fix_spec(all_structs)
 del all_structs
