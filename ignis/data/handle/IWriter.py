@@ -1,5 +1,6 @@
 from .IEnumTypes import IEnumTypes
 from ignis.data.IObjectProtocol import IObjectProtocol
+import numpy
 
 
 class IWriter:
@@ -30,6 +31,7 @@ class IWriter:
 		self.__methods[tuple] = self.__IWriterType(IEnumTypes.I_PAIR, self.writePair)
 		self.__methods[bytes] = self.__IWriterType(IEnumTypes.I_BINARY, self.writeBytes)
 		self.__methods[bytearray] = self.__IWriterType(IEnumTypes.I_BINARY, self.writeBytes)
+		self.__methods[numpy.ndarray] = self.__IWriterType(IEnumTypes.I_LIST, self.writeList)
 
 	def getWriterByType(self, tp):
 		if tp in self.__methods:
