@@ -1,10 +1,10 @@
 from .IEnumTypes import IEnumTypes
 from ignis.data.IObjectProtocol import IObjectProtocol
-import numpy
+import numpy as np
 
 
 class IWriter:
-	class __IWriterType:
+	class IWriterType:
 		def __init__(self, tp, write):
 			self.__type = tp
 			self.write = write
@@ -20,18 +20,34 @@ class IWriter:
 
 	def __init__(self) -> None:
 		self.__methods = dict()
-		self.__methods[type(None)] = self.__IWriterType(IEnumTypes.I_VOID, self.writeVoid)
-		self.__methods[bool] = self.__IWriterType(IEnumTypes.I_BOOL, self.writeBool)
-		self.__methods[int] = self.__IWriterType(IEnumTypes.I_I64, self.writeI64)
-		self.__methods[float] = self.__IWriterType(IEnumTypes.I_DOUBLE, self.writeDouble)
-		self.__methods[str] = self.__IWriterType(IEnumTypes.I_STRING, self.writeString)
-		self.__methods[list] = self.__IWriterType(IEnumTypes.I_LIST, self.writeList)
-		self.__methods[set] = self.__IWriterType(IEnumTypes.I_SET, self.writeSet)
-		self.__methods[dict] = self.__IWriterType(IEnumTypes.I_MAP, self.writeMap)
-		self.__methods[tuple] = self.__IWriterType(IEnumTypes.I_PAIR, self.writePair)
-		self.__methods[bytes] = self.__IWriterType(IEnumTypes.I_BINARY, self.writeBytes)
-		self.__methods[bytearray] = self.__IWriterType(IEnumTypes.I_BINARY, self.writeBytes)
-		self.__methods[numpy.ndarray] = self.__IWriterType(IEnumTypes.I_LIST, self.writeList)
+		self.__methods[type(None)] = self.IWriterType(IEnumTypes.I_VOID, self.writeVoid)
+		self.__methods[bool] = self.IWriterType(IEnumTypes.I_BOOL, self.writeBool)
+		self.__methods[int] = self.IWriterType(IEnumTypes.I_I64, self.writeI64)
+		self.__methods[float] = self.IWriterType(IEnumTypes.I_DOUBLE, self.writeDouble)
+		self.__methods[str] = self.IWriterType(IEnumTypes.I_STRING, self.writeString)
+		self.__methods[list] = self.IWriterType(IEnumTypes.I_LIST, self.writeList)
+		self.__methods[set] = self.IWriterType(IEnumTypes.I_SET, self.writeSet)
+		self.__methods[dict] = self.IWriterType(IEnumTypes.I_MAP, self.writeMap)
+		self.__methods[tuple] = self.IWriterType(IEnumTypes.I_PAIR, self.writePair)
+		self.__methods[bytes] = self.IWriterType(IEnumTypes.I_BINARY, self.writeBytes)
+		self.__methods[bytearray] = self.IWriterType(IEnumTypes.I_BINARY, self.writeBytes)
+		#Numpy compatibility
+		self.__methods[np.ndarray] = self.IWriterType(IEnumTypes.I_LIST, self.writeList)
+		self.__methods[np.bool_] = self.IWriterType(IEnumTypes.I_BOOL, self.writeBool)
+		self.__methods[np.int8] = self.IWriterType(IEnumTypes.I_I08, self.writeByte)
+		self.__methods[np.uint8] = self.IWriterType(IEnumTypes.I_I16, self.writeI16)
+		self.__methods[np.int16] = self.IWriterType(IEnumTypes.I_I16, self.writeI16)
+		self.__methods[np.uint16] = self.IWriterType(IEnumTypes.I_I32, self.writeI32)
+		self.__methods[np.int32] = self.IWriterType(IEnumTypes.I_I32, self.writeI32)
+		self.__methods[np.uint32] = self.IWriterType(IEnumTypes.I_I64, self.writeI64)
+		self.__methods[np.int64] = self.IWriterType(IEnumTypes.I_I64, self.writeI64)
+		self.__methods[np.uint64] = self.IWriterType(IEnumTypes.I_I64, self.writeI64)
+		self.__methods[np.float16] = self.IWriterType(IEnumTypes.I_DOUBLE, self.writeDouble)
+		self.__methods[np.float32] = self.IWriterType(IEnumTypes.I_DOUBLE, self.writeDouble)
+		self.__methods[np.float64] = self.IWriterType(IEnumTypes.I_DOUBLE, self.writeDouble)
+
+	def setWriterByType(self, tp, writer):
+		self.__methods[tp] = writer
 
 	def getWriterByType(self, tp):
 		if tp in self.__methods:
