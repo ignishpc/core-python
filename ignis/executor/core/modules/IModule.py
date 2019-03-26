@@ -22,7 +22,7 @@ class IModule:
 	def getIObjectStatic(context, elems=1000, bytes=None, storage=None, shared=None):
 		parser = IPropertyParser(context.getProperties())
 		if bytes is None:
-			bytes = elems*128
+			bytes = elems * 128
 		if storage is None:
 			storage = parser.getString("ignis.executor.storage")
 		if shared is None:
@@ -44,9 +44,12 @@ class IModule:
 	def loadSource(source, context):
 		logging.info("IModule loading function")
 		loader = IObjectLoader()
-		if source.name:
-			result = loader.load(source.name, context)
+		if source.obj.bytes:
+			result = loader.decode(source.obj.bytes)
 		else:
-			result = loader.load(source.bytes, context)
+			result = loader.load(source.obj.name)
+			if source.params:
+				logger.info("IModule loading arguments")
+				loader.decodeParams(source.params, context)
 		logging.info("IModule function loaded")
 		return result

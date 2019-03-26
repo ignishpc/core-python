@@ -5,7 +5,7 @@ from ignis.data.IBytearrayTransport import IBytearrayTransport
 
 class IObjectLoader:
 
-	def __fileLoad(self, name):
+	def load(self, name):
 		values = name.split(":")
 		if len(values) != 2:
 			raise NameError(name + " is not a valid python class")
@@ -17,13 +17,13 @@ class IObjectLoader:
 		classObject = getattr(module, className)
 		return classObject()
 
-	def __deserializate(self, binary):
+	def decode(self, binary):
 		return cloudpickle.loads(binary)
 
-	def __decodeArgs(self, source, context):
+	def decodeParams(self, params, context):
 		manager = context.getManager()
 		result = dict()
-		for name, arg in source._args.items():
+		for name, arg in params.items():
 			trans = IBytearrayTransport(arg)
 			proto = IObjectProtocol(trans)
 			result[name] = proto.readObject(manager)

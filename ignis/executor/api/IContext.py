@@ -29,5 +29,14 @@ class IContext:
 	def getVariables(self):
 		return self.__variables
 
+	def removeVariables(self):
+		self.__variables.clear()
+
+	def removeVariable(self, name):
+		del self.__variables[name]
+
 	def getVariable(self, name):
 		return self.__variables[name]
+
+	def containsVariable(self, name):
+		return name in self.__variables

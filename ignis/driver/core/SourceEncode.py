@@ -1,7 +1,7 @@
 from ignis.executor.api.function.IFunction import IFunction
 from ignis.executor.api.function.IFlatFunction import IFlatFunction
 from ignis.executor.api.function.IFunction2 import IFunction2
-from ignis.rpc.source.ttypes import ISource
+from ignis.rpc.source.ttypes import ISource, IEncoded
 from ignis.data.IObjectProtocol import IObjectProtocol
 from ignis.data.IBytearrayTransport import IBytearrayTransport
 import cloudpickle
@@ -9,7 +9,7 @@ import types
 
 
 def __dump(sc):
-	return ISource(bytes=cloudpickle.dumps(sc))
+	return IEncoded(bytes=cloudpickle.dumps(sc))
 
 
 def __encodeIFunction(sc):
@@ -60,19 +60,20 @@ def __encodeArgs(args, manager):
 		proto.writeObject(arg, manager, native=False)
 	return result
 
+
 def encode(sc, iface):
 	from ignis.driver.api.IData import IData
 	if isinstance(sc, str):
-		return ISource(name=sc)
+		return ISource(obj=IEncoded(name=sc))
 	if isinstance(sc, IData.WithArgs):
-		return ISource(name=sc._func, _args=__encodeArgs(sc._args, sc._manager))
+		return ISource(obj=IEncoded(name=sc._func), params=__encodeArgs(sc._args, sc._manager))
 	if isinstance(sc, types.FunctionType):
 		if iface == IFunction:
-			return __encodeIFunction(sc)
+			return ISource(obj=__encodeIFunction(sc))
 		elif iface == IFlatFunction:
-			return __encodeIFlatFunction(sc)
+			return ISource(obj=__encodeIFlatFunction(sc))
 		elif iface == IFunction2:
-			return __encodeIFunction2(sc)
+			return ISource(obj=__encodeIFunction2(sc))
 		else:
 			raise ValueError()
-	return __dump(sc)
+	return ISource(obj=__dump(sc))
