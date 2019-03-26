@@ -25,9 +25,13 @@ class ISource(object):
     """
 
 
-    def __init__(self, name=None, bytes=None, _args=None,):
+    def __init__(self, name=None, bytes=None, _args={
+    },):
         self.name = name
         self.bytes = bytes
+        if _args is self.thrift_spec[3][4]:
+            _args = {
+            }
         self._args = _args
 
     def read(self, iprot):
@@ -107,7 +111,8 @@ ISource.thrift_spec = (
     None,  # 0
     (1, TType.STRING, 'name', 'UTF8', None, ),  # 1
     (2, TType.STRING, 'bytes', 'BINARY', None, ),  # 2
-    (3, TType.MAP, '_args', (TType.STRING, 'UTF8', TType.STRING, 'BINARY', False), None, ),  # 3
+    (3, TType.MAP, '_args', (TType.STRING, 'UTF8', TType.STRING, 'BINARY', False), {
+    }, ),  # 3
 )
 fix_spec(all_structs)
 del all_structs
