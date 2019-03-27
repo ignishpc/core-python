@@ -3,7 +3,7 @@ import random
 import os
 from ignis.executor.core.modules.IMapperModule import IMapperModule
 from ignis.executor.core.IExecutorData import IExecutorData
-from ignis.rpc.source.ttypes import ISource
+from ignis.rpc.source.ttypes import ISource,IEncoded
 
 
 class IMapperModuleTest(unittest.TestCase):
@@ -33,7 +33,7 @@ class IMapperModuleTest(unittest.TestCase):
 		self.__executorData.getContext()["ignis.executor.cores"] = "1"
 		path = os.path.abspath(__file__)
 		dir = os.path.dirname(path)
-		sf = ISource(name=dir + "/TestFunctions.py:MapFunction")
+		sf = ISource(IEncoded(name=dir + "/TestFunctions.py:MapFunction"))
 		self.__mapperModule._map(sf)
 
 		reader = self.__executorData.loadObject().readIterator()
@@ -44,7 +44,7 @@ class IMapperModuleTest(unittest.TestCase):
 		self.__executorData.getContext()["ignis.executor.cores"] = "1"
 		path = os.path.abspath(__file__)
 		dir = os.path.dirname(path)
-		sf = ISource(name=dir + "/TestFunctions.py:FlatmapFunction")
+		sf = ISource(IEncoded(name=dir + "/TestFunctions.py:FlatmapFunction"))
 		self.__mapperModule.flatmap(sf)
 
 		reader = self.__executorData.loadObject().readIterator()
@@ -56,7 +56,7 @@ class IMapperModuleTest(unittest.TestCase):
 		self.__executorData.getContext()["ignis.executor.cores"] = "1"
 		path = os.path.abspath(__file__)
 		dir = os.path.dirname(path)
-		sf = ISource(name=dir + "/TestFunctions.py:FilterFunction")
+		sf = ISource(IEncoded(name=dir + "/TestFunctions.py:FilterFunction"))
 		self.__mapperModule.filter(sf)
 
 		reader = self.__executorData.loadObject().readIterator()
@@ -68,7 +68,7 @@ class IMapperModuleTest(unittest.TestCase):
 		self.__executorData.getContext()["ignis.executor.cores"] = "1"
 		path = os.path.abspath(__file__)
 		dir = os.path.dirname(path)
-		sf = ISource(name=dir + "/TestFunctions.py:MapFunction")
+		sf = ISource(IEncoded(name=dir + "/TestFunctions.py:MapFunction"))
 		self.__mapperModule.keyBy(sf)
 
 		reader = self.__executorData.loadObject().readIterator()
@@ -81,7 +81,7 @@ class IMapperModuleTest(unittest.TestCase):
 		self.__executorData.getContext()["ignis.executor.cores"] = "8"
 		path = os.path.abspath(__file__)
 		dir = os.path.dirname(path)
-		sf = ISource(name=dir + "/TestFunctions.py:MapFunction")
+		sf = ISource(IEncoded(name=dir + "/TestFunctions.py:MapFunction"))
 		self.__mapperModule._map(sf)
 
 		reader = self.__executorData.loadObject().readIterator()
@@ -92,7 +92,7 @@ class IMapperModuleTest(unittest.TestCase):
 		self.__executorData.getContext()["ignis.executor.cores"] = "8"
 		path = os.path.abspath(__file__)
 		dir = os.path.dirname(path)
-		sf = ISource(name=dir + "/TestFunctions.py:FlatmapFunction")
+		sf = ISource(IEncoded(name=dir + "/TestFunctions.py:FlatmapFunction"))
 		self.__mapperModule.flatmap(sf)
 
 		reader = self.__executorData.loadObject().readIterator()
@@ -104,7 +104,7 @@ class IMapperModuleTest(unittest.TestCase):
 		self.__executorData.getContext()["ignis.executor.cores"] = "8"
 		path = os.path.abspath(__file__)
 		dir = os.path.dirname(path)
-		sf = ISource(name=dir + "/TestFunctions.py:FilterFunction")
+		sf = ISource(IEncoded(name=dir + "/TestFunctions.py:FilterFunction"))
 		self.__mapperModule.filter(sf)
 
 		reader = self.__executorData.loadObject().readIterator()
@@ -116,7 +116,7 @@ class IMapperModuleTest(unittest.TestCase):
 		self.__executorData.getContext()["ignis.executor.cores"] = "8"
 		path = os.path.abspath(__file__)
 		dir = os.path.dirname(path)
-		sf = ISource(name=dir + "/TestFunctions.py:MapFunction")
+		sf = ISource(IEncoded(name=dir + "/TestFunctions.py:MapFunction"))
 		self.__mapperModule.keyBy(sf)
 
 		reader = self.__executorData.loadObject().readIterator()

@@ -28,12 +28,3 @@ class IObjectLoader:
 			proto = IObjectProtocol(trans)
 			result[name] = proto.readObject(manager)
 		context.getVariables().update(result)
-
-	def load(self, source, context):
-		if type(source) == str:
-			obj = self.__fileLoad(source)
-			if source._args:
-				self.__decodeArgs(source, context)
-			return obj
-		else:
-			return self.__deserializate(source)

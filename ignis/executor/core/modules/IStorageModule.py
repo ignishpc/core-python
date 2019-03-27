@@ -111,11 +111,16 @@ class IStorageModule(IModule, IStorageModuleRpc.Iface):
 							index.append(j)
 							break
 				index.sort()
-				last = 0
+				last_i = 0
+				last_elem = None
 				for i in index:
-					reader.skip(i - last)
-					writer.write(reader.next())
-					last = i
+					if last_i == i and last_elem:
+						writer.write(last_elem)
+					else:
+						reader.skip(i - last_i)
+						last_elem = reader.next()
+						writer.write(last_elem)
+						last_i = i
 			else:
 				picked = 0
 				for i in range(0, size):

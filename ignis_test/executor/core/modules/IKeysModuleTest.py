@@ -3,7 +3,7 @@ import random
 import os
 from ignis.executor.core.modules.IKeysModule import IKeysModule
 from ignis.executor.core.IExecutorData import IExecutorData
-from ignis.rpc.source.ttypes import ISource
+from ignis.rpc.source.ttypes import ISource,IEncoded
 from ignis.rpc.executor.keys.ttypes import IExecutorKeys
 from ignis.executor.core.IMessage import IMessage
 
@@ -26,7 +26,7 @@ class IKeysModuleTest(unittest.TestCase):
 		obj = self.__keysModule.getIObject()
 		path = os.path.abspath(__file__)
 		dir = os.path.dirname(path)
-		sf = ISource(name=dir + "/TestFunctions.py:ReduceByKeyFunction")
+		sf = ISource(IEncoded(name=dir + "/TestFunctions.py:ReduceByKeyFunction"))
 
 		reduction = dict()
 		writer = obj.writeIterator()
