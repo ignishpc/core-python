@@ -2,6 +2,7 @@ import subprocess
 import threading
 
 from ignis.driver.core.IClientPool import IClientPool
+from ignis.driver.core.ICallBack import ICallBack
 from ignis.driver.api.IDriverException import IDriverException
 
 
@@ -9,15 +10,7 @@ class Ignis:
 	__lock = threading.Lock()
 	__backend = None
 	_pool = None
-
-	@classmethod
-	def debug(Ignis, port, host="127.0.0.1"):
-		try:
-			with Ignis.__lock:
-				if not Ignis._pool:
-					Ignis._pool = IClientPool(host, port)
-		except Exception as ex:
-			raise IDriverException() from ex
+	__callback = None
 
 	@classmethod
 	def start(Ignis):
@@ -25,36 +18,35 @@ class Ignis:
 			with Ignis.__lock:
 				if not Ignis._pool:
 					Ignis.__backend = subprocess.Popen(["ignis-backend"], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
-					port = Ignis.__backend.stdout.readline()
-					if port:
-						Ignis._pool = IClientPool("127.0.0.1", int(port))
-					else:
-						try:
-							Ignis.__backend.kill()
-						except:
-							pass
-						Ignis.__backend = None
-						raise IDriverException("Backend error")
+
+					backend_port = int(Ignis.__backend.stdout.readline())
+					backend_compression = int(Ignis.__backend.stdout.readline())
+					callback_port = int(Ignis.__backend.stdout.readline())
+					callback_compression = int(Ignis.__backend.stdout.readline())
+
+					Ignis.__callback = ICallBack(callback_port, callback_compression)
+					Ignis._pool = IClientPool(backend_port, backend_compression)
 		except Exception as ex:
-			raise IDriverException(ex) from ex
+			raise IDriverException(str(ex)) from ex
 
 	@classmethod
 	def stop(Ignis):
 		try:
 			with Ignis.__lock:
-				if Ignis._pool:
-					if Ignis.__backend:
-						try:
-							with Ignis._pool.client() as client:
-								client.getIBackendService().stop()
-						except Exception:
-							pass
-						try:
-							Ignis.__backend.wait(timeout=60)
-						except subprocess.TimeoutExpired:
-							Ignis.__backend.kill()
-						Ignis.__backend = None
-					Ignis._pool.destroy()
-					Ignis._pool = None
+				if not Ignis._pool:
+					return
+			with Ignis._pool.getClient() as client:
+				client.getIBackendService().stop()
+			Ignis.__backend.wait()
+			Ignis._pool.destroy()
+			Ignis.__callback.stop()
+
+			Ignis.__backend = None
+			Ignis._pool = None
+			Ignis.__callback = None
 		except Exception as ex:
 			raise IDriverException(ex) from ex
+
+	@classmethod
+	def _driverContext(Ignis):
+		return Ignis.__callback.driverContext()

@@ -6,11 +6,9 @@ if [ $# -ne 1 ] || [ ! -d "$1"/ignis/rpc/ ] || [ ! -f $(find "$1"/ignis/rpc/ -na
     exit
 fi
 
-
 out="."
 rm -fr "ignis/rpc"
 for file in `find $1/ignis -name "*thrift"`; do
     thrift --gen py -out $out $file &
 done
 wait
-rm -fr "__init__.py" "ignis/rpc/manager"

@@ -2,49 +2,50 @@ import time
 from thrift.transport.TSocket import TSocket, logger as socket_logger
 from thrift.protocol.TCompactProtocol import TCompactProtocol
 from thrift.protocol.TMultiplexedProtocol import TMultiplexedProtocol
-from thrift.transport.TTransport import TBufferedTransport
+from thrift.transport.TZlibTransport import TZlibTransport
 
 from ignis.rpc.driver.backend import IBackendService
-from ignis.rpc.driver.cluster import IClusterService
-from ignis.rpc.driver.data import IDataService
-from ignis.rpc.driver.job import IJobService
 from ignis.rpc.driver.properties import IPropertiesService
+from ignis.rpc.driver.cluster import IClusterService
+from ignis.rpc.driver.worker import IWorkerService
+from ignis.rpc.driver.dataframe import IDataFrameService
 
 
 class IClient:
 
-	def __init__(self, host, port):
-		self.__transport = TBufferedTransport(TSocket(host, port))
+	def __init__(self, port, compression):
+		self.__transport = TZlibTransport(TSocket("localhost", port), compression)
 		socket_logger.disabled = True  # Avoid reconnection errors
 		for i in range(0, 10):
 			try:
 				self.__transport.open()
 				break
 			except Exception as ex:
-				time.sleep(1)
 				if i == 9:
 					raise ex
+				time.sleep(i)
+		socket_logger.disabled = False
 		protocol = TCompactProtocol(self.__transport)
-		self.__backend = IBackendService.Client(TMultiplexedProtocol(protocol, "backend"))
-		self.__cluster = IClusterService.Client(TMultiplexedProtocol(protocol, "cluster"))
-		self.__data = IDataService.Client(TMultiplexedProtocol(protocol, "data"))
-		self.__job = IJobService.Client(TMultiplexedProtocol(protocol, "job"))
-		self.__properties = IPropertiesService.Client(TMultiplexedProtocol(protocol, "properties"))
+		self.__backendService = IBackendService.Client(TMultiplexedProtocol(protocol, "IBackend"))
+		self.__propertiesService = IPropertiesService.Client(TMultiplexedProtocol(protocol, "IProperties"))
+		self.__clusterService = IClusterService.Client(TMultiplexedProtocol(protocol, "ICluster"))
+		self.__workerService = IWorkerService.Client(TMultiplexedProtocol(protocol, "IWorker"))
+		self.__dataframeService = IDataFrameService.Client(TMultiplexedProtocol(protocol, "IDataFrame"))
 
-	def getIBackendService(self):
-		return self.__backend
+	def getBackendService(self):
+		return self.__backendService;
 
-	def getIClusterService(self):
-		return self.__cluster
+	def getPropertiesService(self):
+		return self.__propertiesService;
 
-	def getIDataService(self):
-		return self.__data
+	def getClusterService(self):
+		return self.__clusterService;
 
-	def getIJobService(self):
-		return self.__job
+	def getWorkerService(self):
+		return self.__workerService;
 
-	def getIPropertiesService(self):
-		return self.__properties
+	def getDataFrameService(self):
+		return self.__dataframeService;
 
 	def _close(self):
 		self.__transport.close()

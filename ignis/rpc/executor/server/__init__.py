@@ -1,1 +1,1 @@
-__all__ = ['ttypes', 'constants', 'IServerModule']
+__all__ = ['ttypes', 'constants', 'IExecutorServerModule']

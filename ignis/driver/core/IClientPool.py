@@ -2,51 +2,44 @@ import threading
 
 from ignis.driver.core.IClient import IClient
 
+
 class IClientPool:
-	def __init__(self, host, port):
-		self.__host = host
+	def __init__(self, port, compression):
 		self.__port = port
-		self.__bound = set()
-		self.__free = list()
+		self.__compression = compression
+		self.__clients = list()
+		self.__queue = list()
 		self.__lock = threading.Lock()
 
 	def destroy(self):
 		with self.__lock:
-			for client in self.__bound:
+			for client in self.__clients:
 				client._close()
-			for client in self.__free:
-				client._close()
-			self.__free.clear()
-			self.__bound.clear()
+			self.__clients.clear()
 
-	def _getClient(self):
-		client = None
-		with self.__lock:
-			if not self.__free:
-				client = IClient(self.__host, self.__port)
-			else:
-				client = self.__free.pop()
-			self.__bound.add(client)
-		return client
+	def getClient(self):
+		return IClientPool.__ClientBound(self.__port, self.__compression, self.__clients, self.__queue, self.__lock)
 
-	def _returnClient(self, client):
-		with self.__lock:
-			self.__bound.remove(client)
-			self.__free.append(client)
+	class __ClientBound:
+		def __init__(self, port, compression, clients, queue, lock):
+			self.__port = port
+			self.__compression = compression
+			self.__clients = clients
+			self.__queue = queue
+			self.__lock = lock
+			self.__client = None
 
-	def client(self):
-		return BoundClient(self)
+		def __enter__(self):
+			with self.__lock:
+				if self.__queue:
+					self.__client = self.__queue.pop()
+			if not self.__client:
+				client = IClient(self.__port, self.__compression)
+				with self.__lock:
+					self.__clients.append(client)
+			return self.__client
 
-
-class BoundClient:
-	def __init__(self, pool):
-		self.__pool = pool
-		self.__client = None
-
-	def __enter__(self):
-		self.__client = self.__pool._getClient()
-		return self.__client
-
-	def __exit__(self, exc_type, exc_val, exc_tb):
-		self.__pool._returnClient(self.__client)
-		self.__client = None
+		def __exit__(self, exc_type, exc_val, exc_tb):
+			with self.__lock:
+				self.__queue.append(self.__client)
+			self.__client = None

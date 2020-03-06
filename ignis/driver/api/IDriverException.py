@@ -1,9 +1,13 @@
-from ignis.rpc.exception.ttypes import IRemoteException
-
 
 class IDriverException(RuntimeError):
-	def __init__(self, ex):
-		if type(ex) is IRemoteException:
-			RuntimeError.__init__(self, self.__class__.__name__ + ": " + ex.message + "\n" + ex.stack)
-		else:
-			RuntimeError.__init__(self, str(ex))
+	def __init__(self, message, cause=None):
+		self.__cause = cause
+		if cause:
+			message += "\n" + "Caused by: " + cause
+		RuntimeError.__init__(self, message)
+
+	def hasCause(self):
+		return bool(self.__cause)
+
+	def getCause(self):
+		return self.__cause
