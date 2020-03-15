@@ -1,4 +1,4 @@
-from ignis.executor.api.function.IFunction import IFunction
+from ignis.executor.api.function.IVoidFunction import IFunction
 from ignis.executor.api.function.IFlatFunction import IFlatFunction
 from ignis.executor.api.function.IFunction2 import IFunction2
 

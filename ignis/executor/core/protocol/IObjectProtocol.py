@@ -1,5 +1,9 @@
 from thrift.protocol.TCompactProtocol import TCompactProtocol, CompactType, makeZigZag
 from struct import pack, unpack
+from ignis.executor.core.io.IWriter import IWriter
+from ignis.executor.core.io.INativeWriter import INativeWriter
+from ignis.executor.core.io.IReader import IReader
+from ignis.executor.core.io.INativeReader import INativeReader
 
 
 class IObjectProtocol(TCompactProtocol):
@@ -42,33 +46,35 @@ class IObjectProtocol(TCompactProtocol):
 
 	readBinary = TCompactProtocol._TCompactProtocol__readBinary
 
-	def readObject(self, manager):
+	def readObject(self):
 		native = self.readBool()
+		reader = IReader()
 		if native:
+			nativeReader = INativeReader()
 			header = self.readBool()
 			if header:
-				elems = manager.reader.readSizeAux(self)
-				l = list()
+				elems = reader._readSizeAux(self)
+				array = list()
 				for i in range(0, elems):
-					l.append(manager.nativeReader.read(self.trans))
-				return l
+					array.append(nativeReader.read(self))
+				return array
 			else:
-				return manager.nativeReader.read(self.trans)
+				return nativeReader.read(self)
 		else:
-			return manager.reader.getReader(manager.reader.readTypeAux(self)).read(self)
+			return reader.read(self)
 
-	def writeObject(self, obj, manager, native, listHeader=False):
+	def writeObject(self, obj, native=False, listHeader=False):
 		self.writeBool(native)
+		writer = IWriter()
 		if native:
+			nativeWriter = INativeWriter()
 			isList = type(obj) == list
 			self.writeBool(isList and listHeader)  # Header
 			if isList and listHeader:
-				manager.writer.writeSizeAux(len(obj), self)
+				writer._writeSizeAux(self, len(obj))
 				for i in range(0, len(obj)):
-					manager.nativeWriter.write(obj[i], self.trans)
+					nativeWriter.write(self, obj[i])
 			else:
-				manager.nativeWriter.write(obj, self.trans)
+				nativeWriter.write(self, obj)
 		else:
-			writer = manager.writer.getWriter(obj)
-			writer.writeType(self)
-			writer.write(obj, self)
+			writer.write(self, obj)

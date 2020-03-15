@@ -31,8 +31,8 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  void partitionObjectFile(string path, i64 first, i64 partitions)')
     print('  void partitionObjectFile4(string path, i64 first, i64 partitions, ISource src)')
     print('  void partitionTextFile(string path, i64 first, i64 partitions)')
-    print('  void partitionJsonFile(string path, i64 first, i64 partitions)')
-    print('  void partitionJsonFile4(string path, i64 first, i64 partitions, ISource src)')
+    print('  void partitionJsonFile4a(string path, i64 first, i64 partitions, bool objectMapping)')
+    print('  void partitionJsonFile4b(string path, i64 first, i64 partitions, ISource src)')
     print('  void saveAsObjectFile(string path, i8 compression, i64 first)')
     print('  void saveAsTextFile(string path, i64 first)')
     print('  void saveAsJsonFile(string path, i64 first, bool pretty)')
@@ -157,17 +157,17 @@ elif cmd == 'partitionTextFile':
         sys.exit(1)
     pp.pprint(client.partitionTextFile(args[0], eval(args[1]), eval(args[2]),))
 
-elif cmd == 'partitionJsonFile':
-    if len(args) != 3:
-        print('partitionJsonFile requires 3 args')
-        sys.exit(1)
-    pp.pprint(client.partitionJsonFile(args[0], eval(args[1]), eval(args[2]),))
-
-elif cmd == 'partitionJsonFile4':
+elif cmd == 'partitionJsonFile4a':
     if len(args) != 4:
-        print('partitionJsonFile4 requires 4 args')
+        print('partitionJsonFile4a requires 4 args')
         sys.exit(1)
-    pp.pprint(client.partitionJsonFile4(args[0], eval(args[1]), eval(args[2]), eval(args[3]),))
+    pp.pprint(client.partitionJsonFile4a(args[0], eval(args[1]), eval(args[2]), eval(args[3]),))
+
+elif cmd == 'partitionJsonFile4b':
+    if len(args) != 4:
+        print('partitionJsonFile4b requires 4 args')
+        sys.exit(1)
+    pp.pprint(client.partitionJsonFile4b(args[0], eval(args[1]), eval(args[2]), eval(args[3]),))
 
 elif cmd == 'saveAsObjectFile':
     if len(args) != 3:

@@ -1,19 +1,12 @@
 from thrift.transport.TZlibTransport import TZlibTransport, BufferIO
 import zlib
 
+
 class IZlibTransport(TZlibTransport):
 
-	def __init__(self, trans, compresslevel=9, skipHeader=False):
+	def __init__(self, trans, compresslevel=6):
 		super().__init__(trans, compresslevel)
 		self.__trans = trans
-		if skipHeader:
-			self._zcomp_write.flush(zlib.Z_SYNC_FLUSH)
-
-	def readComp(self, sz):
-		old = self.bytes_in
-		while not super().readComp(max(sz, 256)) and old != self.bytes_in:
-			old = self.bytes_in
-		return True
 
 	def flush(self):
 		"""Flush any queued up data in the write buffer and ensure the

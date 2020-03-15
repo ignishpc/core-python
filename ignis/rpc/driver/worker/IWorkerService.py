@@ -174,16 +174,17 @@ class Iface(object):
         """
         pass
 
-    def partitionJsonFile(self, id, path):
+    def partitionJsonFile3a(self, id, path, objectMapping):
         """
         Parameters:
          - id
          - path
+         - objectMapping
 
         """
         pass
 
-    def partitionJsonFile3(self, id, path, src):
+    def partitionJsonFile3b(self, id, path, src):
         """
         Parameters:
          - id
@@ -797,26 +798,28 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "partitionTextFile failed: unknown result")
 
-    def partitionJsonFile(self, id, path):
+    def partitionJsonFile3a(self, id, path, objectMapping):
         """
         Parameters:
          - id
          - path
+         - objectMapping
 
         """
-        self.send_partitionJsonFile(id, path)
-        return self.recv_partitionJsonFile()
+        self.send_partitionJsonFile3a(id, path, objectMapping)
+        return self.recv_partitionJsonFile3a()
 
-    def send_partitionJsonFile(self, id, path):
-        self._oprot.writeMessageBegin('partitionJsonFile', TMessageType.CALL, self._seqid)
-        args = partitionJsonFile_args()
+    def send_partitionJsonFile3a(self, id, path, objectMapping):
+        self._oprot.writeMessageBegin('partitionJsonFile3a', TMessageType.CALL, self._seqid)
+        args = partitionJsonFile3a_args()
         args.id = id
         args.path = path
+        args.objectMapping = objectMapping
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_partitionJsonFile(self):
+    def recv_partitionJsonFile3a(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -824,16 +827,16 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = partitionJsonFile_result()
+        result = partitionJsonFile3a_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.success is not None:
             return result.success
         if result.ex is not None:
             raise result.ex
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "partitionJsonFile failed: unknown result")
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "partitionJsonFile3a failed: unknown result")
 
-    def partitionJsonFile3(self, id, path, src):
+    def partitionJsonFile3b(self, id, path, src):
         """
         Parameters:
          - id
@@ -841,12 +844,12 @@ class Client(Iface):
          - src
 
         """
-        self.send_partitionJsonFile3(id, path, src)
-        return self.recv_partitionJsonFile3()
+        self.send_partitionJsonFile3b(id, path, src)
+        return self.recv_partitionJsonFile3b()
 
-    def send_partitionJsonFile3(self, id, path, src):
-        self._oprot.writeMessageBegin('partitionJsonFile3', TMessageType.CALL, self._seqid)
-        args = partitionJsonFile3_args()
+    def send_partitionJsonFile3b(self, id, path, src):
+        self._oprot.writeMessageBegin('partitionJsonFile3b', TMessageType.CALL, self._seqid)
+        args = partitionJsonFile3b_args()
         args.id = id
         args.path = path
         args.src = src
@@ -854,7 +857,7 @@ class Client(Iface):
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_partitionJsonFile3(self):
+    def recv_partitionJsonFile3b(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -862,14 +865,14 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = partitionJsonFile3_result()
+        result = partitionJsonFile3b_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.success is not None:
             return result.success
         if result.ex is not None:
             raise result.ex
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "partitionJsonFile3 failed: unknown result")
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "partitionJsonFile3b failed: unknown result")
 
 
 class Processor(Iface, TProcessor):
@@ -892,8 +895,8 @@ class Processor(Iface, TProcessor):
         self._processMap["partitionObjectFile"] = Processor.process_partitionObjectFile
         self._processMap["partitionObjectFile3"] = Processor.process_partitionObjectFile3
         self._processMap["partitionTextFile"] = Processor.process_partitionTextFile
-        self._processMap["partitionJsonFile"] = Processor.process_partitionJsonFile
-        self._processMap["partitionJsonFile3"] = Processor.process_partitionJsonFile3
+        self._processMap["partitionJsonFile3a"] = Processor.process_partitionJsonFile3a
+        self._processMap["partitionJsonFile3b"] = Processor.process_partitionJsonFile3b
         self._on_message_begin = None
 
     def on_message_begin(self, func):
@@ -1332,13 +1335,13 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_partitionJsonFile(self, seqid, iprot, oprot):
-        args = partitionJsonFile_args()
+    def process_partitionJsonFile3a(self, seqid, iprot, oprot):
+        args = partitionJsonFile3a_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = partitionJsonFile_result()
+        result = partitionJsonFile3a_result()
         try:
-            result.success = self._handler.partitionJsonFile(args.id, args.path)
+            result.success = self._handler.partitionJsonFile3a(args.id, args.path, args.objectMapping)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -1353,18 +1356,18 @@ class Processor(Iface, TProcessor):
             logging.exception('Unexpected exception in handler')
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("partitionJsonFile", msg_type, seqid)
+        oprot.writeMessageBegin("partitionJsonFile3a", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_partitionJsonFile3(self, seqid, iprot, oprot):
-        args = partitionJsonFile3_args()
+    def process_partitionJsonFile3b(self, seqid, iprot, oprot):
+        args = partitionJsonFile3b_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = partitionJsonFile3_result()
+        result = partitionJsonFile3b_result()
         try:
-            result.success = self._handler.partitionJsonFile3(args.id, args.path, args.src)
+            result.success = self._handler.partitionJsonFile3b(args.id, args.path, args.src)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -1379,7 +1382,7 @@ class Processor(Iface, TProcessor):
             logging.exception('Unexpected exception in handler')
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("partitionJsonFile3", msg_type, seqid)
+        oprot.writeMessageBegin("partitionJsonFile3b", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -3911,18 +3914,20 @@ partitionTextFile_result.thrift_spec = (
 )
 
 
-class partitionJsonFile_args(object):
+class partitionJsonFile3a_args(object):
     """
     Attributes:
      - id
      - path
+     - objectMapping
 
     """
 
 
-    def __init__(self, id=None, path=None,):
+    def __init__(self, id=None, path=None, objectMapping=None,):
         self.id = id
         self.path = path
+        self.objectMapping = objectMapping
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -3944,6 +3949,11 @@ class partitionJsonFile_args(object):
                     self.path = iprot.readString().decode('utf-8') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.BOOL:
+                    self.objectMapping = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -3953,7 +3963,7 @@ class partitionJsonFile_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('partitionJsonFile_args')
+        oprot.writeStructBegin('partitionJsonFile3a_args')
         if self.id is not None:
             oprot.writeFieldBegin('id', TType.STRUCT, 1)
             self.id.write(oprot)
@@ -3961,6 +3971,10 @@ class partitionJsonFile_args(object):
         if self.path is not None:
             oprot.writeFieldBegin('path', TType.STRING, 2)
             oprot.writeString(self.path.encode('utf-8') if sys.version_info[0] == 2 else self.path)
+            oprot.writeFieldEnd()
+        if self.objectMapping is not None:
+            oprot.writeFieldBegin('objectMapping', TType.BOOL, 3)
+            oprot.writeBool(self.objectMapping)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -3978,15 +3992,16 @@ class partitionJsonFile_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(partitionJsonFile_args)
-partitionJsonFile_args.thrift_spec = (
+all_structs.append(partitionJsonFile3a_args)
+partitionJsonFile3a_args.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'id', [IWorkerId, None], None, ),  # 1
     (2, TType.STRING, 'path', 'UTF8', None, ),  # 2
+    (3, TType.BOOL, 'objectMapping', None, None, ),  # 3
 )
 
 
-class partitionJsonFile_result(object):
+class partitionJsonFile3a_result(object):
     """
     Attributes:
      - success
@@ -4029,7 +4044,7 @@ class partitionJsonFile_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('partitionJsonFile_result')
+        oprot.writeStructBegin('partitionJsonFile3a_result')
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.STRUCT, 0)
             self.success.write(oprot)
@@ -4054,14 +4069,14 @@ class partitionJsonFile_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(partitionJsonFile_result)
-partitionJsonFile_result.thrift_spec = (
+all_structs.append(partitionJsonFile3a_result)
+partitionJsonFile3a_result.thrift_spec = (
     (0, TType.STRUCT, 'success', [ignis.rpc.driver.dataframe.ttypes.IDataFrameId, None], None, ),  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.driver.exception.ttypes.IDriverException, None], None, ),  # 1
 )
 
 
-class partitionJsonFile3_args(object):
+class partitionJsonFile3b_args(object):
     """
     Attributes:
      - id
@@ -4111,7 +4126,7 @@ class partitionJsonFile3_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('partitionJsonFile3_args')
+        oprot.writeStructBegin('partitionJsonFile3b_args')
         if self.id is not None:
             oprot.writeFieldBegin('id', TType.STRUCT, 1)
             self.id.write(oprot)
@@ -4140,8 +4155,8 @@ class partitionJsonFile3_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(partitionJsonFile3_args)
-partitionJsonFile3_args.thrift_spec = (
+all_structs.append(partitionJsonFile3b_args)
+partitionJsonFile3b_args.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'id', [IWorkerId, None], None, ),  # 1
     (2, TType.STRING, 'path', 'UTF8', None, ),  # 2
@@ -4149,7 +4164,7 @@ partitionJsonFile3_args.thrift_spec = (
 )
 
 
-class partitionJsonFile3_result(object):
+class partitionJsonFile3b_result(object):
     """
     Attributes:
      - success
@@ -4192,7 +4207,7 @@ class partitionJsonFile3_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('partitionJsonFile3_result')
+        oprot.writeStructBegin('partitionJsonFile3b_result')
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.STRUCT, 0)
             self.success.write(oprot)
@@ -4217,8 +4232,8 @@ class partitionJsonFile3_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(partitionJsonFile3_result)
-partitionJsonFile3_result.thrift_spec = (
+all_structs.append(partitionJsonFile3b_result)
+partitionJsonFile3b_result.thrift_spec = (
     (0, TType.STRUCT, 'success', [ignis.rpc.driver.dataframe.ttypes.IDataFrameId, None], None, ),  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.driver.exception.ttypes.IDriverException, None], None, ),  # 1
 )

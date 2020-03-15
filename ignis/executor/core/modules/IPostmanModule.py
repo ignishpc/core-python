@@ -8,7 +8,7 @@ from thrift.transport.TTransport import TBufferedTransport
 from ..IMessage import IMessage
 from concurrent.futures.thread import ThreadPoolExecutor
 from ignis.data.IFileTransport import IFileTransport
-from ignis.data.ISocket import ISocket, IServerSocket
+from ignis.executor.core.transport.ISocket import ISocket, IServerSocket
 
 logger = logging.getLogger(__name__)
 

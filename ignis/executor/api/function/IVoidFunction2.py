@@ -1,6 +1,7 @@
+from ignis.executor.api.function.IFunction2 import IFunction2
 
 
-class IFunction2:
+class IVoidFunction2(IFunction2):
 
 	def before(self, context):
 		pass

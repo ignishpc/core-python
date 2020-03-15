@@ -20,6 +20,6 @@ class INativeReader:
 					break
 			return buff
 
-	def read(self, transport):
-		wrapper = INativeReader.__Wrapper(transport)
+	def read(self, protocol):
+		wrapper = INativeReader.__Wrapper(protocol.trans)
 		return pickle.load(wrapper)

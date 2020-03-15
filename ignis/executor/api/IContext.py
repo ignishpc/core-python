@@ -1,42 +1,30 @@
-from .IManager import IManager
+import mpi4py
 
 
 class IContext:
 
 	def __init__(self):
 		self.__properties = dict()
-		self.__manager = IManager()
 		self.__variables = dict()
+		self._mpi_group = mpi4py.MPI.COMM_WORLD
 
-	def __getitem__(self, key):
-		return self.__properties[key]
+	def cores(self):
+		return 1
 
-	def __setitem__(self, key, value):
-		self.__properties[key] = value
+	def executors(self):
+		return self._mpi_group.Get_size()
 
-	def __delitem__(self, key):
-		del self.__properties[key]
+	def executorId(self):
+		return self._mpi_group.Get_rank()
 
-	def __contains__(self, key):
-		return key in self.__properties
+	def threadId(self):
+		return 0
 
-	def getProperties(self):
+	def mpiGroup(self):
+		return self._mpi_group
+
+	def props(self):
 		return self.__properties
 
-	def getManager(self):
-		return self.__manager
-
-	def getVariables(self):
+	def vars(self):
 		return self.__variables
-
-	def removeVariables(self):
-		self.__variables.clear()
-
-	def removeVariable(self, name):
-		del self.__variables[name]
-
-	def getVariable(self, name):
-		return self.__variables[name]
-
-	def containsVariable(self, name):
-		return name in self.__variables

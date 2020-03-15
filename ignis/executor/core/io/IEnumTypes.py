@@ -1,4 +1,7 @@
-class IEnumTypes:
+from enum import Enum
+
+
+class IEnumTypes(Enum):
 	I_VOID = 0x0
 	I_BOOL = 0x1
 	I_I08 = 0x2
@@ -13,3 +16,4 @@ class IEnumTypes:
 	I_PAIR = 0xb
 	I_BINARY = 0xc
 	I_PAIR_LIST = 0xd
+	I_JSON = 0xe

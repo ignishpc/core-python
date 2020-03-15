@@ -13,40 +13,40 @@ class Ignis:
 	__callback = None
 
 	@classmethod
-	def start(Ignis):
+	def start(cls):
 		try:
-			with Ignis.__lock:
-				if not Ignis._pool:
-					Ignis.__backend = subprocess.Popen(["ignis-backend"], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+			with cls.__lock:
+				if not cls._pool:
+					cls.__backend = subprocess.Popen(["ignis-backend"], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
 
-					backend_port = int(Ignis.__backend.stdout.readline())
-					backend_compression = int(Ignis.__backend.stdout.readline())
-					callback_port = int(Ignis.__backend.stdout.readline())
-					callback_compression = int(Ignis.__backend.stdout.readline())
+					backend_port = int(cls.__backend.stdout.readline())
+					backend_compression = int(cls.__backend.stdout.readline())
+					callback_port = int(cls.__backend.stdout.readline())
+					callback_compression = int(cls.__backend.stdout.readline())
 
-					Ignis.__callback = ICallBack(callback_port, callback_compression)
-					Ignis._pool = IClientPool(backend_port, backend_compression)
+					cls.__callback = ICallBack(callback_port, callback_compression)
+					cls._pool = IClientPool(backend_port, backend_compression)
 		except Exception as ex:
 			raise IDriverException(str(ex)) from ex
 
 	@classmethod
-	def stop(Ignis):
+	def stop(cls):
 		try:
-			with Ignis.__lock:
-				if not Ignis._pool:
+			with cls.__lock:
+				if not cls._pool:
 					return
-			with Ignis._pool.getClient() as client:
+			with cls._pool.getClient() as client:
 				client.getIBackendService().stop()
-			Ignis.__backend.wait()
-			Ignis._pool.destroy()
-			Ignis.__callback.stop()
+			cls.__backend.wait()
+			cls._pool.destroy()
+			cls.__callback.stop()
 
-			Ignis.__backend = None
-			Ignis._pool = None
-			Ignis.__callback = None
+			cls.__backend = None
+			cls._pool = None
+			cls.__callback = None
 		except Exception as ex:
 			raise IDriverException(ex) from ex
 
 	@classmethod
-	def _driverContext(Ignis):
-		return Ignis.__callback.driverContext()
+	def _driverContext(cls):
+		return cls.__callback.driverContext()

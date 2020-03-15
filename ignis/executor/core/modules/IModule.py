@@ -4,7 +4,7 @@ from ignis.rpc.exception.ttypes import IRemoteException
 from ..storage.IMemoryObject import IMemoryObject
 from ..storage.IRawIndexMemoryObject import IRawIndexMemoryObject
 from ..storage.IRawMemoryObject import IRawMemoryObject
-from ..IObjectLoader import IObjectLoader
+from ..ILibraryLoader import IObjectLoader
 from ..IPropertyParser import IPropertyParser
 
 logger = logging.getLogger(__name__)

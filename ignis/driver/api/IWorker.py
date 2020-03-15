@@ -54,7 +54,8 @@ class IWorker:
 						return IDataFrame(client.getWorkerService().importDataFrame3a(self._id, data, partitions))
 					else:
 						src = ISource.wrap(src)
-						return IDataFrame(client.getWorkerService().importDataFrame4(self._id, data, partitions, src.rpc()))
+						return IDataFrame(
+							client.getWorkerService().importDataFrame4(self._id, data, partitions, src.rpc()))
 				else:
 					if src is None:
 						return IDataFrame(client.getWorkerService().importDataFrame(self._id, data))
@@ -92,13 +93,13 @@ class IWorker:
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
 			raise IDriverException(ex.message, ex._cause)
 
-	def partitionJsonFile(self, path, src=None):
+	def partitionJsonFile(self, path, src=None, objectMapping=False):
 		try:
 			with Ignis._pool.getClient() as client:
 				if src is None:
-					return IDataFrame(client.getWorkerService().partitionJsonFile(self._id, path))
+					return IDataFrame(client.getWorkerService().partitionJsonFile3a(self._id, path, objectMapping))
 				else:
 					src = ISource.wrap(src)
-					return IDataFrame(client.getWorkerService().partitionJsonFile3(self._id, path, src.rpc()))
+					return IDataFrame(client.getWorkerService().partitionJsonFile3b(self._id, path, src.rpc()))
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
 			raise IDriverException(ex.message, ex._cause)
