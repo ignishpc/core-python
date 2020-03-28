@@ -47,34 +47,46 @@ class IObjectProtocol(TCompactProtocol):
 	readBinary = TCompactProtocol._TCompactProtocol__readBinary
 
 	def readObject(self):
-		native = self.readBool()
-		reader = IReader()
+		native = self.readSerialization()
 		if native:
-			nativeReader = INativeReader()
 			header = self.readBool()
 			if header:
-				elems = reader._readSizeAux(self)
+				elems = IReader._readSizeAux(self)
 				array = list()
 				for i in range(0, elems):
-					array.append(nativeReader.read(self))
+					array.append(INativeReader.read(self))
 				return array
 			else:
-				return nativeReader.read(self)
+				return INativeReader.read(self)
 		else:
-			return reader.read(self)
+			return IReader.read(self)
 
 	def writeObject(self, obj, native=False, listHeader=False):
-		self.writeBool(native)
-		writer = IWriter()
+		self.writeSerialization(native)
 		if native:
-			nativeWriter = INativeWriter()
 			isList = type(obj) == list
 			self.writeBool(isList and listHeader)  # Header
 			if isList and listHeader:
-				writer._writeSizeAux(self, len(obj))
+				IWriter._writeSizeAux(self, len(obj))
 				for i in range(0, len(obj)):
-					nativeWriter.write(self, obj[i])
+					INativeWriter.write(self, obj[i])
 			else:
-				nativeWriter.write(self, obj)
+				INativeWriter.write(self, obj)
 		else:
-			writer.write(self, obj)
+			IWriter.write(self, obj)
+
+	def readSerialization(self):
+		id = self.readByte()
+		if id == 0:
+			return False
+		elif id == 1:
+			return True
+		else:
+			raise TypeError("Serialization is not compatible with Python")
+
+	def writeSerialization(self, native):
+		if native:
+			self.writeByte(1)
+		else:
+			self.writeByte(0)
+

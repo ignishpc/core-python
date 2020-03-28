@@ -6,10 +6,10 @@ class IPartition:
 	def writeIterator(self):
 		pass
 
-	def read(self, trans):
+	def read(self, transport):
 		pass
 
-	def write(self, trans, compression=0):
+	def write(self, transport, compression=0, native=None):
 		pass
 
 	def clone(self):
@@ -29,6 +29,9 @@ class IPartition:
 
 	def size(self):
 		pass
+
+	def __len__(self):
+		return self.size()
 
 	def bytes(self):
 		pass

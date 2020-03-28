@@ -1,112 +1,127 @@
 from ignis.executor.core.io.IEnumTypes import IEnumTypes
 
 
-class IReader:
+class __IReaderAbs(type):
 	__types = dict()
 
 	@classmethod
 	def __setitem__(cls, key, value):
+		if isinstance(key, IEnumTypes):
+			key = key.value
 		cls.__types[key] = value
 
 	@classmethod
 	def __getitem__(cls, key):
+		if isinstance(key, IEnumTypes):
+			key = key.value
 		return cls.__types[key]
 
 	@classmethod
 	def __delitem__(cls, key):
+		if isinstance(key, IEnumTypes):
+			key = key.value
 		del cls.__types[key]
 
-	def __init__(self):
-		self.__types = IReader.__types.copy()
-
-	def _getReaderType(self, id):
+	@classmethod
+	def _getReaderType(cls, id):
 		try:
-			return self.__types[id]
+			return cls.__types[id]
 		except KeyError as ex:
-			raise NotImplementedError("IWriterType not implemented for id" + str(id))
+			raise NotImplementedError("IWriterType not implemented for id " + str(id))
 
-	def _readSizeAux(self, protocol):
+	@classmethod
+	def _readSizeAux(cls, protocol):
 		return protocol.readI64()
 
-	def _readTypeAux(self, protocol):
+	@classmethod
+	def _readTypeAux(cls, protocol):
 		return protocol.readByte()
 
-	def read(self, protocol):
-		readerType = self.getReaderType(self._readTypeAux(protocol))
+	@classmethod
+	def read(cls, protocol):
+		readerType = cls._getReaderType(cls._readTypeAux(protocol))
 		return readerType.read(protocol)
+
+
+class IReader(metaclass=__IReaderAbs):
+	pass
 
 
 class IReaderType:
 
-	def __init__(self, read):
+	def __init__(self, cls, read):
+		self.__cls = cls
 		self.read = read
 
-
-IReader[IEnumTypes.I_VOID] = IReaderType(lambda reader, protocol: None)
-IReader[IEnumTypes.I_BOOL] = IReaderType(lambda reader, protocol: protocol.readBool())
-IReader[IEnumTypes.I_I08] = IReaderType(lambda reader, protocol: protocol.readByte())
-IReader[IEnumTypes.I_I16] = IReaderType(lambda reader, protocol: protocol.readI16())
-IReader[IEnumTypes.I_I32] = IReaderType(lambda reader, protocol: protocol.readI32())
-IReader[IEnumTypes.I_I64] = IReaderType(lambda reader, protocol: protocol.readI64())
-IReader[IEnumTypes.I_DOUBLE] = IReaderType(lambda reader, protocol: protocol.readDouble())
-IReader[IEnumTypes.I_STRING] = IReaderType(lambda reader, protocol: protocol.readString())
+	def getClass(self):
+		return self.__cls
 
 
-def __readList(reader, protocol):
+IReader[IEnumTypes.I_VOID] = IReaderType(type(None), lambda protocol: None)
+IReader[IEnumTypes.I_BOOL] = IReaderType(bool, lambda protocol: protocol.readBool())
+IReader[IEnumTypes.I_I08] = IReaderType(int, lambda protocol: protocol.readByte())
+IReader[IEnumTypes.I_I16] = IReaderType(int, lambda protocol: protocol.readI16())
+IReader[IEnumTypes.I_I32] = IReaderType(int, lambda protocol: protocol.readI32())
+IReader[IEnumTypes.I_I64] = IReaderType(int, lambda protocol: protocol.readI64())
+IReader[IEnumTypes.I_DOUBLE] = IReaderType(float, lambda protocol: protocol.readDouble())
+IReader[IEnumTypes.I_STRING] = IReaderType(str, lambda protocol: protocol.readString())
+
+
+def __readList(protocol):
 	obj = list()
-	size = reader.readSizeAux(protocol)
-	readerType = reader._getReaderType(reader.readTypeAux(protocol))
+	size = IReader._readSizeAux(protocol)
+	readerType = IReader._getReaderType(IReader._readTypeAux(protocol))
 	for i in range(0, size):
-		obj.append(readerType.read(reader, protocol))
+		obj.append(readerType.read(protocol))
 	return obj
 
 
-def __readSet(reader, protocol):
+def __readSet(protocol):
 	obj = set()
-	size = reader.readSizeAux(protocol)
-	readerType = reader._getReaderType(reader.readTypeAux(protocol))
+	size = IReader._readSizeAux(protocol)
+	readerType = IReader._getReaderType(IReader._readTypeAux(protocol))
 	for i in range(0, size):
-		obj.add(readerType.read(reader, protocol))
+		obj.add(readerType.read(protocol))
 	return obj
 
 
-def __readMap(reader, protocol):
+def __readMap(protocol):
 	obj = dict()
-	size = reader.readSizeAux(protocol)
-	keyReader = reader._getReaderType(reader.readTypeAux(protocol))
-	valueReader = reader._getReaderType(reader.readTypeAux(protocol))
+	size = IReader._readSizeAux(protocol)
+	keyReader = IReader._getReaderType(IReader._readTypeAux(protocol))
+	valueReader = IReader._getReaderType(IReader._readTypeAux(protocol))
 	for i in range(0, size):
-		obj[keyReader.read(reader, protocol)] = valueReader.read(reader, protocol)
+		obj[keyReader.read(protocol)] = valueReader.read(protocol)
 	return obj
 
 
-def __readPair(reader, protocol):
-	firstReader = reader._getReaderType(reader.readTypeAux(protocol))
-	secondReader = reader._getReaderType(reader.readTypeAux(protocol))
-	return firstReader.read(reader, protocol), secondReader.read(reader, protocol)
+def __readPair(protocol):
+	firstReader = IReader._getReaderType(IReader._readTypeAux(protocol))
+	secondReader = IReader._getReaderType(IReader._readTypeAux(protocol))
+	return firstReader.read(protocol), secondReader.read(protocol)
 
 
-def __readBinary(reader, protocol):
+def __readBinary(protocol):
 	obj = bytearray()
-	size = reader.readSizeAux(protocol)
+	size = IReader._readSizeAux(protocol)
 	for i in range(0, size):
 		obj.append(protocol.readByte())
 	return obj
 
 
-def __readPairList(reader, protocol):
+def __readPairList(protocol):
 	obj = list()
-	size = reader.readSizeAux(protocol)
-	firstReader = reader._getReaderType(reader.readTypeAux(protocol))
-	secondReader = reader._getReaderType(reader.readTypeAux(protocol))
+	size = IReader._readSizeAux(protocol)
+	firstReader = IReader._getReaderType(IReader._readTypeAux(protocol))
+	secondReader = IReader._getReaderType(IReader._readTypeAux(protocol))
 	for i in range(0, size):
-		obj.append((firstReader.read(reader, protocol), secondReader.read(reader, protocol)))
+		obj.append((firstReader.read(protocol), secondReader.read(protocol)))
 	return obj
 
 
-IReader[IEnumTypes.I_LIST] = IReaderType(__readList)
-IReader[IEnumTypes.I_SET] = IReaderType(__readSet)
-IReader[IEnumTypes.I_MAP] = IReaderType(__readMap)
-IReader[IEnumTypes.I_PAIR] = IReaderType(__readPair)
-IReader[IEnumTypes.I_BINARY] = IReaderType(__readBinary)
-IReader[IEnumTypes.I_PAIR_LIST] = IReaderType(__readPairList)
+IReader[IEnumTypes.I_LIST] = IReaderType(list, __readList)
+IReader[IEnumTypes.I_SET] = IReaderType(set, __readSet)
+IReader[IEnumTypes.I_MAP] = IReaderType(dict, __readMap)
+IReader[IEnumTypes.I_PAIR] = IReaderType(tuple, __readPair)
+IReader[IEnumTypes.I_BINARY] = IReaderType(bytearray, __readBinary)
+IReader[IEnumTypes.I_PAIR_LIST] = IReaderType(list, __readPairList)

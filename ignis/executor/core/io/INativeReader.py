@@ -20,6 +20,14 @@ class INativeReader:
 					break
 			return buff
 
-	def read(self, protocol):
+		def readinto(self, b):
+			toRead = len(b)
+			data = self.read(toRead)
+			toWrite = len(data)
+			b[:toWrite] = data
+			return toWrite
+
+	@classmethod
+	def read(cls, protocol):
 		wrapper = INativeReader.__Wrapper(protocol.trans)
 		return pickle.load(wrapper)

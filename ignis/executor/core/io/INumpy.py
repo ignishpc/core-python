@@ -41,4 +41,4 @@ def __readList(reader, protocol):
 	return obj
 
 
-IWriter[IEnumTypes.I_LIST] = IReaderType(__readList)
+IReader[IEnumTypes.I_LIST] = IReaderType(numpy.ndarray, __readList)

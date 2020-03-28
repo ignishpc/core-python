@@ -39,7 +39,7 @@ def main(argv):
 	sort = ISortModule(executorData)
 	processor.registerProcessor("sort", ISortModuleRpc.Processor(sort))
 	storage = IStorageModule(executorData)
-	processor.registerProcessor("storage", IStorageModuleRpc.Processor(storage))
+	processor.registerProcessor("storage2", IStorageModuleRpc.Processor(storage))
 
 	if len(argv) == 1:
 		logging.error("Executor need a server port as argument")

@@ -25,8 +25,6 @@ class ISocket(TSocket):
 				raise TTransportException(type=TTransportException.TIMED_OUT, message="read timeout", inner=e)
 			else:
 				raise TTransportException(message="unexpected exception", inner=e)
-		if len(buff) == 0:
-			raise TTransportException(type=TTransportException.END_OF_FILE, message='TSocket read 0 bytes')
 		return buff
 
 
