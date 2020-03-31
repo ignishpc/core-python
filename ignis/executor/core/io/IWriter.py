@@ -14,7 +14,11 @@ class __IWriterAbs(type):
 
 	@classmethod
 	def __delitem__(cls, key):
-		del cls.__types[key]
+		cls.__types.pop(key, None)
+
+	@classmethod
+	def __contains__(cls, key):
+		return key in cls.__types.keys()
 
 	@classmethod
 	def _getWriterType(cls, obj):
@@ -65,7 +69,10 @@ class IWriterType:
 		return self.__types[key]
 
 	def __delitem__(self, key):
-		del self.__types[key]
+		self.__types.pop(key, None)
+
+	def __contains__(self, key):
+		return key in self.__types.keys()
 
 	def _getWriter(self, cls):
 		return self.__types.get(cls, self)

@@ -4,13 +4,12 @@ from ignis.executor.core.protocol.IObjectProtocol import IObjectProtocol
 from ignis.executor.api.IReadIterator import IReadIterator
 from ignis.executor.api.IWriteIterator import IWriteIterator
 import sys
-import copy
 
 
 class IMemoryPartition(IPartition):
 	TYPE = "Memory"
 
-	def __init__(self, sz, native, cls=list):
+	def __init__(self, native, cls=list):
 		self.__elements = cls()
 		self.__native = native
 		self.__cls = cls
@@ -28,22 +27,19 @@ class IMemoryPartition(IPartition):
 		zlib_trans = IZlibTransport(transport)
 		proto = IObjectProtocol(zlib_trans)
 		new_elems = proto.readObject()
-		if self.__elements:
-			if type(self.__elements) == type(new_elems):
-				self.__elements += new_elems
-			else:
-				it = self.writeIterator()
-				for elem in new_elems:
-					it.write(elem)
+		if isinstance(new_elems, type(self.__elements)):
+			self.__elements += new_elems
 		else:
-			self.__elements = new_elems
+			it = self.writeIterator()
+			for elem in new_elems:
+				it.write(elem)
 
 	def write(self, transport, compression=0, native=None):
 		if native is None:
 			native = self.__native
 		zlib_trans = IZlibTransport(transport, compression)
 		proto = IObjectProtocol(zlib_trans)
-		proto.writeObject(self.__elements, native)
+		proto.writeObject(self.__elements, native, listHeader=True)
 		zlib_trans.flush()
 
 	def clone(self):
@@ -64,7 +60,7 @@ class IMemoryPartition(IPartition):
 			self.__elements, source.__elements = source.__elements, self.__elements
 		else:
 			self.copyFrom(source)
-			source.clear()
+		source.clear()
 
 	def size(self):
 		return len(self.__elements)

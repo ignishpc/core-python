@@ -7,7 +7,7 @@ from ignis.executor.core.storage.IMemoryPartition import IMemoryPartition
 class IMemoryPartitionTest(IPartitionTest, unittest.TestCase):
 
 	def create(self):
-		return IMemoryPartition(100, native=False)
+		return IMemoryPartition(native=False)
 
 	def elemens(self, n):
 		random.seed(0)
@@ -17,7 +17,7 @@ class IMemoryPartitionTest(IPartitionTest, unittest.TestCase):
 class IMemoryPartitionNativeTest(IPartitionTest, unittest.TestCase):
 
 	def create(self):
-		return IMemoryPartition(100, native=True)
+		return IMemoryPartition(native=True)
 
 	def elemens(self, n):
 		random.seed(0)

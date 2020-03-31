@@ -20,7 +20,13 @@ class __IReaderAbs(type):
 	def __delitem__(cls, key):
 		if isinstance(key, IEnumTypes):
 			key = key.value
-		del cls.__types[key]
+		cls.__types.pop(key, None)
+
+	@classmethod
+	def __contains__(cls, key):
+		if isinstance(key, IEnumTypes):
+			key = key.value
+		return key in cls.__types.keys()
 
 	@classmethod
 	def _getReaderType(cls, id):

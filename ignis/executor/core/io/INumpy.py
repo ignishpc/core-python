@@ -2,20 +2,6 @@ from ignis.executor.core.io.IReader import IReader, IEnumTypes, IReaderType
 from ignis.executor.core.io.IWriter import IWriter
 import numpy
 
-IWriter[numpy.ndarray] = IWriter[IEnumTypes.I_LIST]
-IWriter[numpy.bool_] = IWriter[IEnumTypes.I_BOOL]
-IWriter[numpy.int8] = IWriter[IEnumTypes.I_I08]
-IWriter[numpy.uint8] = IWriter[IEnumTypes.I_I16]
-IWriter[numpy.int16] = IWriter[IEnumTypes.I_I16]
-IWriter[numpy.uint16] = IWriter[IEnumTypes.I_I32]
-IWriter[numpy.int32] = IWriter[IEnumTypes.I_I32]
-IWriter[numpy.uint32] = IWriter[IEnumTypes.I_I64]
-IWriter[numpy.int64] = IWriter[IEnumTypes.I_I64]
-IWriter[numpy.uint64] = IWriter[IEnumTypes.I_I64]
-IWriter[numpy.float16] = IWriter[IEnumTypes.I_DOUBLE]
-IWriter[numpy.float32] = IWriter[IEnumTypes.I_DOUBLE]
-IWriter[numpy.float64] = IWriter[IEnumTypes.I_DOUBLE]
-
 __NUMPY_TYPES = {
 	IEnumTypes.I_BOOL: numpy.bool_,
 	IEnumTypes.I_I08: numpy.int8,
@@ -25,20 +11,102 @@ __NUMPY_TYPES = {
 	IEnumTypes.I_DOUBLE: numpy.float64
 }
 
-def __readList(reader, protocol):
-	size = reader.readSizeAux(protocol)
-	tp = reader.readTypeAux(protocol)
-	readerType = reader._getReaderType(tp)
+__LIST_READER = None
+
+
+class INumpyWrapper:
+
+	def __init__(self, sz, dtype):
+		self.array = numpy.empty(shape=sz, dtype=dtype)
+		self.__next = 0
+
+	def __len__(self):
+		return self.__next
+
+	def __getitem__(self, item):
+		return self.array.__getitem__(item)
+
+	def __iter__(self):
+		return self.array.__iter__()
+
+	def __add__(self, other):
+		new_elems = len(other)
+		sz = self.array.size
+		while new_elems > sz:
+			sz = int(sz * 1.5)
+		self.array.resize(sz, refcheck=False)
+		self.array[self.__next:self.__next + new_elems] = other.array[0:new_elems]
+		self.__next += new_elems
+		return self
+
+	def append(self, obj):
+		if self.array.size == self.__next:
+			self.array.resize(int(self.array.size * 1.5), refcheck=False)
+		self.array[self.__next] = obj
+		self.__next += 1
+
+	def clear(self):
+		self.__next = 0
+
+
+def __readList(protocol):
+	size = IReader._readSizeAux(protocol)
+	tp = IReader._readTypeAux(protocol)
+	readerType = IReader._getReaderType(tp)
 	numpy_tp = __NUMPY_TYPES.get(tp, None)
 	if numpy_tp is None:
 		obj = list()
 		for i in range(0, size):
-			obj.append(readerType.read(reader, protocol))
+			obj.append(readerType.read(protocol))
 	else:
 		obj = numpy.zeros(shape=size, dtype=numpy_tp)
 		for i in range(0, size):
-			obj[i] = readerType.read(reader, protocol)
+			obj[i] = readerType.read(protocol)
 	return obj
 
 
-IReader[IEnumTypes.I_LIST] = IReaderType(numpy.ndarray, __readList)
+def enable():
+	IWriter[numpy.ndarray] = IWriter[list]
+	IWriter[INumpyWrapper] = IWriter[numpy.ndarray]
+	IWriter[numpy.bool_] = IWriter[bool]
+	IWriter[numpy.int8] = IWriter[int]
+	IWriter[numpy.uint8] = IWriter[int]
+	IWriter[numpy.int16] = IWriter[int]
+	IWriter[numpy.uint16] = IWriter[int]
+	IWriter[numpy.int32] = IWriter[int]
+	IWriter[numpy.uint32] = IWriter[int]
+	IWriter[numpy.int64] = IWriter[int]
+	IWriter[numpy.uint64] = IWriter[int]
+	IWriter[numpy.float16] = IWriter[float]
+	IWriter[numpy.float32] = IWriter[float]
+	IWriter[numpy.float64] = IWriter[float]
+
+	if IEnumTypes.I_LIST in IReader:
+		global __LIST_READER
+		__LIST_READER = IReader[IEnumTypes.I_LIST]
+	IReader[IEnumTypes.I_LIST] = IReaderType(numpy.ndarray, __readList)
+
+
+def disable():
+	del IWriter[numpy.ndarray]
+	del IWriter[numpy.bool_]
+	del IWriter[numpy.int8]
+	del IWriter[numpy.uint8]
+	del IWriter[numpy.int16]
+	del IWriter[numpy.uint16]
+	del IWriter[numpy.int32]
+	del IWriter[numpy.uint32]
+	del IWriter[numpy.int64]
+	del IWriter[numpy.uint64]
+	del IWriter[numpy.float16]
+	del IWriter[numpy.float32]
+	del IWriter[numpy.float64]
+
+	if IEnumTypes.I_LIST in IReader and IReader[IEnumTypes.I_LIST].getClass() == numpy.ndarray:
+		if __LIST_READER:
+			IReader[IEnumTypes.I_LIST] = __LIST_READER
+		else:
+			del IReader[IEnumTypes.I_LIST]
+
+
+enable()

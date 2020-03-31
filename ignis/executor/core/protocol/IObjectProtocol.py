@@ -1,5 +1,6 @@
 from thrift.protocol.TCompactProtocol import TCompactProtocol, CompactType, makeZigZag
 from struct import pack, unpack
+import collections
 from ignis.executor.core.io.IWriter import IWriter
 from ignis.executor.core.io.INativeWriter import INativeWriter
 from ignis.executor.core.io.IReader import IReader
@@ -64,7 +65,7 @@ class IObjectProtocol(TCompactProtocol):
 	def writeObject(self, obj, native=False, listHeader=False):
 		self.writeSerialization(native)
 		if native:
-			isList = type(obj) == list
+			isList = isinstance(obj, (collections.Sized, collections.Iterable))
 			self.writeBool(isList and listHeader)  # Header
 			if isList and listHeader:
 				IWriter._writeSizeAux(self, len(obj))
@@ -89,4 +90,3 @@ class IObjectProtocol(TCompactProtocol):
 			self.writeByte(1)
 		else:
 			self.writeByte(0)
-

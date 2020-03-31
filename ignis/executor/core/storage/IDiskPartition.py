@@ -77,8 +77,11 @@ class IDiskPartition(IRawPartition):
 	def __del__(self):
 		if self.__destroy:
 			self._transport.close()
-			os.remove(self.__path)
-			os.remove(self.__path + ".header")
+			try:
+				os.remove(self.__path)
+				os.remove(self.__path + ".header")
+			except:
+				pass
 		else:
 			self.sync()
 
