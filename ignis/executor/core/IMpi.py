@@ -11,7 +11,12 @@ class IMpi:
 	def gather(self, part, root):
 		if self.executors() == 1: return
 		if part.getType() == IMemoryPartition.TYPE:
-			pass
+			if part._IMemoryPartition__cls in (bytes, bytearray):
+				pass
+			elif part._IMemoryPartition__cls.__name__ == 'INumpyWrapper':
+				pass
+			else:
+				pass
 		elif part.getType() == IRawMemoryPartition.TYPE:
 			pass
 		else:  # IDiskPartition.TYP
@@ -19,24 +24,39 @@ class IMpi:
 
 	def bcast(self, part, root):
 		if self.executors() == 1: return
-		if part.getType() == IMemoryPartition.TYPE:
-			pass
+		if part.type() == IMemoryPartition.TYPE:
+			if part._IMemoryPartition__cls == bytearray:
+				sz = self.native().bcast(part.size(), root)
+				if not self.isRoot(root):
+					part._IMemoryPartition__elements = bytearray(sz)
+
+				with memoryview(part._IMemoryPartition__elements) as men:
+					self.native().Bcast((men, men.nbytes, MPI.BYTE), root)
+
+			elif part._IMemoryPartition__cls.__name__ == 'INumpyWrapperCl':
+				sz = self.native().bcast(part.size(), root)
+				elems = part._IMemoryPartition__elements
+				if not self.isRoot(root):
+					elems._resize(sz)
+				self.native().Bcast((elems.array, elems.bytes(), MPI.BYTE), root)
+			else:
+				pass
 		elif part.getType() == IRawMemoryPartition.TYPE:
 			pass
 		else:  # IDiskPartition.TYP
 			pass
 
 	def barrier(self):
-		pass
+		self.native().Barrier()
 
 	def isRoot(self, root):
-		pass
+		return self.rank() == root
 
 	def rank(self):
-		pass
+		return self.__context.executorId()
 
 	def executors(self):
-		pass
+		return self.__context.executors()
 
-	def native(self):
-		pass
+	def native(self) -> MPI.Intracomm:
+		return self.__context.mpiGroup()

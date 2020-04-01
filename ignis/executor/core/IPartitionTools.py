@@ -10,7 +10,7 @@ class IPartitionTools:
 		self.__partition_id_gen = 0
 
 	def __preferredClass(self):
-		return self.__context.vars.get('STORAGE_CLASS', list)
+		return self.__context.vars().get('STORAGE_CLASS', list)
 
 	def newPartition(self, other=None):
 		partitionType = self.__properties.partitionType()
@@ -37,7 +37,7 @@ class IPartitionTools:
 		if self.__preferredClass().__name__ == 'ndarray':
 			return self.__newNumpyMemoryPartition(elems,
 			                                      self.__properties.nativeSerialization(),
-			                                      self.__context.vars['STORAGE_CLASS_DTYPE'])
+			                                      self.__context.vars()['STORAGE_CLASS_DTYPE'])
 		return IMemoryPartition(native=self.__properties.nativeSerialization(),
 		                        cls=self.__preferredClass())
 

@@ -66,7 +66,10 @@ class IMemoryPartition(IPartition):
 		return len(self.__elements)
 
 	def bytes(self):
-		return sys.getsizeof(self.__elements, 1024)
+		if self.size() == 0:
+			return 0
+		else:
+			return sys.getsizeof(self.__elements[0] * self.size(), 1024)
 
 	def clear(self):
 		self.__elements.clear()
