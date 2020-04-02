@@ -41,14 +41,14 @@ class IPartitionTools:
 		return IMemoryPartition(native=self.__properties.nativeSerialization(),
 		                        cls=self.__preferredClass())
 
-	def newRawMemoryPartition(self, sz=120 * 1024 * 1024):
+	def newRawMemoryPartition(self, sz=10 * 1024 * 1024):
 		return IRawMemoryPartition(bytes=sz,
 		                           compression=self.__properties.partitionCompression(),
 		                           native=self.__properties.nativeSerialization(),
 		                           cls=self.__preferredClass())
 
 	def newDiskPartition(self, name='', persist=False, read=False):
-		path = self.__properties.JobDirectory() + "/partitions"
+		path = self.__properties.jobDirectory() + "/partitions"
 		self.createDirectoryIfNotExists(path)
 		if name == '':
 			path += "/partition"

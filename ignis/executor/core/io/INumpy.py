@@ -46,6 +46,9 @@ class INumpyWrapper:
 	def bytes(self):
 		return self.array.itemsize * self.__next
 
+	def itemsize(self):
+		return self.array.itemsize
+
 	def append(self, obj):
 		if self.array.size == self.__next:
 			self.array.resize(int(self.array.size * 1.5), refcheck=False)

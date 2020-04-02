@@ -42,6 +42,6 @@ if __name__ == '__main__':
 			log = open("log.txt", 'w')
 			sys.stderr = log
 			sys.stdout = log
-	main(path, True)
+	main(path, parallel)
 	if rank > 0:
 		sys.stderr.close()

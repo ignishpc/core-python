@@ -16,8 +16,8 @@ else:
 from thrift.transport import TTransport, TSocket, TSSLSocket, THttpClient
 from thrift.protocol.TBinaryProtocol import TBinaryProtocol
 
-from ignis.rpc.executor.io import ICommModule
-from ignis.rpc.executor.io.ttypes import *
+from ignis.rpc.executor.comm import ICommModule
+from ignis.rpc.executor.comm.ttypes import *
 
 if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('')

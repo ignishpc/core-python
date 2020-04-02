@@ -1,7 +1,54 @@
 from thrift.transport.TTransport import TTransportBase, CReadableTransport, TTransportException
-from io import BytesIO
 from enum import Enum
 import sys
+import ctypes
+import ctypes.util
+
+
+class IBuffer:
+	__libc = ctypes.cdll.LoadLibrary(ctypes.util.find_library('msvcrt') or ctypes.util.find_library('c'))
+	__malloc = __libc.malloc
+	__malloc.argtypes = [ctypes.c_size_t]
+	__malloc.restype = ctypes.c_void_p
+	__realloc = __libc.realloc
+	__realloc.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
+	__realloc.restype = ctypes.c_void_p
+	__free = __libc.free
+	__free.argtypes = [ctypes.c_void_p]
+	__free.restype = None
+
+	def __init__(self, sz):
+		self.__sz = sz
+		self.__address = self.__malloc(sz)
+
+	def __len__(self):
+		return self.__sz
+
+	__sizeof__ = __len__
+
+	def __getitem__(self, index):
+		return ctypes.string_at(self.__address + index.start, index.stop - index.start)
+
+	def __setitem__(self, index, value):
+		ctypes.memmove(self.__address + index.start, value, index.stop - index.start)
+
+	def realloc(self, sz):
+		self.__sz = sz
+		self.__address = self.__realloc(self.__address, sz)
+
+	def free(self):
+		self.__free(self.__address)
+
+	def address(self, offset=0):
+		return (ctypes.c_byte * (self.__sz - offset)).from_address(self.__address + offset)
+
+	__del__ = free
+
+	def __repr__(self):
+		return str(self[0:self.__sz])
+
+	def padding(self, n, sz=None):
+		ctypes.memmove(self.__address + n, self.__address, sz or (self.__sz - n))
 
 
 class IMemoryBuffer(TTransportBase, CReadableTransport):
@@ -121,10 +168,7 @@ class IMemoryBuffer(TTransportBase, CReadableTransport):
 	def setBufferSize(self, new_size):
 		if not self.__owner:
 			raise TTransportException(message="resize in buffer we don't own")
-		if new_size > len(self.__buffer):
-			self.__buffer.zfill(new_size - len(self.__buffer))
-		else:
-			self.__buffer[:] = self.__buffer[0:new_size]
+		self.__buffer.realloc(new_size)
 		self.__size = new_size
 		self.__rBase = min(self.__rBase, new_size)
 		self.__wBase = min(self.__wBase, new_size)
@@ -139,7 +183,7 @@ class IMemoryBuffer(TTransportBase, CReadableTransport):
 
 	def write(self, buf):
 		self._ensureCanWrite(len(buf))
-		old_wBase=self.__wBase
+		old_wBase = self.__wBase
 		self.__wBase = old_wBase + len(buf)
 		self.__buffer[old_wBase:self.__wBase] = buf
 
@@ -188,7 +232,7 @@ class IMemoryBuffer(TTransportBase, CReadableTransport):
 		self.__maxBufferSize = sys.maxsize
 
 		if buf is None and size != 0:
-			buf = bytearray(size)
+			buf = IBuffer(size)
 		self.__buffer = buf
 		self.__rBase = wPos
 		self.__wBase = wPos

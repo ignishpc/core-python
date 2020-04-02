@@ -1,0 +1,108 @@
+import logging
+import threading
+from ignis.executor.core.modules.IModule import IModule
+from thrift.TMultiplexedProcessor import TMultiplexedProcessor
+from thrift.server.TServer import TServer
+from thrift.transport.TSocket import TServerSocket
+from thrift.protocol.TCompactProtocol import TCompactProtocolFactory
+from ignis.executor.core.transport.IZlibTransport import IZlibTransportFactory
+from ignis.rpc.executor.server.IExecutorServerModule import Iface as IExecutorServerModuleIface, \
+	Processor as IExecutorServerModuleProcessor
+
+logger = logging.getLogger(__name__)
+
+
+class IThreadedServer(TServer):
+
+	def __init__(self, *args):
+		TServer.__init__(self, *args)
+		self.__stop = False
+		self.__clients = list()
+
+	def serve(self):
+		self.__stop = False
+		self.serverTransport.listen()
+		try:
+			while not self.__stop:
+				try:
+					client = self.serverTransport.accept()
+					self.__clients.append(client)
+					if not client:
+						continue
+					t = threading.Thread(target=self.handle, args=(client,))
+					t.setDaemon(True)
+					t.start()
+				except KeyboardInterrupt:
+					raise
+				except Exception as x:
+					if not self.__stop:
+						logger.exception(x)
+		finally:
+			self.stop()
+			self.serverTransport.close()
+
+	def handle(self, client):
+		trans = self.inputTransportFactory.getTransport(client)
+		prot = self.inputProtocolFactory.getProtocol(trans)
+
+		try:
+			while not self.__stop:
+				self.processor.process(prot, prot)
+		except Exception as x:
+			if not self.__stop:
+				logger.exception(x)
+
+		trans.close()
+
+	def stop(self):
+		for client in self.__clients:
+			self.__stop = True
+			client.close()
+
+
+class IExecutorServerModule(IModule, IExecutorServerModuleIface):
+
+	def __init__(self, executor_data):
+		IModule.__init__(self, executor_data)
+		self.__server = None
+		self.__processor = None
+
+	def serve(self, name, port, compression):
+		if not self.__server:
+			self.__processor = TMultiplexedProcessor()
+			self.__server = IThreadedServer(
+				self.__processor,
+				TServerSocket(host='127.0.0.1', port=port),
+				IZlibTransportFactory(compression),
+				TCompactProtocolFactory()
+			)
+
+			self.__processor.registerProcessor(name, IExecutorServerModuleProcessor(self))
+			logger.info("ServerModule: cpp executor started")
+			self.__server.serve()
+			logger.info("ServerModule: cpp executor stopped")
+			self.__server.stop()
+
+	def start(self, properties):
+		try:
+			self._executor_data.getContext().props.update(properties)
+			self._createServices(self.__processor)
+			logger.info("ServerModule: cpp executor ready")
+		except Exception as ex:
+			self._pack_exception(ex)
+
+	def stop(self):
+		try:
+			if self.__server:
+				self.__server.stop()
+		except Exception as ex:
+			self._pack_exception(ex)
+
+	def test(self):
+		try:
+			logger.info("ServerModule: test ok")
+		except Exception as ex:
+			self._pack_exception(ex)
+
+	def _createServices(self, processor):
+		pass

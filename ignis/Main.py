@@ -1,58 +1,52 @@
 import sys
 import logging
-from thrift.TMultiplexedProcessor import TMultiplexedProcessor
 from ignis.executor.core import ILog
 from ignis.executor.core.IExecutorData import IExecutorData
-from ignis.executor.core.modules.IFilesModule import IFilesModule, IFilesModuleRpc
-from ignis.executor.core.modules.IKeysModule import IKeysModule, IKeysModuleRpc
-from ignis.executor.core.modules.IMapperModule import IMapperModule, IMapperModuleRpc
-from ignis.executor.core.modules.IPostmanModule import IPostmanModule, IPostmanModuleRpc
-from ignis.executor.core.modules.IReducerModule import IReducerModule, IReducerModuleRpc
-from ignis.executor.core.modules.IServerModule import IServerModule, IServerModuleRpc
-from ignis.executor.core.modules.IShuffleModule import IShuffleModule, IShuffleModuleRpc
-from ignis.executor.core.modules.ISortModule import ISortModule, ISortModuleRpc
-from ignis.executor.core.modules.IStorageModule import IStorageModule, IStorageModuleRpc
+from ignis.executor.core.modules.ICacheContextModule import ICacheContextModule, ICacheContextModuleProcessor
+from ignis.executor.core.modules.ICommModule import ICommModule, ICommModuleProcessor
+from ignis.executor.core.modules.IExecutorServerModule import IExecutorServerModule, IExecutorServerModuleProcessor
+from ignis.executor.core.modules.IGeneralActionModule import IGeneralActionModule, IGeneralActionModuleProcessor
+from ignis.executor.core.modules.IGeneralModule import IGeneralModule, IGeneralModuleProcessor
+from ignis.executor.core.modules.IIOModule import IIOModule, IIOModuleProcessor
+from ignis.executor.core.modules.IMathModule import IMathModule, IMathModuleProcessor
 
 logger = logging.getLogger(__name__)
 
 
 def main(argv):
 	ILog.init()
-
-	processor = TMultiplexedProcessor()
-	executorData = IExecutorData()
-
-	files = IFilesModule(executorData)
-	processor.registerProcessor("files", IFilesModuleRpc.Processor(files))
-	keys = IKeysModule(executorData)
-	processor.registerProcessor("keys", IKeysModuleRpc.Processor(keys))
-	mapper = IMapperModule(executorData)
-	processor.registerProcessor("mapper", IMapperModuleRpc.Processor(mapper))
-	postman = IPostmanModule(executorData)
-	processor.registerProcessor("postman", IPostmanModuleRpc.Processor(postman))
-	reducer = IReducerModule(executorData)
-	processor.registerProcessor("reducer", IReducerModuleRpc.Processor(reducer))
-	server = IServerModule(executorData)
-	processor.registerProcessor("server", IServerModuleRpc.Processor(server))
-	shuffle = IShuffleModule(executorData)
-	processor.registerProcessor("shuffle", IShuffleModuleRpc.Processor(shuffle))
-	sort = ISortModule(executorData)
-	processor.registerProcessor("sort", ISortModuleRpc.Processor(sort))
-	storage = IStorageModule(executorData)
-	processor.registerProcessor("storage2", IStorageModuleRpc.Processor(storage))
-
-	if len(argv) == 1:
-		logging.error("Executor need a server port as argument")
+	if len(argv) < 3:
+		logging.error("Executor need a server port and compression as argument")
 		return 1
 	try:
-		port = int(sys.argv[1])
+		port = int(argv[1])
+		compression = int(argv[2])
 	except ValueError as ex:
-		logging.error("logging")
+		logging.error("Executor need a valid server port and compression")
 		return 1
 
-	server.start(processor, port)
-	return 0
+	class IExecutorServerModuleImpl(IExecutorServerModule):
 
+		def _createServices(self, processor):
+			cache_context = ICacheContextModule(executor_data)
+			processor.registerProcessor("ICacheContext", ICacheContextModuleProcessor(cache_context))
+			comm = ICommModule(executor_data)
+			processor.registerProcessor("IComm", ICommModuleProcessor(comm))
+			general_action = IGeneralActionModule(executor_data)
+			processor.registerProcessor("IGeneralActio", IGeneralActionModuleProcessor(general_action))
+			general = IGeneralModule(executor_data)
+			processor.registerProcessor("IGeneral", IGeneralModuleProcessor(general))
+			io = IIOModule(executor_data)
+			processor.registerProcessor("IIO", IIOModuleProcessor(io))
+			math = IMathModule(executor_data)
+			processor.registerProcessor("IMath", IMathModuleProcessor(math))
+
+
+	executor_data = IExecutorData()
+	server = IExecutorServerModuleImpl(executor_data)
+	server.serve("IExecutorServer", port, compression)
+
+	return 0
 
 if __name__ == '__main__':
 	sys.exit(main(sys.argv))
