@@ -18,3 +18,6 @@ class ILibraryLoader:
 
 	def unpickle(self, bytes):
 		return cloudpickle.loads(bytes)
+
+	def pickle(self, obj):
+		return cloudpickle.dumps(obj)

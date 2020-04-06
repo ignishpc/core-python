@@ -18,10 +18,13 @@ class IHeaderTransport(TTransportBase):
 		self.__trans.close()
 
 	def read(self, sz):
-		comsumed = min(len(self.__header) - self.__pos, sz)
+		consumed = min(len(self.__header) - self.__pos, sz)
 		old_pos = self.__pos
-		self.__pos += comsumed
+		self.__pos += consumed
 		if len(self.__header) - self.__pos == 0:
 			self.read = self.__trans.read
+			if consumed == 0:
+				return self.__trans.read(sz)
 		return self.__header[old_pos:self.__pos]
+
 

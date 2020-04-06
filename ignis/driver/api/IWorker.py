@@ -34,9 +34,9 @@ class IWorker:
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
 			raise IDriverException(ex.message, ex._cause)
 
-	def parallelize(self, data, partitions, src=None):
+	def parallelize(self, data, partitions, src=None, native=False):
 		try:
-			data_id = Ignis._driverContext().parallelize(data, partitions)
+			data_id = Ignis._driverContext().parallelize(data, partitions, native)
 			with Ignis._pool.getClient() as client:
 				if src is None:
 					return IDataFrame(client.getWorkerService().parallelize(self._id, data_id))

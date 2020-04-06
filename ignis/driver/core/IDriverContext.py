@@ -2,7 +2,7 @@
 
 class IDriverContext:
 
-	def parallelize(data, partitions):
+	def parallelize(data, partitions, native):
 		#TODO
 		pass
 

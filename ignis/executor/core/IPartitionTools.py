@@ -67,12 +67,18 @@ class IPartitionTools:
 		                      cls=self.__preferredClass())
 
 	def isMemory(self, part):
+		if isinstance(part, IPartitionGroup):
+			return len(part) > 0 and part[0] == IMemoryPartition.TYPE
 		return IMemoryPartition.TYPE == part.getType()
 
 	def isRawMemory(self, part):
+		if isinstance(part, IPartitionGroup):
+			return len(part) > 0 and part[0] == IRawMemoryPartition.TYPE
 		return IRawMemoryPartition.TYPE == part.getType()
 
 	def isDisk(self, part):
+		if isinstance(part, IPartitionGroup):
+			return len(part) > 0 and part[0] == IDiskPartition.TYPE
 		return IDiskPartition.TYPE == part.getType()
 
 	def createDirectoryIfNotExists(self, path):

@@ -25,7 +25,9 @@ class IDiskPartition(IRawPartition):
 			with open(self.__path + ".header", "rb") as file:
 				file_header = IFileObjectTransport(file)
 				zlib_header = IZlibTransport(file_header)
-				self._readHeader(zlib_header)
+				compatible, _ = self._readHeader(zlib_header)
+				if not compatible:
+					self._native = not self._native
 		else:
 			self.clear()
 
