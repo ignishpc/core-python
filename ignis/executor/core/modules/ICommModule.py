@@ -195,10 +195,7 @@ class ICommModule(IModule, ICommModuleIface):
 			self._pack_exception(ex)
 
 	def setPartitions2(self, partitions, src):
-		try:
-			self._use_source(src)
-		except Exception as ex:
-			self._pack_exception(ex)
+		self._use_source(src)
 		self.setPartitions(partitions)
 
 	def driverGather(self, id, src):

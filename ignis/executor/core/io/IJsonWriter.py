@@ -1,7 +1,8 @@
 import json
+import collections.abc
 
 
-class IJsonWriter(json.JSONEncoder):
+class __IJsonWriterAbs(type):
 	__types = dict()
 
 	@classmethod
@@ -16,13 +17,24 @@ class IJsonWriter(json.JSONEncoder):
 	def __delitem__(cls, key):
 		del cls.__types[key]
 
-	def __init__(self, pretty=False):
-		json.JSONEncoder.__init__(indent=4 if pretty else None)
-		self.__types = IJsonWriter.__types.copy()
+	@classmethod
+	def _getWriterType(cls, obj):
+		return cls.__types.get(type(obj), None)
+
+
+class IJsonWriter(json.JSONEncoder, metaclass=__IJsonWriterAbs):
 
 	def default(self, o):
-		writer = self.__types.get(type(o), None)
+		writer = IJsonWriter._getWriterType(o)
 		if writer:
-			return writer(self, o)
+			return writer(o)
+		elif isinstance(o, collections.abc.Iterable):
+			class StreamArray(list):
+				def __iter__(self):
+					return iter(o)
+
+				def __len__(self):
+					return 1
+			return StreamArray()
 		else:
 			return o.__dict__

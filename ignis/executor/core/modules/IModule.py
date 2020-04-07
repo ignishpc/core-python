@@ -18,4 +18,7 @@ class IModule:
 		raise IExecutorException(message=message, cause=cause)
 
 	def _use_source(self, src):
-		self._executor_data.loadLibrary(src).before(self._executor_data.getContext())
+		try:
+			self._executor_data.loadLibrary(src).before(self._executor_data.getContext())
+		except Exception as ex:
+			self._pack_exception(ex)

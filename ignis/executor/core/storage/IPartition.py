@@ -3,6 +3,9 @@ class IPartition:
 	def readIterator(self):
 		pass
 
+	def __iter__(self):
+		return self.readIterator()
+
 	def writeIterator(self):
 		pass
 

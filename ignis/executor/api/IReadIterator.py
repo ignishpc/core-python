@@ -6,9 +6,7 @@ class IReadIterator:
 	def hasNext(self):
 		raise NotImplementedError("not implemented")
 
-	def __iter__(self):
-		return self
-
 	def __next__(self):
 		if self.hasNext():
 			return self.next()
+		raise StopIteration

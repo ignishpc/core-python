@@ -1,10 +1,13 @@
 from ignis.executor.core.modules.IModule import IModule
 from ignis.rpc.executor.io.IIOModule import Iface as IIOModuleIface, Processor as IIOModuleProcessor
 from ignis.executor.core.storage import IDiskPartition
+from ignis.executor.core.io.IJsonWriter import IJsonWriter
+from ignis.executor.api.IJsonValue import IJsonValue
 from pathlib import Path
 import logging
 import os
 import math
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +19,7 @@ class IIOModule(IModule, IIOModuleIface):
 
 	def partitionCount(self):
 		try:
-			raise NotImplementedError()
+			return len(self._executor_data.getPartitions())
 		except Exception as ex:
 			self._pack_exception(ex)
 
@@ -93,51 +96,105 @@ class IIOModule(IModule, IIOModuleIface):
 				file_name = self.__partitionFileName(path, first + p)
 				with self.__openFileRead(file_name) as file:  # Only to check
 					pass
-				file = IDiskPartition(file_name, 0, True, True)
+				file = IDiskPartition(file_name, 0, False, True, True)
 				file.copyTo(group[p])
 			self._executor_data.setPartitions(group)
 		except Exception as ex:
 			self._pack_exception(ex)
 
 	def partitionObjectFile4(self, path, first, partitions, src):
-		try:
-			raise NotImplementedError()
-		except Exception as ex:
-			self._pack_exception(ex)
+		self._use_source(src)
+		self.partitionObjectFile(path, first, partitions)
 
 	def partitionTextFile(self, path, first, partitions):
 		try:
-			raise NotImplementedError()
+			logger.info("IO: reading partitions text file")
+			group = self._executor_data.getPartitionTools().newPartitionGroup()
+
+			for i in range(partitions):
+				with self.__openFileRead(self.__partitionFileName(path, first + i)) as file:
+					partition = self._executor_data.getPartitionTools().newPartition()
+					write_iterator = partition.writeIterator()
+					for line in file:
+						write_iterator.write(line)
+					group.add(partition)
 		except Exception as ex:
 			self._pack_exception(ex)
 
 	def partitionJsonFile4a(self, path, first, partitions, objectMapping):
 		try:
-			raise NotImplementedError()
+			logger.info("IO: reading partitions json file")
+			group = self._executor_data.getPartitionTools().newPartitionGroup()
+
+			for i in range(partitions):
+				with self.__openFileRead(self.__partitionFileName(path, first + i)) as file:
+					partition = self._executor_data.getPartitionTools().newPartition()
+					write_iterator = partition.writeIterator()
+					if objectMapping:
+						for elem in json.load(file):
+							write_iterator.write(elem)
+					else:
+						for elem in json.load(file):
+							write_iterator.write(IJsonValue(elem))
+
+				group.add(partition)
 		except Exception as ex:
 			self._pack_exception(ex)
 
 	def partitionJsonFile4b(self, path, first, partitions, src):
-		try:
-			raise NotImplementedError()
-		except Exception as ex:
-			self._pack_exception(ex)
+		self._use_source(src)
+		self.partitionJsonFile4a(self, path, first, partitions, objectMapping=True)
 
 	def saveAsObjectFile(self, path, compression, first):
 		try:
-			raise NotImplementedError()
+			logger.info("IO: saving as object file")
+			group = self._executor_data.getPartitions()
+			self._executor_data.deletePartitions()
+			native = self._executor_data.getProperties().nativeSerialization()
+
+			for i in range(len(group)):
+				file_name = self.__partitionFileName(path, first + i)
+				with self.__openFileWrite(file_name) as file:
+					pass  # Only to check
+				logger.info("IO: saving partition object file " + file_name)
+				save = IDiskPartition(file_name, compression, native, True)
+				group[i].copyTo(save)
+				save.sync()
 		except Exception as ex:
 			self._pack_exception(ex)
 
 	def saveAsTextFile(self, path, first):
 		try:
-			raise NotImplementedError()
+			logger.info("IO: saving as text file")
+			group = self._executor_data.getPartitions()
+			self._executor_data.deletePartitions()
+
+			for i in range(len(group)):
+				file_name = self.__partitionFileName(path, first + i)
+				with self.__openFileWrite(file_name) as file:
+					logger.info("IO: saving text file " + file_name)
+					for elem in group[i]:
+						file.write(elem.__repr__())
 		except Exception as ex:
 			self._pack_exception(ex)
 
 	def saveAsJsonFile(self, path, first, pretty):
 		try:
-			raise NotImplementedError()
+			logger.info("IO: saving as json file")
+			group = self._executor_data.getPartitions()
+			self._executor_data.deletePartitions()
+
+			for i in range(len(group)):
+				file_name = self.__partitionFileName(path, first + i)
+				with self.__openFileWrite(file_name + ".json") as file:
+					logger.info("IO: saving json file " + file_name)
+					json.dump(iter(group[i]), file, cls=IJsonWriter, indent=4 if pretty else None)
+
+			header = path + "/json"
+			with self.__openFileWrite(header) as file:
+				pass
+			st = IDiskPartition(header, 0, False, True)
+			st.sync()
 		except Exception as ex:
 			self._pack_exception(ex)
 
