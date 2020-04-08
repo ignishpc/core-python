@@ -4,7 +4,8 @@ import cloudpickle
 
 class ILibraryLoader:
 
-	def load(self, name):
+	@classmethod
+	def load(cls, name):
 		values = name.split(":")
 		if len(values) != 2:
 			raise NameError(name + " is not a valid python class")
@@ -16,8 +17,10 @@ class ILibraryLoader:
 		classObject = getattr(module, className)
 		return classObject()
 
-	def unpickle(self, bytes):
+	@classmethod
+	def unpickle(cls, bytes):
 		return cloudpickle.loads(bytes)
 
-	def pickle(self, obj):
-		return cloudpickle.dumps(obj)
+	@classmethod
+	def pickle(cls, src):
+		return cloudpickle.dumps(src)

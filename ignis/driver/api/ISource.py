@@ -2,6 +2,19 @@ import ignis.rpc.source.ttypes
 from ignis.executor.core.protocol.IObjectProtocol import IObjectProtocol
 from ignis.executor.core.transport.IMemoryBuffer import IMemoryBuffer
 from ignis.executor.core.ILibraryLoader import ILibraryLoader
+from types import FunctionType
+
+
+class _IFunctionLambda:
+
+	def __init__(self, f):
+		self.call = f
+
+	def before(self, context):
+		pass
+
+	def after(self, context):
+		pass
 
 
 class ISource:
@@ -10,8 +23,10 @@ class ISource:
 		self.__native = native
 		self.__inner = ignis.rpc.source.ttypes.ISource()
 		obj = ignis.rpc.source.ttypes.IEncoded()
-		if isinstance(self.__src, str):
+		if isinstance(src, str):
 			obj.name = self.__src
+		elif isinstance(src, FunctionType):
+			obj.bytes = ILibraryLoader.pickle(_IFunctionLambda(src))
 		else:
 			obj.bytes = ILibraryLoader.pickle(src)
 		self.__inner.obj = obj
