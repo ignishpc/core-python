@@ -25,10 +25,15 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('')
     print('Functions:')
     print('  void sample(bool withReplacement, double fraction, i32 seed)')
-    print('  void takeSample(bool withReplacement, double fraction, i32 seed)')
+    print('  void takeSample(bool withReplacement, i64 num, i32 seed)')
     print('  i64 count()')
-    print('  void max(ISource cmp)')
-    print('  void min(ISource cmp)')
+    print('  void max()')
+    print('  void min()')
+    print('  void max1(ISource cmp)')
+    print('  void min1(ISource cmp)')
+    print('  void sampleByKey(bool withReplacement, ISource fractions, i32 seed)')
+    print('  void countByKey()')
+    print('  void countByValue()')
     print('')
     sys.exit(0)
 
@@ -127,16 +132,46 @@ elif cmd == 'count':
     pp.pprint(client.count())
 
 elif cmd == 'max':
-    if len(args) != 1:
-        print('max requires 1 args')
+    if len(args) != 0:
+        print('max requires 0 args')
         sys.exit(1)
-    pp.pprint(client.max(eval(args[0]),))
+    pp.pprint(client.max())
 
 elif cmd == 'min':
-    if len(args) != 1:
-        print('min requires 1 args')
+    if len(args) != 0:
+        print('min requires 0 args')
         sys.exit(1)
-    pp.pprint(client.min(eval(args[0]),))
+    pp.pprint(client.min())
+
+elif cmd == 'max1':
+    if len(args) != 1:
+        print('max1 requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.max1(eval(args[0]),))
+
+elif cmd == 'min1':
+    if len(args) != 1:
+        print('min1 requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.min1(eval(args[0]),))
+
+elif cmd == 'sampleByKey':
+    if len(args) != 3:
+        print('sampleByKey requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.sampleByKey(eval(args[0]), eval(args[1]), eval(args[2]),))
+
+elif cmd == 'countByKey':
+    if len(args) != 0:
+        print('countByKey requires 0 args')
+        sys.exit(1)
+    pp.pprint(client.countByKey())
+
+elif cmd == 'countByValue':
+    if len(args) != 0:
+        print('countByValue requires 0 args')
+        sys.exit(1)
+    pp.pprint(client.countByValue())
 
 else:
     print('Unrecognized method %s' % cmd)

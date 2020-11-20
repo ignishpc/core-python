@@ -42,6 +42,9 @@ class IPropertyParser:
 	def jobDirectory(self):
 		return self.getString("ignis.job.directory")
 
+	def executorDirectory(self):
+		return self.getString("ignis.executor.directory")
+
 	# Auxiliary functions
 	def getString(self, key):
 		if key in self.__properties:

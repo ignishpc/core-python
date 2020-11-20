@@ -26,8 +26,14 @@ class INumpyWrapper:
 	def __getitem__(self, item):
 		return self.array.__getitem__(item)
 
+	def __setitem__(self, key, value):
+		self.array[key] = value
+
 	def __iter__(self):
 		return self.array.__iter__()
+
+	def __repr__(self):
+		return str(self.array)
 
 	def __add__(self, other):
 		new_elems = len(other)
@@ -40,7 +46,8 @@ class INumpyWrapper:
 		return self
 
 	def _resize(self, n):
-		self.array.resize(n, refcheck=False)
+		if n != len(self.array):
+			self.array.resize(n, refcheck=False)
 		self.__next = n
 
 	def bytes(self):
@@ -99,6 +106,7 @@ def enable():
 
 def disable():
 	del IWriter[numpy.ndarray]
+	del IWriter[INumpyWrapper]
 	del IWriter[numpy.bool_]
 	del IWriter[numpy.int8]
 	del IWriter[numpy.uint8]

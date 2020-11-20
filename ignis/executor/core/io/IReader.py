@@ -65,7 +65,7 @@ class IReaderType:
 
 IReader[IEnumTypes.I_VOID] = IReaderType(type(None), lambda protocol: None)
 IReader[IEnumTypes.I_BOOL] = IReaderType(bool, lambda protocol: protocol.readBool())
-IReader[IEnumTypes.I_I08] = IReaderType(int, lambda protocol: protocol.readByte())
+IReader[IEnumTypes.I_I08] = IReaderType(int, lambda protocol: protocol.readByte() + 128)
 IReader[IEnumTypes.I_I16] = IReaderType(int, lambda protocol: protocol.readI16())
 IReader[IEnumTypes.I_I32] = IReaderType(int, lambda protocol: protocol.readI32())
 IReader[IEnumTypes.I_I64] = IReaderType(int, lambda protocol: protocol.readI64())
@@ -111,7 +111,7 @@ def __readBinary(protocol):
 	obj = bytearray()
 	size = IReader._readSizeAux(protocol)
 	for i in range(0, size):
-		obj.append(protocol.readByte())
+		obj.append(protocol.readByte() + 128)
 	return obj
 
 

@@ -60,7 +60,24 @@ class Iface(object):
     def destroyGroups(self):
         pass
 
-    def getPartitions(self):
+    def getProtocol(self):
+        pass
+
+    def getPartitions(self, protocol):
+        """
+        Parameters:
+         - protocol
+
+        """
+        pass
+
+    def getPartitions2(self, protocol, minPartitions):
+        """
+        Parameters:
+         - protocol
+         - minPartitions
+
+        """
         pass
 
     def setPartitions(self, partitions):
@@ -98,20 +115,20 @@ class Iface(object):
         """
         pass
 
-    def driverScatter(self, id, dataId):
+    def driverScatter(self, id, partitions):
         """
         Parameters:
          - id
-         - dataId
+         - partitions
 
         """
         pass
 
-    def driverScatter3(self, id, dataId, src):
+    def driverScatter3(self, id, partitions, src):
         """
         Parameters:
          - id
-         - dataId
+         - partitions
          - src
 
         """
@@ -315,13 +332,47 @@ class Client(Iface):
             raise result.ex
         return
 
-    def getPartitions(self):
-        self.send_getPartitions()
+    def getProtocol(self):
+        self.send_getProtocol()
+        return self.recv_getProtocol()
+
+    def send_getProtocol(self):
+        self._oprot.writeMessageBegin('getProtocol', TMessageType.CALL, self._seqid)
+        args = getProtocol_args()
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_getProtocol(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = getProtocol_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.ex is not None:
+            raise result.ex
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "getProtocol failed: unknown result")
+
+    def getPartitions(self, protocol):
+        """
+        Parameters:
+         - protocol
+
+        """
+        self.send_getPartitions(protocol)
         return self.recv_getPartitions()
 
-    def send_getPartitions(self):
+    def send_getPartitions(self, protocol):
         self._oprot.writeMessageBegin('getPartitions', TMessageType.CALL, self._seqid)
         args = getPartitions_args()
+        args.protocol = protocol
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -342,6 +393,42 @@ class Client(Iface):
         if result.ex is not None:
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "getPartitions failed: unknown result")
+
+    def getPartitions2(self, protocol, minPartitions):
+        """
+        Parameters:
+         - protocol
+         - minPartitions
+
+        """
+        self.send_getPartitions2(protocol, minPartitions)
+        return self.recv_getPartitions2()
+
+    def send_getPartitions2(self, protocol, minPartitions):
+        self._oprot.writeMessageBegin('getPartitions2', TMessageType.CALL, self._seqid)
+        args = getPartitions2_args()
+        args.protocol = protocol
+        args.minPartitions = minPartitions
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_getPartitions2(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = getPartitions2_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.ex is not None:
+            raise result.ex
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "getPartitions2 failed: unknown result")
 
     def setPartitions(self, partitions):
         """
@@ -477,21 +564,21 @@ class Client(Iface):
             raise result.ex
         return
 
-    def driverScatter(self, id, dataId):
+    def driverScatter(self, id, partitions):
         """
         Parameters:
          - id
-         - dataId
+         - partitions
 
         """
-        self.send_driverScatter(id, dataId)
+        self.send_driverScatter(id, partitions)
         self.recv_driverScatter()
 
-    def send_driverScatter(self, id, dataId):
+    def send_driverScatter(self, id, partitions):
         self._oprot.writeMessageBegin('driverScatter', TMessageType.CALL, self._seqid)
         args = driverScatter_args()
         args.id = id
-        args.dataId = dataId
+        args.partitions = partitions
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -511,22 +598,22 @@ class Client(Iface):
             raise result.ex
         return
 
-    def driverScatter3(self, id, dataId, src):
+    def driverScatter3(self, id, partitions, src):
         """
         Parameters:
          - id
-         - dataId
+         - partitions
          - src
 
         """
-        self.send_driverScatter3(id, dataId, src)
+        self.send_driverScatter3(id, partitions, src)
         self.recv_driverScatter3()
 
-    def send_driverScatter3(self, id, dataId, src):
+    def send_driverScatter3(self, id, partitions, src):
         self._oprot.writeMessageBegin('driverScatter3', TMessageType.CALL, self._seqid)
         args = driverScatter3_args()
         args.id = id
-        args.dataId = dataId
+        args.partitions = partitions
         args.src = src
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
@@ -558,7 +645,9 @@ class Processor(Iface, TProcessor):
         self._processMap["hasGroup"] = Processor.process_hasGroup
         self._processMap["destroyGroup"] = Processor.process_destroyGroup
         self._processMap["destroyGroups"] = Processor.process_destroyGroups
+        self._processMap["getProtocol"] = Processor.process_getProtocol
         self._processMap["getPartitions"] = Processor.process_getPartitions
+        self._processMap["getPartitions2"] = Processor.process_getPartitions2
         self._processMap["setPartitions"] = Processor.process_setPartitions
         self._processMap["setPartitions2"] = Processor.process_setPartitions2
         self._processMap["driverGather"] = Processor.process_driverGather
@@ -743,13 +832,39 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
+    def process_getProtocol(self, seqid, iprot, oprot):
+        args = getProtocol_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = getProtocol_result()
+        try:
+            result.success = self._handler.getProtocol()
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("getProtocol", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
     def process_getPartitions(self, seqid, iprot, oprot):
         args = getPartitions_args()
         args.read(iprot)
         iprot.readMessageEnd()
         result = getPartitions_result()
         try:
-            result.success = self._handler.getPartitions()
+            result.success = self._handler.getPartitions(args.protocol)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -765,6 +880,32 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
         oprot.writeMessageBegin("getPartitions", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_getPartitions2(self, seqid, iprot, oprot):
+        args = getPartitions2_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = getPartitions2_result()
+        try:
+            result.success = self._handler.getPartitions2(args.protocol, args.minPartitions)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("getPartitions2", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -879,7 +1020,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = driverScatter_result()
         try:
-            self._handler.driverScatter(args.id, args.dataId)
+            self._handler.driverScatter(args.id, args.partitions)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -905,7 +1046,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = driverScatter3_result()
         try:
-            self._handler.driverScatter3(args.id, args.dataId, args.src)
+            self._handler.driverScatter3(args.id, args.partitions, args.src)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -1698,7 +1839,7 @@ destroyGroups_result.thrift_spec = (
 )
 
 
-class getPartitions_args(object):
+class getProtocol_args(object):
 
 
     def read(self, iprot):
@@ -1719,7 +1860,141 @@ class getPartitions_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
+        oprot.writeStructBegin('getProtocol_args')
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(getProtocol_args)
+getProtocol_args.thrift_spec = (
+)
+
+
+class getProtocol_result(object):
+    """
+    Attributes:
+     - success
+     - ex
+
+    """
+
+
+    def __init__(self, success=None, ex=None,):
+        self.success = success
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.BYTE:
+                    self.success = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('getProtocol_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.BYTE, 0)
+            oprot.writeByte(self.success)
+            oprot.writeFieldEnd()
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(getProtocol_result)
+getProtocol_result.thrift_spec = (
+    (0, TType.BYTE, 'success', None, None, ),  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class getPartitions_args(object):
+    """
+    Attributes:
+     - protocol
+
+    """
+
+
+    def __init__(self, protocol=None,):
+        self.protocol = protocol
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.BYTE:
+                    self.protocol = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
         oprot.writeStructBegin('getPartitions_args')
+        if self.protocol is not None:
+            oprot.writeFieldBegin('protocol', TType.BYTE, 1)
+            oprot.writeByte(self.protocol)
+            oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
@@ -1738,6 +2013,8 @@ class getPartitions_args(object):
         return not (self == other)
 all_structs.append(getPartitions_args)
 getPartitions_args.thrift_spec = (
+    None,  # 0
+    (1, TType.BYTE, 'protocol', None, None, ),  # 1
 )
 
 
@@ -1823,6 +2100,162 @@ getPartitions_result.thrift_spec = (
 )
 
 
+class getPartitions2_args(object):
+    """
+    Attributes:
+     - protocol
+     - minPartitions
+
+    """
+
+
+    def __init__(self, protocol=None, minPartitions=None,):
+        self.protocol = protocol
+        self.minPartitions = minPartitions
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.BYTE:
+                    self.protocol = iprot.readByte()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I64:
+                    self.minPartitions = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('getPartitions2_args')
+        if self.protocol is not None:
+            oprot.writeFieldBegin('protocol', TType.BYTE, 1)
+            oprot.writeByte(self.protocol)
+            oprot.writeFieldEnd()
+        if self.minPartitions is not None:
+            oprot.writeFieldBegin('minPartitions', TType.I64, 2)
+            oprot.writeI64(self.minPartitions)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(getPartitions2_args)
+getPartitions2_args.thrift_spec = (
+    None,  # 0
+    (1, TType.BYTE, 'protocol', None, None, ),  # 1
+    (2, TType.I64, 'minPartitions', None, None, ),  # 2
+)
+
+
+class getPartitions2_result(object):
+    """
+    Attributes:
+     - success
+     - ex
+
+    """
+
+
+    def __init__(self, success=None, ex=None,):
+        self.success = success
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.LIST:
+                    self.success = []
+                    (_etype10, _size7) = iprot.readListBegin()
+                    for _i11 in range(_size7):
+                        _elem12 = iprot.readBinary()
+                        self.success.append(_elem12)
+                    iprot.readListEnd()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('getPartitions2_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.LIST, 0)
+            oprot.writeListBegin(TType.STRING, len(self.success))
+            for iter13 in self.success:
+                oprot.writeBinary(iter13)
+            oprot.writeListEnd()
+            oprot.writeFieldEnd()
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(getPartitions2_result)
+getPartitions2_result.thrift_spec = (
+    (0, TType.LIST, 'success', (TType.STRING, 'BINARY', False), None, ),  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
 class setPartitions_args(object):
     """
     Attributes:
@@ -1846,10 +2279,10 @@ class setPartitions_args(object):
             if fid == 1:
                 if ftype == TType.LIST:
                     self.partitions = []
-                    (_etype10, _size7) = iprot.readListBegin()
-                    for _i11 in range(_size7):
-                        _elem12 = iprot.readBinary()
-                        self.partitions.append(_elem12)
+                    (_etype17, _size14) = iprot.readListBegin()
+                    for _i18 in range(_size14):
+                        _elem19 = iprot.readBinary()
+                        self.partitions.append(_elem19)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -1866,8 +2299,8 @@ class setPartitions_args(object):
         if self.partitions is not None:
             oprot.writeFieldBegin('partitions', TType.LIST, 1)
             oprot.writeListBegin(TType.STRING, len(self.partitions))
-            for iter13 in self.partitions:
-                oprot.writeBinary(iter13)
+            for iter20 in self.partitions:
+                oprot.writeBinary(iter20)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -1981,10 +2414,10 @@ class setPartitions2_args(object):
             if fid == 1:
                 if ftype == TType.LIST:
                     self.partitions = []
-                    (_etype17, _size14) = iprot.readListBegin()
-                    for _i18 in range(_size14):
-                        _elem19 = iprot.readBinary()
-                        self.partitions.append(_elem19)
+                    (_etype24, _size21) = iprot.readListBegin()
+                    for _i25 in range(_size21):
+                        _elem26 = iprot.readBinary()
+                        self.partitions.append(_elem26)
                     iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
@@ -2007,8 +2440,8 @@ class setPartitions2_args(object):
         if self.partitions is not None:
             oprot.writeFieldBegin('partitions', TType.LIST, 1)
             oprot.writeListBegin(TType.STRING, len(self.partitions))
-            for iter20 in self.partitions:
-                oprot.writeBinary(iter20)
+            for iter27 in self.partitions:
+                oprot.writeBinary(iter27)
             oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.src is not None:
@@ -2382,14 +2815,14 @@ class driverScatter_args(object):
     """
     Attributes:
      - id
-     - dataId
+     - partitions
 
     """
 
 
-    def __init__(self, id=None, dataId=None,):
+    def __init__(self, id=None, partitions=None,):
         self.id = id
-        self.dataId = dataId
+        self.partitions = partitions
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -2407,7 +2840,7 @@ class driverScatter_args(object):
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.I64:
-                    self.dataId = iprot.readI64()
+                    self.partitions = iprot.readI64()
                 else:
                     iprot.skip(ftype)
             else:
@@ -2424,9 +2857,9 @@ class driverScatter_args(object):
             oprot.writeFieldBegin('id', TType.STRING, 1)
             oprot.writeString(self.id.encode('utf-8') if sys.version_info[0] == 2 else self.id)
             oprot.writeFieldEnd()
-        if self.dataId is not None:
-            oprot.writeFieldBegin('dataId', TType.I64, 2)
-            oprot.writeI64(self.dataId)
+        if self.partitions is not None:
+            oprot.writeFieldBegin('partitions', TType.I64, 2)
+            oprot.writeI64(self.partitions)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -2448,7 +2881,7 @@ all_structs.append(driverScatter_args)
 driverScatter_args.thrift_spec = (
     None,  # 0
     (1, TType.STRING, 'id', 'UTF8', None, ),  # 1
-    (2, TType.I64, 'dataId', None, None, ),  # 2
+    (2, TType.I64, 'partitions', None, None, ),  # 2
 )
 
 
@@ -2519,15 +2952,15 @@ class driverScatter3_args(object):
     """
     Attributes:
      - id
-     - dataId
+     - partitions
      - src
 
     """
 
 
-    def __init__(self, id=None, dataId=None, src=None,):
+    def __init__(self, id=None, partitions=None, src=None,):
         self.id = id
-        self.dataId = dataId
+        self.partitions = partitions
         self.src = src
 
     def read(self, iprot):
@@ -2546,7 +2979,7 @@ class driverScatter3_args(object):
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.I64:
-                    self.dataId = iprot.readI64()
+                    self.partitions = iprot.readI64()
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
@@ -2569,9 +3002,9 @@ class driverScatter3_args(object):
             oprot.writeFieldBegin('id', TType.STRING, 1)
             oprot.writeString(self.id.encode('utf-8') if sys.version_info[0] == 2 else self.id)
             oprot.writeFieldEnd()
-        if self.dataId is not None:
-            oprot.writeFieldBegin('dataId', TType.I64, 2)
-            oprot.writeI64(self.dataId)
+        if self.partitions is not None:
+            oprot.writeFieldBegin('partitions', TType.I64, 2)
+            oprot.writeI64(self.partitions)
             oprot.writeFieldEnd()
         if self.src is not None:
             oprot.writeFieldBegin('src', TType.STRUCT, 3)
@@ -2597,7 +3030,7 @@ all_structs.append(driverScatter3_args)
 driverScatter3_args.thrift_spec = (
     None,  # 0
     (1, TType.STRING, 'id', 'UTF8', None, ),  # 1
-    (2, TType.I64, 'dataId', None, None, ),  # 2
+    (2, TType.I64, 'partitions', None, None, ),  # 2
     (3, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 3
 )
 

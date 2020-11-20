@@ -1,26 +1,33 @@
-import unittest
-import coverage
 import os
 import sys
-import ignis.executor.core.ILog as Ilog
-from mpi4py import MPI
+import unittest
 from pathlib import Path
+
+import coverage
+from mpi4py import MPI
 
 
 def main(path, parallel):
-	tests = unittest.TestLoader().discover(path + '/executor/core/storage', pattern='*Test.py')
-	if parallel:
-		tests.addTests(unittest.TestLoader().discover(path + '/executor/core', pattern='IMpiTestParallel.py'))
-	else:
-		print("WARNING: mpi test skipped", sys.stderr)
 	cov = coverage.coverage(
 		branch=True,
-		include=str(Path(path).parent) + '/ignis/*.py',
+		include=str(Path(path).parent) + '/ignis/executor/*.py',
 	)
 	cov.start()
-	result = unittest.TextTestRunner(verbosity=2).run(tests)
+	import ignis.executor.core.ILog as Ilog
+	Ilog.enable(False)
+	tests = unittest.TestLoader().discover(path + '/executor/core/storage', pattern='*Test.py')
+	if parallel:
+		tests.addTests(unittest.TestLoader().discover(path + '/executor/core', pattern='IMpiTest2.py'))
+	else:
+		print("WARNING: mpi test skipped", file=sys.stderr)
+	result = unittest.TextTestRunner(verbosity=2, failfast=True).run(tests)
 	cov.stop()
-	if result.wasSuccessful() and result.testsRun > 0:
+	cov.save()
+	MPI.COMM_WORLD.Barrier()
+	if result.wasSuccessful() and result.testsRun > 0 and MPI.COMM_WORLD.Get_rank() == 0:
+		if parallel:
+			others = ["../np" + str(i) + "/.coverage" for i in range(1, MPI.COMM_WORLD.Get_size())]
+			cov.combine(data_paths=others, strict=True)
 		covdir = os.path.join(os.getcwd(), "ignis-python-coverage")
 		print('Coverage: (HTML version: file://%s/index.html)' % covdir, file=sys.stderr)
 		cov.report(file=sys.stderr)
@@ -28,7 +35,6 @@ def main(path, parallel):
 
 
 if __name__ == '__main__':
-	Ilog.enable(False)
 	rank = MPI.COMM_WORLD.Get_rank()
 	parallel = MPI.COMM_WORLD.Get_size() > 1
 	path = os.getcwd()

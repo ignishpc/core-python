@@ -8,6 +8,8 @@ from ignis.executor.core.io.INativeReader import INativeReader
 
 
 class IObjectProtocol(TCompactProtocol):
+	IGNIS_PROTOCOL = 0
+	PYTHON_PROTOCOL = 2
 
 	def __init__(self, trans):
 		TCompactProtocol.__init__(self, trans)
@@ -78,15 +80,15 @@ class IObjectProtocol(TCompactProtocol):
 
 	def readSerialization(self):
 		id = self.readByte()
-		if id == 0:
+		if id == IObjectProtocol.IGNIS_PROTOCOL:
 			return False
-		elif id == 1:
+		elif id == IObjectProtocol.PYTHON_PROTOCOL:
 			return True
 		else:
 			raise TypeError("Serialization is not compatible with Python")
 
 	def writeSerialization(self, native):
 		if native:
-			self.writeByte(1)
+			self.writeByte(IObjectProtocol.PYTHON_PROTOCOL)
 		else:
-			self.writeByte(0)
+			self.writeByte(IObjectProtocol.IGNIS_PROTOCOL)

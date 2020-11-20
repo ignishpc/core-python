@@ -29,7 +29,8 @@ class IDiskPartitionTestAbs(IPartitionTest, ABC):
 		self._writeIterator(elems, part)
 		part.persist(True)
 		part.sync()
-		part = IDiskPartition(native=False, path=path, compression=6, persist=False, read=True)
+		del part
+		part = IDiskPartition(native=False, path=path, compression=6, persist=True, read=True)
 		self.assertEqual(len(elems), len(part))
 		result = self._readIterator(part)
 		self.assert_(elems == result)

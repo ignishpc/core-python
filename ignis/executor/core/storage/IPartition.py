@@ -36,6 +36,12 @@ class IPartition:
 	def __len__(self):
 		return self.size()
 
+	def empty(self):
+		return self.size() == 0
+
+	def __nonzero__(self):
+		return self.size() != 0
+
 	def bytes(self):
 		pass
 
@@ -72,6 +78,12 @@ class IPartitionGroup:
 
 	def __len__(self):
 		return self.__partitions.__len__()
+
+	def empty(self):
+		return self.size() == 0
+
+	def __nonzero__(self):
+		return self.size() != 0
 
 	def add(self, partition):
 		self.__partitions.append(partition)

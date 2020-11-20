@@ -1,5 +1,20 @@
-from ignis.executor.core.storage import IMemoryPartition, IRawMemoryPartition, IDiskPartition, IPartitionGroup
+import logging
+import os
+import shutil
 from pathlib import Path
+
+from ignis.executor.core.storage import IMemoryPartition, IRawMemoryPartition, IDiskPartition, IPartitionGroup
+
+logger = logging.getLogger(__name__)
+
+
+def _newNumpyMemoryPartition(sz, native, dtype):
+	from ignis.executor.core.io.INumpy import INumpyWrapper as Wrapper
+	class INumpyWrapper(Wrapper):
+		def __init__(self):
+			Wrapper.__init__(self, sz, dtype)
+
+	return IMemoryPartition(native=native, cls=INumpyWrapper)
 
 
 class IPartitionTools:
@@ -12,8 +27,19 @@ class IPartitionTools:
 	def __preferredClass(self):
 		return self.__context.vars().get('STORAGE_CLASS', list)
 
-	def newPartition(self, other=None):
-		partitionType = self.__properties.partitionType()
+	def swap(self, p1, p2):
+		p1.__dict__, p2.__dict__ = p2.__dict__, p1.__dict__
+
+	def newPartition(self, tp=None):
+		if isinstance(tp, str):
+			partitionType = tp
+			other = None
+		else:
+			other = tp
+			partitionType = self.__properties.partitionType()
+
+		if partitionType is None:
+			partitionType = self.__properties.partitionType()
 		if partitionType == IMemoryPartition.TYPE:
 			return self.newMemoryPartition(other.size()) if other else self.newMemoryPartition()
 		elif partitionType == IRawMemoryPartition.TYPE:
@@ -33,13 +59,23 @@ class IPartitionTools:
 				group.add(self.newPartition(p))
 		return group
 
-	def newMemoryPartition(self, elems=1000):
+	def newMemoryPartition(self, elems=1000, cls=None):
+		if cls is not None:
+			return IMemoryPartition(native=self.__properties.nativeSerialization(),
+			                        cls=cls)
 		if self.__preferredClass().__name__ == 'ndarray':
-			return self.__newNumpyMemoryPartition(elems,
-			                                      self.__properties.nativeSerialization(),
-			                                      self.__context.vars()['STORAGE_CLASS_DTYPE'])
+			return _newNumpyMemoryPartition(elems,
+			                                self.__properties.nativeSerialization(),
+			                                self.__context.vars()['STORAGE_CLASS_DTYPE'])
 		return IMemoryPartition(native=self.__properties.nativeSerialization(),
 		                        cls=self.__preferredClass())
+
+	def newNumpyMemoryPartition(self, dtype, elems=1000):
+		return _newNumpyMemoryPartition(elems, self.__properties.nativeSerialization(), dtype)
+
+	def newBytearrayMemoryPartition(self, elems=1000):
+		return IMemoryPartition(native=self.__properties.nativeSerialization(),
+		                        cls=bytearray)
 
 	def newRawMemoryPartition(self, sz=10 * 1024 * 1024):
 		return IRawMemoryPartition(bytes=sz,
@@ -47,8 +83,8 @@ class IPartitionTools:
 		                           native=self.__properties.nativeSerialization(),
 		                           cls=self.__preferredClass())
 
-	def newDiskPartition(self, name='', persist=False, read=False):
-		path = self.__properties.jobDirectory() + "/partitions"
+	def __diskPath(self, name):
+		path = self.__properties.executorDirectory() + "/partitions"
 		self.createDirectoryIfNotExists(path)
 		if name == '':
 			path += "/partition"
@@ -58,12 +94,38 @@ class IPartitionTools:
 			self.__partition_id_gen += 1
 		else:
 			path += '/' + name
+		return path
+
+	def newDiskPartition(self, name='', persist=False, read=False):
+		path = self.__diskPath(name)
 
 		return IDiskPartition(path=path,
 		                      compression=self.__properties.partitionCompression(),
 		                      native=self.__properties.nativeSerialization(),
 		                      persist=persist,
 		                      read=read,
+		                      cls=self.__preferredClass())
+
+	def copyDiskPartition(self, path, name="", persist=False):
+		cmp = self.__properties.partitionCompression()
+		newPath = self.__diskPath(name)
+		if os.path.exists(newPath):
+			os.remove(newPath)
+		if os.path.exists(newPath + ".header"):
+			os.remove(newPath + ".header")
+		try:
+			os.link(path, newPath)
+			os.link(path + ".header", newPath + ".header")
+		except NotImplementedError as ex:
+			logger.warning("current file system not support hard links, disk partitions will be copied")
+			shutil.copy(path, newPath)
+			shutil.copy(path + ".header", newPath + ".header")
+
+		return IDiskPartition(path=newPath,
+		                      compression=cmp,
+		                      native=self.__properties.nativeSerialization(),
+		                      persist=persist,
+		                      read=True,
 		                      cls=self.__preferredClass())
 
 	def isMemory(self, part):
@@ -83,13 +145,3 @@ class IPartitionTools:
 
 	def createDirectoryIfNotExists(self, path):
 		Path(path).mkdir(parents=True, exist_ok=True)
-
-	@classmethod
-	def __newNumpyMemoryPartition(cls, sz, native, dtype):
-		from ignis.executor.core.io.INumpy import INumpyWrapper
-		class INumpyWrapperCl(INumpyWrapper):
-			def __init__(self):
-				INumpyWrapper.__init__(self, sz, dtype)
-				self.__class__ = INumpyWrapper
-
-		return IMemoryPartition(native=native, cls=INumpyWrapperCl)

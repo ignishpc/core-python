@@ -42,9 +42,15 @@ class ICacheContextModule(IModule, ICacheContextModuleIface):
 		except Exception as ex:
 			self._pack_exception(ex)
 
+	def clearContext(self):
+		try:
+			self._executor_data.deletePartitions()
+			self._executor_data.clearVariables()
+		except Exception as ex:
+			self._pack_exception(ex)
+
 	def loadContext(self, id):
 		try:
-			self._executor_data.clearVariables()
 			value = self.__context.get(id, None)
 			if value and value == self._executor_data.getPartitions():
 				del self.__context.get[id]

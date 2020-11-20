@@ -1,10 +1,11 @@
-from ignis.executor.core.storage.IRawPartition import IRawPartition
-from ignis.executor.core.transport.IZlibTransport import IZlibTransport
-from ignis.executor.core.transport.IMemoryBuffer import IMemoryBuffer
+import os
+
 from ignis.executor.core.protocol.IObjectProtocol import IObjectProtocol
+from ignis.executor.core.storage.IRawPartition import IRawPartition
 from ignis.executor.core.transport.IFileObjectTransport import IFileObjectTransport
 from ignis.executor.core.transport.IHeaderTransport import IHeaderTransport
-import os
+from ignis.executor.core.transport.IMemoryBuffer import IMemoryBuffer
+from ignis.executor.core.transport.IZlibTransport import IZlibTransport
 
 
 class IDiskPartition(IRawPartition):
@@ -67,7 +68,7 @@ class IDiskPartition(IRawPartition):
 		try:
 			os.rename(self.__path, new_path)
 			if os.path.exists(self.__path + ".header"):
-				os.remove(self.__path + ".header")
+				os.rename(self.__path + ".header", new_path + ".header")
 			self.__path = new_path
 		except OSError as ex:
 			error = ValueError("error: " + new_path + " is not a valid storage name, " + str(ex))

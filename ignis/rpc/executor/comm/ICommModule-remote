@@ -30,13 +30,15 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  bool hasGroup(string id)')
     print('  void destroyGroup(string id)')
     print('  void destroyGroups()')
-    print('   getPartitions()')
+    print('  i8 getProtocol()')
+    print('   getPartitions(i8 protocol)')
+    print('   getPartitions2(i8 protocol, i64 minPartitions)')
     print('  void setPartitions( partitions)')
     print('  void setPartitions2( partitions, ISource src)')
     print('  void driverGather(string id, ISource src)')
     print('  void driverGather0(string id, ISource src)')
-    print('  void driverScatter(string id, i64 dataId)')
-    print('  void driverScatter3(string id, i64 dataId, ISource src)')
+    print('  void driverScatter(string id, i64 partitions)')
+    print('  void driverScatter3(string id, i64 partitions, ISource src)')
     print('')
     sys.exit(0)
 
@@ -152,11 +154,23 @@ elif cmd == 'destroyGroups':
         sys.exit(1)
     pp.pprint(client.destroyGroups())
 
-elif cmd == 'getPartitions':
+elif cmd == 'getProtocol':
     if len(args) != 0:
-        print('getPartitions requires 0 args')
+        print('getProtocol requires 0 args')
         sys.exit(1)
-    pp.pprint(client.getPartitions())
+    pp.pprint(client.getProtocol())
+
+elif cmd == 'getPartitions':
+    if len(args) != 1:
+        print('getPartitions requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.getPartitions(eval(args[0]),))
+
+elif cmd == 'getPartitions2':
+    if len(args) != 2:
+        print('getPartitions2 requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.getPartitions2(eval(args[0]), eval(args[1]),))
 
 elif cmd == 'setPartitions':
     if len(args) != 1:

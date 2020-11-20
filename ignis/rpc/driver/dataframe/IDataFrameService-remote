@@ -38,9 +38,11 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  IDataFrameId map_(IDataFrameId id, ISource src)')
     print('  IDataFrameId filter(IDataFrameId id, ISource src)')
     print('  IDataFrameId flatmap(IDataFrameId id, ISource src)')
+    print('  IDataFrameId keyBy(IDataFrameId id, ISource src)')
     print('  IDataFrameId mapPartitions(IDataFrameId id, ISource src, bool preservesPartitioning)')
     print('  IDataFrameId mapPartitionsWithIndex(IDataFrameId id, ISource src, bool preservesPartitioning)')
-    print('  IDataFrameId applyPartition(IDataFrameId id, ISource src)')
+    print('  IDataFrameId mapExecutor(IDataFrameId id, ISource src)')
+    print('  IDataFrameId mapExecutorTo(IDataFrameId id, ISource src)')
     print('  IDataFrameId groupBy(IDataFrameId id, ISource src)')
     print('  IDataFrameId groupBy2(IDataFrameId id, ISource src, i64 numPartitions)')
     print('  IDataFrameId sort(IDataFrameId id, bool ascending)')
@@ -49,22 +51,46 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  IDataFrameId sortBy3(IDataFrameId id, ISource src, bool ascending, i64 numPartitions)')
     print('  i64 reduce(IDataFrameId id, ISource src, ISource tp)')
     print('  i64 treeReduce(IDataFrameId id, ISource src, ISource tp)')
-    print('  i64 treeReduce4(IDataFrameId id, ISource src, i64 depth, ISource tp)')
     print('  i64 collect(IDataFrameId id, ISource tp)')
-    print('  i64 aggregate(IDataFrameId id, ISource seqOp, ISource combOp, ISource tp)')
-    print('  i64 treeAggregate(IDataFrameId id, ISource seqOp, ISource combOp, ISource tp)')
-    print('  i64 treeAggregate5(IDataFrameId id, ISource seqOp, ISource combOp, i64 depth, ISource tp)')
-    print('  i64 fold(IDataFrameId id, ISource src, ISource tp)')
+    print('  i64 aggregate(IDataFrameId id, ISource zero, ISource seqOp, ISource combOp, ISource tp)')
+    print('  i64 treeAggregate(IDataFrameId id, ISource zero, ISource seqOp, ISource combOp, ISource tp)')
+    print('  i64 fold(IDataFrameId id, ISource zero, ISource src, ISource tp)')
+    print('  i64 treeFold(IDataFrameId id, ISource zero, ISource src, ISource tp)')
     print('  i64 take(IDataFrameId id, i64 num, ISource tp)')
     print('  void foreach_(IDataFrameId id, ISource src)')
     print('  void foreachPartition(IDataFrameId id, ISource src)')
     print('  i64 top(IDataFrameId id, i64 num, ISource tp)')
     print('  i64 top4(IDataFrameId id, i64 num, ISource cmp, ISource tp)')
+    print('  i64 takeOrdered(IDataFrameId id, i64 num, ISource tp)')
+    print('  i64 takeOrdered4(IDataFrameId id, i64 num, ISource cmp, ISource tp)')
     print('  IDataFrameId sample(IDataFrameId id, bool withReplacement, double fraction, i32 seed)')
     print('  i64 takeSample(IDataFrameId id, bool withReplacement, i64 num, i32 seed, ISource tp)')
     print('  i64 count(IDataFrameId id)')
-    print('  i64 max(IDataFrameId id, ISource cmp, ISource tp)')
-    print('  i64 min(IDataFrameId id, ISource cmp, ISource tp)')
+    print('  i64 max(IDataFrameId id, ISource tp)')
+    print('  i64 max3(IDataFrameId id, ISource cmp, ISource tp)')
+    print('  i64 min(IDataFrameId id, ISource tp)')
+    print('  i64 min3(IDataFrameId id, ISource cmp, ISource tp)')
+    print('  IDataFrameId flatMapValues(IDataFrameId id, ISource src)')
+    print('  IDataFrameId mapValues(IDataFrameId id, ISource src)')
+    print('  IDataFrameId groupByKey(IDataFrameId id)')
+    print('  IDataFrameId groupByKey2(IDataFrameId id, i64 numPartitions)')
+    print('  IDataFrameId reduceByKey(IDataFrameId id, ISource src, bool localReduce)')
+    print('  IDataFrameId reduceByKey4(IDataFrameId id, ISource src, i64 numPartitions, bool localReduce)')
+    print('  IDataFrameId aggregateByKey(IDataFrameId id, ISource zero, ISource seqOp)')
+    print('  IDataFrameId aggregateByKey4a(IDataFrameId id, ISource zero, ISource seqOp, i64 numPartitions)')
+    print('  IDataFrameId aggregateByKey4b(IDataFrameId id, ISource zero, ISource seqOp, ISource combOp)')
+    print('  IDataFrameId aggregateByKey5(IDataFrameId id, ISource zero, ISource seqOp, ISource combOp, i64 numPartitions)')
+    print('  IDataFrameId foldByKey(IDataFrameId id, ISource zero, ISource src, bool localFold)')
+    print('  IDataFrameId foldByKey5(IDataFrameId id, ISource zero, ISource src, i64 numPartitions, bool localFold)')
+    print('  IDataFrameId sortByKey(IDataFrameId id, bool ascending)')
+    print('  IDataFrameId sortByKey3a(IDataFrameId id, bool ascending, i64 numPartitions)')
+    print('  IDataFrameId sortByKey3b(IDataFrameId id, ISource src, bool ascending)')
+    print('  IDataFrameId sortByKey4(IDataFrameId id, ISource src, bool ascending, i64 numPartitions)')
+    print('  i64 keys(IDataFrameId id, ISource tp)')
+    print('  i64 values(IDataFrameId id, ISource tp)')
+    print('  IDataFrameId sampleByKey(IDataFrameId id, bool withReplacement, ISource fractions, i32 seed)')
+    print('  i64 countByKey(IDataFrameId id)')
+    print('  i64 countByValue(IDataFrameId id)')
     print('')
     sys.exit(0)
 
@@ -228,6 +254,12 @@ elif cmd == 'flatmap':
         sys.exit(1)
     pp.pprint(client.flatmap(eval(args[0]), eval(args[1]),))
 
+elif cmd == 'keyBy':
+    if len(args) != 2:
+        print('keyBy requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.keyBy(eval(args[0]), eval(args[1]),))
+
 elif cmd == 'mapPartitions':
     if len(args) != 3:
         print('mapPartitions requires 3 args')
@@ -240,11 +272,17 @@ elif cmd == 'mapPartitionsWithIndex':
         sys.exit(1)
     pp.pprint(client.mapPartitionsWithIndex(eval(args[0]), eval(args[1]), eval(args[2]),))
 
-elif cmd == 'applyPartition':
+elif cmd == 'mapExecutor':
     if len(args) != 2:
-        print('applyPartition requires 2 args')
+        print('mapExecutor requires 2 args')
         sys.exit(1)
-    pp.pprint(client.applyPartition(eval(args[0]), eval(args[1]),))
+    pp.pprint(client.mapExecutor(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'mapExecutorTo':
+    if len(args) != 2:
+        print('mapExecutorTo requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.mapExecutorTo(eval(args[0]), eval(args[1]),))
 
 elif cmd == 'groupBy':
     if len(args) != 2:
@@ -294,12 +332,6 @@ elif cmd == 'treeReduce':
         sys.exit(1)
     pp.pprint(client.treeReduce(eval(args[0]), eval(args[1]), eval(args[2]),))
 
-elif cmd == 'treeReduce4':
-    if len(args) != 4:
-        print('treeReduce4 requires 4 args')
-        sys.exit(1)
-    pp.pprint(client.treeReduce4(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
-
 elif cmd == 'collect':
     if len(args) != 2:
         print('collect requires 2 args')
@@ -307,28 +339,28 @@ elif cmd == 'collect':
     pp.pprint(client.collect(eval(args[0]), eval(args[1]),))
 
 elif cmd == 'aggregate':
-    if len(args) != 4:
-        print('aggregate requires 4 args')
+    if len(args) != 5:
+        print('aggregate requires 5 args')
         sys.exit(1)
-    pp.pprint(client.aggregate(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
+    pp.pprint(client.aggregate(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]), eval(args[4]),))
 
 elif cmd == 'treeAggregate':
-    if len(args) != 4:
-        print('treeAggregate requires 4 args')
-        sys.exit(1)
-    pp.pprint(client.treeAggregate(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
-
-elif cmd == 'treeAggregate5':
     if len(args) != 5:
-        print('treeAggregate5 requires 5 args')
+        print('treeAggregate requires 5 args')
         sys.exit(1)
-    pp.pprint(client.treeAggregate5(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]), eval(args[4]),))
+    pp.pprint(client.treeAggregate(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]), eval(args[4]),))
 
 elif cmd == 'fold':
-    if len(args) != 3:
-        print('fold requires 3 args')
+    if len(args) != 4:
+        print('fold requires 4 args')
         sys.exit(1)
-    pp.pprint(client.fold(eval(args[0]), eval(args[1]), eval(args[2]),))
+    pp.pprint(client.fold(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
+
+elif cmd == 'treeFold':
+    if len(args) != 4:
+        print('treeFold requires 4 args')
+        sys.exit(1)
+    pp.pprint(client.treeFold(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
 
 elif cmd == 'take':
     if len(args) != 3:
@@ -360,6 +392,18 @@ elif cmd == 'top4':
         sys.exit(1)
     pp.pprint(client.top4(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
 
+elif cmd == 'takeOrdered':
+    if len(args) != 3:
+        print('takeOrdered requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.takeOrdered(eval(args[0]), eval(args[1]), eval(args[2]),))
+
+elif cmd == 'takeOrdered4':
+    if len(args) != 4:
+        print('takeOrdered4 requires 4 args')
+        sys.exit(1)
+    pp.pprint(client.takeOrdered4(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
+
 elif cmd == 'sample':
     if len(args) != 4:
         print('sample requires 4 args')
@@ -379,16 +423,154 @@ elif cmd == 'count':
     pp.pprint(client.count(eval(args[0]),))
 
 elif cmd == 'max':
-    if len(args) != 3:
-        print('max requires 3 args')
+    if len(args) != 2:
+        print('max requires 2 args')
         sys.exit(1)
-    pp.pprint(client.max(eval(args[0]), eval(args[1]), eval(args[2]),))
+    pp.pprint(client.max(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'max3':
+    if len(args) != 3:
+        print('max3 requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.max3(eval(args[0]), eval(args[1]), eval(args[2]),))
 
 elif cmd == 'min':
-    if len(args) != 3:
-        print('min requires 3 args')
+    if len(args) != 2:
+        print('min requires 2 args')
         sys.exit(1)
-    pp.pprint(client.min(eval(args[0]), eval(args[1]), eval(args[2]),))
+    pp.pprint(client.min(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'min3':
+    if len(args) != 3:
+        print('min3 requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.min3(eval(args[0]), eval(args[1]), eval(args[2]),))
+
+elif cmd == 'flatMapValues':
+    if len(args) != 2:
+        print('flatMapValues requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.flatMapValues(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'mapValues':
+    if len(args) != 2:
+        print('mapValues requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.mapValues(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'groupByKey':
+    if len(args) != 1:
+        print('groupByKey requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.groupByKey(eval(args[0]),))
+
+elif cmd == 'groupByKey2':
+    if len(args) != 2:
+        print('groupByKey2 requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.groupByKey2(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'reduceByKey':
+    if len(args) != 3:
+        print('reduceByKey requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.reduceByKey(eval(args[0]), eval(args[1]), eval(args[2]),))
+
+elif cmd == 'reduceByKey4':
+    if len(args) != 4:
+        print('reduceByKey4 requires 4 args')
+        sys.exit(1)
+    pp.pprint(client.reduceByKey4(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
+
+elif cmd == 'aggregateByKey':
+    if len(args) != 3:
+        print('aggregateByKey requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.aggregateByKey(eval(args[0]), eval(args[1]), eval(args[2]),))
+
+elif cmd == 'aggregateByKey4a':
+    if len(args) != 4:
+        print('aggregateByKey4a requires 4 args')
+        sys.exit(1)
+    pp.pprint(client.aggregateByKey4a(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
+
+elif cmd == 'aggregateByKey4b':
+    if len(args) != 4:
+        print('aggregateByKey4b requires 4 args')
+        sys.exit(1)
+    pp.pprint(client.aggregateByKey4b(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
+
+elif cmd == 'aggregateByKey5':
+    if len(args) != 5:
+        print('aggregateByKey5 requires 5 args')
+        sys.exit(1)
+    pp.pprint(client.aggregateByKey5(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]), eval(args[4]),))
+
+elif cmd == 'foldByKey':
+    if len(args) != 4:
+        print('foldByKey requires 4 args')
+        sys.exit(1)
+    pp.pprint(client.foldByKey(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
+
+elif cmd == 'foldByKey5':
+    if len(args) != 5:
+        print('foldByKey5 requires 5 args')
+        sys.exit(1)
+    pp.pprint(client.foldByKey5(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]), eval(args[4]),))
+
+elif cmd == 'sortByKey':
+    if len(args) != 2:
+        print('sortByKey requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.sortByKey(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'sortByKey3a':
+    if len(args) != 3:
+        print('sortByKey3a requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.sortByKey3a(eval(args[0]), eval(args[1]), eval(args[2]),))
+
+elif cmd == 'sortByKey3b':
+    if len(args) != 3:
+        print('sortByKey3b requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.sortByKey3b(eval(args[0]), eval(args[1]), eval(args[2]),))
+
+elif cmd == 'sortByKey4':
+    if len(args) != 4:
+        print('sortByKey4 requires 4 args')
+        sys.exit(1)
+    pp.pprint(client.sortByKey4(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
+
+elif cmd == 'keys':
+    if len(args) != 2:
+        print('keys requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.keys(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'values':
+    if len(args) != 2:
+        print('values requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.values(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'sampleByKey':
+    if len(args) != 4:
+        print('sampleByKey requires 4 args')
+        sys.exit(1)
+    pp.pprint(client.sampleByKey(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
+
+elif cmd == 'countByKey':
+    if len(args) != 1:
+        print('countByKey requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.countByKey(eval(args[0]),))
+
+elif cmd == 'countByValue':
+    if len(args) != 1:
+        print('countByValue requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.countByValue(eval(args[0]),))
 
 else:
     print('Unrecognized method %s' % cmd)

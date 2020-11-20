@@ -47,7 +47,7 @@ class IPartitionTest:
 		self._writeIterator(elems, part)
 		self.assertEqual(len(elems), len(part))
 		result = self._readIterator(part)
-		self.assert_(elems == result)
+		self.assertEqual(elems, result)
 
 	def __itWriteTransRead(self, w_native):
 		part = self.create()
@@ -55,7 +55,7 @@ class IPartitionTest:
 		self._writeIterator(elems, part)
 		self.assertEqual(len(elems), len(part))
 		result = self._write(part, w_native)
-		self.assert_(elems == result)
+		self.assertEqual(elems, result)
 
 	def test_itWriteTransRead(self):
 		self.__itWriteTransRead(False)
@@ -69,7 +69,7 @@ class IPartitionTest:
 		self._read(elems, part, r_native)
 		self.assertEqual(len(elems), len(part))
 		result = self._readIterator(part)
-		self.assert_(elems == result)
+		self.assertEqual(elems, result)
 
 	def test_transWriteItRead(self):
 		self.__transWriteItRead(False)
@@ -83,7 +83,7 @@ class IPartitionTest:
 		self._read(elems, part, w_native)
 		self.assertEqual(len(elems), len(part))
 		result = self._write(part, r_native)
-		self.assert_(elems == result)
+		self.assertEqual(elems, result)
 
 	def test_transWriteTransRead(self):
 		self.__transWriteTransRead(False, False)
@@ -114,7 +114,7 @@ class IPartitionTest:
 		self._read(elems[100:200], part, r2_native)
 		self.assertEqual(len(elems), len(part))
 		result = self._readIterator(part)
-		self.assert_(elems == result)
+		self.assertEqual(elems, result)
 
 	def test_appendIgnisIgnis(self):
 		self.__append(False, False)
@@ -138,8 +138,8 @@ class IPartitionTest:
 		self.assertEqual(len(elems), len(part2))
 		result = self._readIterator(part)
 		result2 = self._readIterator(part2)
-		self.assert_(elems == result)
-		self.assert_(elems == result2)
+		self.assertEqual(elems, result)
+		self.assertEqual(elems, result2)
 
 	def test_move(self):
 		part = self.create()
@@ -152,4 +152,4 @@ class IPartitionTest:
 		result = self._readIterator(part)
 		result2 = self._readIterator(part2)
 		self.assertEqual(0, len(result))
-		self.assert_(elems == result2)
+		self.assertEqual(elems, result2)

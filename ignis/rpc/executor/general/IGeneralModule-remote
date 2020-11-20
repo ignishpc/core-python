@@ -27,15 +27,27 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  void map_(ISource src)')
     print('  void filter(ISource src)')
     print('  void flatmap(ISource src)')
+    print('  void keyBy(ISource src)')
     print('  void mapPartitions(ISource src, bool preservesPartitioning)')
     print('  void mapPartitionsWithIndex(ISource src, bool preservesPartitioning)')
-    print('  void applyPartition(ISource src)')
-    print('  void groupBy(ISource src)')
-    print('  void groupBy2(ISource src, i64 numPartitions)')
+    print('  void mapExecutor(ISource src)')
+    print('  void mapExecutorTo(ISource src)')
+    print('  void groupBy(ISource src, i64 numPartitions)')
     print('  void sort(bool ascending)')
     print('  void sort2(bool ascending, i64 numPartitions)')
     print('  void sortBy(ISource src, bool ascending)')
     print('  void sortBy3(ISource src, bool ascending, i64 numPartitions)')
+    print('  void flatMapValues(ISource src)')
+    print('  void mapValues(ISource src)')
+    print('  void groupByKey(i64 numPartitions)')
+    print('  void reduceByKey(ISource src, i64 numPartitions, bool localReduce)')
+    print('  void aggregateByKey(ISource zero, ISource seqOp, i64 numPartitions)')
+    print('  void aggregateByKey4(ISource zero, ISource seqOp, ISource combOp, i64 numPartitions)')
+    print('  void foldByKey(ISource zero, ISource src, i64 numPartitions, bool localFold)')
+    print('  void sortByKey(bool ascending)')
+    print('  void sortByKey2a(bool ascending, i64 numPartitions)')
+    print('  void sortByKey2b(ISource src, bool ascending)')
+    print('  void sortByKey3(ISource src, bool ascending, i64 numPartitions)')
     print('')
     sys.exit(0)
 
@@ -133,6 +145,12 @@ elif cmd == 'flatmap':
         sys.exit(1)
     pp.pprint(client.flatmap(eval(args[0]),))
 
+elif cmd == 'keyBy':
+    if len(args) != 1:
+        print('keyBy requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.keyBy(eval(args[0]),))
+
 elif cmd == 'mapPartitions':
     if len(args) != 2:
         print('mapPartitions requires 2 args')
@@ -145,23 +163,23 @@ elif cmd == 'mapPartitionsWithIndex':
         sys.exit(1)
     pp.pprint(client.mapPartitionsWithIndex(eval(args[0]), eval(args[1]),))
 
-elif cmd == 'applyPartition':
+elif cmd == 'mapExecutor':
     if len(args) != 1:
-        print('applyPartition requires 1 args')
+        print('mapExecutor requires 1 args')
         sys.exit(1)
-    pp.pprint(client.applyPartition(eval(args[0]),))
+    pp.pprint(client.mapExecutor(eval(args[0]),))
+
+elif cmd == 'mapExecutorTo':
+    if len(args) != 1:
+        print('mapExecutorTo requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.mapExecutorTo(eval(args[0]),))
 
 elif cmd == 'groupBy':
-    if len(args) != 1:
-        print('groupBy requires 1 args')
-        sys.exit(1)
-    pp.pprint(client.groupBy(eval(args[0]),))
-
-elif cmd == 'groupBy2':
     if len(args) != 2:
-        print('groupBy2 requires 2 args')
+        print('groupBy requires 2 args')
         sys.exit(1)
-    pp.pprint(client.groupBy2(eval(args[0]), eval(args[1]),))
+    pp.pprint(client.groupBy(eval(args[0]), eval(args[1]),))
 
 elif cmd == 'sort':
     if len(args) != 1:
@@ -186,6 +204,72 @@ elif cmd == 'sortBy3':
         print('sortBy3 requires 3 args')
         sys.exit(1)
     pp.pprint(client.sortBy3(eval(args[0]), eval(args[1]), eval(args[2]),))
+
+elif cmd == 'flatMapValues':
+    if len(args) != 1:
+        print('flatMapValues requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.flatMapValues(eval(args[0]),))
+
+elif cmd == 'mapValues':
+    if len(args) != 1:
+        print('mapValues requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.mapValues(eval(args[0]),))
+
+elif cmd == 'groupByKey':
+    if len(args) != 1:
+        print('groupByKey requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.groupByKey(eval(args[0]),))
+
+elif cmd == 'reduceByKey':
+    if len(args) != 3:
+        print('reduceByKey requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.reduceByKey(eval(args[0]), eval(args[1]), eval(args[2]),))
+
+elif cmd == 'aggregateByKey':
+    if len(args) != 3:
+        print('aggregateByKey requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.aggregateByKey(eval(args[0]), eval(args[1]), eval(args[2]),))
+
+elif cmd == 'aggregateByKey4':
+    if len(args) != 4:
+        print('aggregateByKey4 requires 4 args')
+        sys.exit(1)
+    pp.pprint(client.aggregateByKey4(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
+
+elif cmd == 'foldByKey':
+    if len(args) != 4:
+        print('foldByKey requires 4 args')
+        sys.exit(1)
+    pp.pprint(client.foldByKey(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
+
+elif cmd == 'sortByKey':
+    if len(args) != 1:
+        print('sortByKey requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.sortByKey(eval(args[0]),))
+
+elif cmd == 'sortByKey2a':
+    if len(args) != 2:
+        print('sortByKey2a requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.sortByKey2a(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'sortByKey2b':
+    if len(args) != 2:
+        print('sortByKey2b requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.sortByKey2b(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'sortByKey3':
+    if len(args) != 3:
+        print('sortByKey3 requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.sortByKey3(eval(args[0]), eval(args[1]), eval(args[2]),))
 
 else:
     print('Unrecognized method %s' % cmd)

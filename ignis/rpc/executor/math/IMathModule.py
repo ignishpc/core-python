@@ -29,11 +29,11 @@ class Iface(object):
         """
         pass
 
-    def takeSample(self, withReplacement, fraction, seed):
+    def takeSample(self, withReplacement, num, seed):
         """
         Parameters:
          - withReplacement
-         - fraction
+         - num
          - seed
 
         """
@@ -42,7 +42,13 @@ class Iface(object):
     def count(self):
         pass
 
-    def max(self, cmp):
+    def max(self):
+        pass
+
+    def min(self):
+        pass
+
+    def max1(self, cmp):
         """
         Parameters:
          - cmp
@@ -50,12 +56,28 @@ class Iface(object):
         """
         pass
 
-    def min(self, cmp):
+    def min1(self, cmp):
         """
         Parameters:
          - cmp
 
         """
+        pass
+
+    def sampleByKey(self, withReplacement, fractions, seed):
+        """
+        Parameters:
+         - withReplacement
+         - fractions
+         - seed
+
+        """
+        pass
+
+    def countByKey(self):
+        pass
+
+    def countByValue(self):
         pass
 
 
@@ -102,22 +124,22 @@ class Client(Iface):
             raise result.ex
         return
 
-    def takeSample(self, withReplacement, fraction, seed):
+    def takeSample(self, withReplacement, num, seed):
         """
         Parameters:
          - withReplacement
-         - fraction
+         - num
          - seed
 
         """
-        self.send_takeSample(withReplacement, fraction, seed)
+        self.send_takeSample(withReplacement, num, seed)
         self.recv_takeSample()
 
-    def send_takeSample(self, withReplacement, fraction, seed):
+    def send_takeSample(self, withReplacement, num, seed):
         self._oprot.writeMessageBegin('takeSample', TMessageType.CALL, self._seqid)
         args = takeSample_args()
         args.withReplacement = withReplacement
-        args.fraction = fraction
+        args.num = num
         args.seed = seed
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
@@ -166,19 +188,13 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "count failed: unknown result")
 
-    def max(self, cmp):
-        """
-        Parameters:
-         - cmp
-
-        """
-        self.send_max(cmp)
+    def max(self):
+        self.send_max()
         self.recv_max()
 
-    def send_max(self, cmp):
+    def send_max(self):
         self._oprot.writeMessageBegin('max', TMessageType.CALL, self._seqid)
         args = max_args()
-        args.cmp = cmp
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -198,19 +214,13 @@ class Client(Iface):
             raise result.ex
         return
 
-    def min(self, cmp):
-        """
-        Parameters:
-         - cmp
-
-        """
-        self.send_min(cmp)
+    def min(self):
+        self.send_min()
         self.recv_min()
 
-    def send_min(self, cmp):
+    def send_min(self):
         self._oprot.writeMessageBegin('min', TMessageType.CALL, self._seqid)
         args = min_args()
-        args.cmp = cmp
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -230,6 +240,158 @@ class Client(Iface):
             raise result.ex
         return
 
+    def max1(self, cmp):
+        """
+        Parameters:
+         - cmp
+
+        """
+        self.send_max1(cmp)
+        self.recv_max1()
+
+    def send_max1(self, cmp):
+        self._oprot.writeMessageBegin('max1', TMessageType.CALL, self._seqid)
+        args = max1_args()
+        args.cmp = cmp
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_max1(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = max1_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def min1(self, cmp):
+        """
+        Parameters:
+         - cmp
+
+        """
+        self.send_min1(cmp)
+        self.recv_min1()
+
+    def send_min1(self, cmp):
+        self._oprot.writeMessageBegin('min1', TMessageType.CALL, self._seqid)
+        args = min1_args()
+        args.cmp = cmp
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_min1(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = min1_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def sampleByKey(self, withReplacement, fractions, seed):
+        """
+        Parameters:
+         - withReplacement
+         - fractions
+         - seed
+
+        """
+        self.send_sampleByKey(withReplacement, fractions, seed)
+        self.recv_sampleByKey()
+
+    def send_sampleByKey(self, withReplacement, fractions, seed):
+        self._oprot.writeMessageBegin('sampleByKey', TMessageType.CALL, self._seqid)
+        args = sampleByKey_args()
+        args.withReplacement = withReplacement
+        args.fractions = fractions
+        args.seed = seed
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_sampleByKey(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = sampleByKey_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def countByKey(self):
+        self.send_countByKey()
+        self.recv_countByKey()
+
+    def send_countByKey(self):
+        self._oprot.writeMessageBegin('countByKey', TMessageType.CALL, self._seqid)
+        args = countByKey_args()
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_countByKey(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = countByKey_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def countByValue(self):
+        self.send_countByValue()
+        self.recv_countByValue()
+
+    def send_countByValue(self):
+        self._oprot.writeMessageBegin('countByValue', TMessageType.CALL, self._seqid)
+        args = countByValue_args()
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_countByValue(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = countByValue_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
 
 class Processor(Iface, TProcessor):
     def __init__(self, handler):
@@ -240,6 +402,11 @@ class Processor(Iface, TProcessor):
         self._processMap["count"] = Processor.process_count
         self._processMap["max"] = Processor.process_max
         self._processMap["min"] = Processor.process_min
+        self._processMap["max1"] = Processor.process_max1
+        self._processMap["min1"] = Processor.process_min1
+        self._processMap["sampleByKey"] = Processor.process_sampleByKey
+        self._processMap["countByKey"] = Processor.process_countByKey
+        self._processMap["countByValue"] = Processor.process_countByValue
         self._on_message_begin = None
 
     def on_message_begin(self, func):
@@ -294,7 +461,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = takeSample_result()
         try:
-            self._handler.takeSample(args.withReplacement, args.fraction, args.seed)
+            self._handler.takeSample(args.withReplacement, args.num, args.seed)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -346,7 +513,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = max_result()
         try:
-            self._handler.max(args.cmp)
+            self._handler.max()
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -372,7 +539,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = min_result()
         try:
-            self._handler.min(args.cmp)
+            self._handler.min()
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -388,6 +555,136 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
         oprot.writeMessageBegin("min", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_max1(self, seqid, iprot, oprot):
+        args = max1_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = max1_result()
+        try:
+            self._handler.max1(args.cmp)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("max1", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_min1(self, seqid, iprot, oprot):
+        args = min1_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = min1_result()
+        try:
+            self._handler.min1(args.cmp)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("min1", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_sampleByKey(self, seqid, iprot, oprot):
+        args = sampleByKey_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = sampleByKey_result()
+        try:
+            self._handler.sampleByKey(args.withReplacement, args.fractions, args.seed)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("sampleByKey", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_countByKey(self, seqid, iprot, oprot):
+        args = countByKey_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = countByKey_result()
+        try:
+            self._handler.countByKey()
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("countByKey", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_countByValue(self, seqid, iprot, oprot):
+        args = countByValue_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = countByValue_result()
+        try:
+            self._handler.countByValue()
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("countByValue", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -548,15 +845,15 @@ class takeSample_args(object):
     """
     Attributes:
      - withReplacement
-     - fraction
+     - num
      - seed
 
     """
 
 
-    def __init__(self, withReplacement=None, fraction=None, seed=None,):
+    def __init__(self, withReplacement=None, num=None, seed=None,):
         self.withReplacement = withReplacement
-        self.fraction = fraction
+        self.num = num
         self.seed = seed
 
     def read(self, iprot):
@@ -574,8 +871,8 @@ class takeSample_args(object):
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
-                if ftype == TType.DOUBLE:
-                    self.fraction = iprot.readDouble()
+                if ftype == TType.I64:
+                    self.num = iprot.readI64()
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
@@ -597,9 +894,9 @@ class takeSample_args(object):
             oprot.writeFieldBegin('withReplacement', TType.BOOL, 1)
             oprot.writeBool(self.withReplacement)
             oprot.writeFieldEnd()
-        if self.fraction is not None:
-            oprot.writeFieldBegin('fraction', TType.DOUBLE, 2)
-            oprot.writeDouble(self.fraction)
+        if self.num is not None:
+            oprot.writeFieldBegin('num', TType.I64, 2)
+            oprot.writeI64(self.num)
             oprot.writeFieldEnd()
         if self.seed is not None:
             oprot.writeFieldBegin('seed', TType.I32, 3)
@@ -625,7 +922,7 @@ all_structs.append(takeSample_args)
 takeSample_args.thrift_spec = (
     None,  # 0
     (1, TType.BOOL, 'withReplacement', None, None, ),  # 1
-    (2, TType.DOUBLE, 'fraction', None, None, ),  # 2
+    (2, TType.I64, 'num', None, None, ),  # 2
     (3, TType.I32, 'seed', None, None, ),  # 3
 )
 
@@ -811,15 +1108,7 @@ count_result.thrift_spec = (
 
 
 class max_args(object):
-    """
-    Attributes:
-     - cmp
 
-    """
-
-
-    def __init__(self, cmp=None,):
-        self.cmp = cmp
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -830,12 +1119,6 @@ class max_args(object):
             (fname, ftype, fid) = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
-            if fid == 1:
-                if ftype == TType.STRUCT:
-                    self.cmp = ignis.rpc.source.ttypes.ISource()
-                    self.cmp.read(iprot)
-                else:
-                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -846,10 +1129,6 @@ class max_args(object):
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
         oprot.writeStructBegin('max_args')
-        if self.cmp is not None:
-            oprot.writeFieldBegin('cmp', TType.STRUCT, 1)
-            self.cmp.write(oprot)
-            oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
@@ -868,8 +1147,6 @@ class max_args(object):
         return not (self == other)
 all_structs.append(max_args)
 max_args.thrift_spec = (
-    None,  # 0
-    (1, TType.STRUCT, 'cmp', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
 )
 
 
@@ -937,15 +1214,7 @@ max_result.thrift_spec = (
 
 
 class min_args(object):
-    """
-    Attributes:
-     - cmp
 
-    """
-
-
-    def __init__(self, cmp=None,):
-        self.cmp = cmp
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -956,12 +1225,6 @@ class min_args(object):
             (fname, ftype, fid) = iprot.readFieldBegin()
             if ftype == TType.STOP:
                 break
-            if fid == 1:
-                if ftype == TType.STRUCT:
-                    self.cmp = ignis.rpc.source.ttypes.ISource()
-                    self.cmp.read(iprot)
-                else:
-                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -972,10 +1235,6 @@ class min_args(object):
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
         oprot.writeStructBegin('min_args')
-        if self.cmp is not None:
-            oprot.writeFieldBegin('cmp', TType.STRUCT, 1)
-            self.cmp.write(oprot)
-            oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
 
@@ -994,8 +1253,6 @@ class min_args(object):
         return not (self == other)
 all_structs.append(min_args)
 min_args.thrift_spec = (
-    None,  # 0
-    (1, TType.STRUCT, 'cmp', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
 )
 
 
@@ -1057,6 +1314,620 @@ class min_result(object):
         return not (self == other)
 all_structs.append(min_result)
 min_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class max1_args(object):
+    """
+    Attributes:
+     - cmp
+
+    """
+
+
+    def __init__(self, cmp=None,):
+        self.cmp = cmp
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.cmp = ignis.rpc.source.ttypes.ISource()
+                    self.cmp.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('max1_args')
+        if self.cmp is not None:
+            oprot.writeFieldBegin('cmp', TType.STRUCT, 1)
+            self.cmp.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(max1_args)
+max1_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'cmp', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
+)
+
+
+class max1_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('max1_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(max1_result)
+max1_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class min1_args(object):
+    """
+    Attributes:
+     - cmp
+
+    """
+
+
+    def __init__(self, cmp=None,):
+        self.cmp = cmp
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.cmp = ignis.rpc.source.ttypes.ISource()
+                    self.cmp.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('min1_args')
+        if self.cmp is not None:
+            oprot.writeFieldBegin('cmp', TType.STRUCT, 1)
+            self.cmp.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(min1_args)
+min1_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'cmp', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
+)
+
+
+class min1_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('min1_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(min1_result)
+min1_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class sampleByKey_args(object):
+    """
+    Attributes:
+     - withReplacement
+     - fractions
+     - seed
+
+    """
+
+
+    def __init__(self, withReplacement=None, fractions=None, seed=None,):
+        self.withReplacement = withReplacement
+        self.fractions = fractions
+        self.seed = seed
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.BOOL:
+                    self.withReplacement = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self.fractions = ignis.rpc.source.ttypes.ISource()
+                    self.fractions.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I32:
+                    self.seed = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('sampleByKey_args')
+        if self.withReplacement is not None:
+            oprot.writeFieldBegin('withReplacement', TType.BOOL, 1)
+            oprot.writeBool(self.withReplacement)
+            oprot.writeFieldEnd()
+        if self.fractions is not None:
+            oprot.writeFieldBegin('fractions', TType.STRUCT, 2)
+            self.fractions.write(oprot)
+            oprot.writeFieldEnd()
+        if self.seed is not None:
+            oprot.writeFieldBegin('seed', TType.I32, 3)
+            oprot.writeI32(self.seed)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(sampleByKey_args)
+sampleByKey_args.thrift_spec = (
+    None,  # 0
+    (1, TType.BOOL, 'withReplacement', None, None, ),  # 1
+    (2, TType.STRUCT, 'fractions', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 2
+    (3, TType.I32, 'seed', None, None, ),  # 3
+)
+
+
+class sampleByKey_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('sampleByKey_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(sampleByKey_result)
+sampleByKey_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class countByKey_args(object):
+
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('countByKey_args')
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(countByKey_args)
+countByKey_args.thrift_spec = (
+)
+
+
+class countByKey_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('countByKey_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(countByKey_result)
+countByKey_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class countByValue_args(object):
+
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('countByValue_args')
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(countByValue_args)
+countByValue_args.thrift_spec = (
+)
+
+
+class countByValue_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('countByValue_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(countByValue_result)
+countByValue_result.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
 )

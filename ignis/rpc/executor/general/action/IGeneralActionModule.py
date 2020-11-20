@@ -27,11 +27,10 @@ class Iface(object):
         """
         pass
 
-    def treeReduce(self, src, depth):
+    def treeReduce(self, src):
         """
         Parameters:
          - src
-         - depth
 
         """
         pass
@@ -39,28 +38,39 @@ class Iface(object):
     def collect(self):
         pass
 
-    def aggregate(self, seqOp, combOp):
+    def aggregate(self, zero, seqOp, combOp):
         """
         Parameters:
+         - zero
          - seqOp
          - combOp
 
         """
         pass
 
-    def treeAggregate(self, seqOp, combOp, depth):
+    def treeAggregate(self, zero, seqOp, combOp):
         """
         Parameters:
+         - zero
          - seqOp
          - combOp
-         - depth
 
         """
         pass
 
-    def fold(self, src):
+    def fold(self, zero, src):
         """
         Parameters:
+         - zero
+         - src
+
+        """
+        pass
+
+    def treeFold(self, zero, src):
+        """
+        Parameters:
+         - zero
          - src
 
         """
@@ -107,6 +117,29 @@ class Iface(object):
         """
         pass
 
+    def takeOrdered(self, num):
+        """
+        Parameters:
+         - num
+
+        """
+        pass
+
+    def takeOrdered2(self, num, cmp):
+        """
+        Parameters:
+         - num
+         - cmp
+
+        """
+        pass
+
+    def keys(self):
+        pass
+
+    def values(self):
+        pass
+
 
 class Client(Iface):
     def __init__(self, iprot, oprot=None):
@@ -147,21 +180,19 @@ class Client(Iface):
             raise result.ex
         return
 
-    def treeReduce(self, src, depth):
+    def treeReduce(self, src):
         """
         Parameters:
          - src
-         - depth
 
         """
-        self.send_treeReduce(src, depth)
+        self.send_treeReduce(src)
         self.recv_treeReduce()
 
-    def send_treeReduce(self, src, depth):
+    def send_treeReduce(self, src):
         self._oprot.writeMessageBegin('treeReduce', TMessageType.CALL, self._seqid)
         args = treeReduce_args()
         args.src = src
-        args.depth = depth
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -207,19 +238,21 @@ class Client(Iface):
             raise result.ex
         return
 
-    def aggregate(self, seqOp, combOp):
+    def aggregate(self, zero, seqOp, combOp):
         """
         Parameters:
+         - zero
          - seqOp
          - combOp
 
         """
-        self.send_aggregate(seqOp, combOp)
+        self.send_aggregate(zero, seqOp, combOp)
         self.recv_aggregate()
 
-    def send_aggregate(self, seqOp, combOp):
+    def send_aggregate(self, zero, seqOp, combOp):
         self._oprot.writeMessageBegin('aggregate', TMessageType.CALL, self._seqid)
         args = aggregate_args()
+        args.zero = zero
         args.seqOp = seqOp
         args.combOp = combOp
         args.write(self._oprot)
@@ -241,23 +274,23 @@ class Client(Iface):
             raise result.ex
         return
 
-    def treeAggregate(self, seqOp, combOp, depth):
+    def treeAggregate(self, zero, seqOp, combOp):
         """
         Parameters:
+         - zero
          - seqOp
          - combOp
-         - depth
 
         """
-        self.send_treeAggregate(seqOp, combOp, depth)
+        self.send_treeAggregate(zero, seqOp, combOp)
         self.recv_treeAggregate()
 
-    def send_treeAggregate(self, seqOp, combOp, depth):
+    def send_treeAggregate(self, zero, seqOp, combOp):
         self._oprot.writeMessageBegin('treeAggregate', TMessageType.CALL, self._seqid)
         args = treeAggregate_args()
+        args.zero = zero
         args.seqOp = seqOp
         args.combOp = combOp
-        args.depth = depth
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -277,18 +310,20 @@ class Client(Iface):
             raise result.ex
         return
 
-    def fold(self, src):
+    def fold(self, zero, src):
         """
         Parameters:
+         - zero
          - src
 
         """
-        self.send_fold(src)
+        self.send_fold(zero, src)
         self.recv_fold()
 
-    def send_fold(self, src):
+    def send_fold(self, zero, src):
         self._oprot.writeMessageBegin('fold', TMessageType.CALL, self._seqid)
         args = fold_args()
+        args.zero = zero
         args.src = src
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
@@ -303,6 +338,40 @@ class Client(Iface):
             iprot.readMessageEnd()
             raise x
         result = fold_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def treeFold(self, zero, src):
+        """
+        Parameters:
+         - zero
+         - src
+
+        """
+        self.send_treeFold(zero, src)
+        self.recv_treeFold()
+
+    def send_treeFold(self, zero, src):
+        self._oprot.writeMessageBegin('treeFold', TMessageType.CALL, self._seqid)
+        args = treeFold_args()
+        args.zero = zero
+        args.src = src
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_treeFold(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = treeFold_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.ex is not None:
@@ -471,6 +540,124 @@ class Client(Iface):
             raise result.ex
         return
 
+    def takeOrdered(self, num):
+        """
+        Parameters:
+         - num
+
+        """
+        self.send_takeOrdered(num)
+        self.recv_takeOrdered()
+
+    def send_takeOrdered(self, num):
+        self._oprot.writeMessageBegin('takeOrdered', TMessageType.CALL, self._seqid)
+        args = takeOrdered_args()
+        args.num = num
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_takeOrdered(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = takeOrdered_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def takeOrdered2(self, num, cmp):
+        """
+        Parameters:
+         - num
+         - cmp
+
+        """
+        self.send_takeOrdered2(num, cmp)
+        self.recv_takeOrdered2()
+
+    def send_takeOrdered2(self, num, cmp):
+        self._oprot.writeMessageBegin('takeOrdered2', TMessageType.CALL, self._seqid)
+        args = takeOrdered2_args()
+        args.num = num
+        args.cmp = cmp
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_takeOrdered2(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = takeOrdered2_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def keys(self):
+        self.send_keys()
+        self.recv_keys()
+
+    def send_keys(self):
+        self._oprot.writeMessageBegin('keys', TMessageType.CALL, self._seqid)
+        args = keys_args()
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_keys(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = keys_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def values(self):
+        self.send_values()
+        self.recv_values()
+
+    def send_values(self):
+        self._oprot.writeMessageBegin('values', TMessageType.CALL, self._seqid)
+        args = values_args()
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_values(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = values_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
 
 class Processor(Iface, TProcessor):
     def __init__(self, handler):
@@ -482,11 +669,16 @@ class Processor(Iface, TProcessor):
         self._processMap["aggregate"] = Processor.process_aggregate
         self._processMap["treeAggregate"] = Processor.process_treeAggregate
         self._processMap["fold"] = Processor.process_fold
+        self._processMap["treeFold"] = Processor.process_treeFold
         self._processMap["take"] = Processor.process_take
         self._processMap["foreach_"] = Processor.process_foreach_
         self._processMap["foreachPartition"] = Processor.process_foreachPartition
         self._processMap["top"] = Processor.process_top
         self._processMap["top2"] = Processor.process_top2
+        self._processMap["takeOrdered"] = Processor.process_takeOrdered
+        self._processMap["takeOrdered2"] = Processor.process_takeOrdered2
+        self._processMap["keys"] = Processor.process_keys
+        self._processMap["values"] = Processor.process_values
         self._on_message_begin = None
 
     def on_message_begin(self, func):
@@ -541,7 +733,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = treeReduce_result()
         try:
-            self._handler.treeReduce(args.src, args.depth)
+            self._handler.treeReduce(args.src)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -593,7 +785,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = aggregate_result()
         try:
-            self._handler.aggregate(args.seqOp, args.combOp)
+            self._handler.aggregate(args.zero, args.seqOp, args.combOp)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -619,7 +811,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = treeAggregate_result()
         try:
-            self._handler.treeAggregate(args.seqOp, args.combOp, args.depth)
+            self._handler.treeAggregate(args.zero, args.seqOp, args.combOp)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -645,7 +837,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = fold_result()
         try:
-            self._handler.fold(args.src)
+            self._handler.fold(args.zero, args.src)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -661,6 +853,32 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
         oprot.writeMessageBegin("fold", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_treeFold(self, seqid, iprot, oprot):
+        args = treeFold_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = treeFold_result()
+        try:
+            self._handler.treeFold(args.zero, args.src)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("treeFold", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -791,6 +1009,110 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
         oprot.writeMessageBegin("top2", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_takeOrdered(self, seqid, iprot, oprot):
+        args = takeOrdered_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = takeOrdered_result()
+        try:
+            self._handler.takeOrdered(args.num)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("takeOrdered", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_takeOrdered2(self, seqid, iprot, oprot):
+        args = takeOrdered2_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = takeOrdered2_result()
+        try:
+            self._handler.takeOrdered2(args.num, args.cmp)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("takeOrdered2", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_keys(self, seqid, iprot, oprot):
+        args = keys_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = keys_result()
+        try:
+            self._handler.keys()
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("keys", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_values(self, seqid, iprot, oprot):
+        args = values_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = values_result()
+        try:
+            self._handler.values()
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("values", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -928,14 +1250,12 @@ class treeReduce_args(object):
     """
     Attributes:
      - src
-     - depth
 
     """
 
 
-    def __init__(self, src=None, depth=None,):
+    def __init__(self, src=None,):
         self.src = src
-        self.depth = depth
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -952,11 +1272,6 @@ class treeReduce_args(object):
                     self.src.read(iprot)
                 else:
                     iprot.skip(ftype)
-            elif fid == 2:
-                if ftype == TType.I64:
-                    self.depth = iprot.readI64()
-                else:
-                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -970,10 +1285,6 @@ class treeReduce_args(object):
         if self.src is not None:
             oprot.writeFieldBegin('src', TType.STRUCT, 1)
             self.src.write(oprot)
-            oprot.writeFieldEnd()
-        if self.depth is not None:
-            oprot.writeFieldBegin('depth', TType.I64, 2)
-            oprot.writeI64(self.depth)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -995,7 +1306,6 @@ all_structs.append(treeReduce_args)
 treeReduce_args.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
-    (2, TType.I64, 'depth', None, None, ),  # 2
 )
 
 
@@ -1171,13 +1481,15 @@ collect_result.thrift_spec = (
 class aggregate_args(object):
     """
     Attributes:
+     - zero
      - seqOp
      - combOp
 
     """
 
 
-    def __init__(self, seqOp=None, combOp=None,):
+    def __init__(self, zero=None, seqOp=None, combOp=None,):
+        self.zero = zero
         self.seqOp = seqOp
         self.combOp = combOp
 
@@ -1192,11 +1504,17 @@ class aggregate_args(object):
                 break
             if fid == 1:
                 if ftype == TType.STRUCT:
+                    self.zero = ignis.rpc.source.ttypes.ISource()
+                    self.zero.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
                     self.seqOp = ignis.rpc.source.ttypes.ISource()
                     self.seqOp.read(iprot)
                 else:
                     iprot.skip(ftype)
-            elif fid == 2:
+            elif fid == 3:
                 if ftype == TType.STRUCT:
                     self.combOp = ignis.rpc.source.ttypes.ISource()
                     self.combOp.read(iprot)
@@ -1212,12 +1530,16 @@ class aggregate_args(object):
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
         oprot.writeStructBegin('aggregate_args')
+        if self.zero is not None:
+            oprot.writeFieldBegin('zero', TType.STRUCT, 1)
+            self.zero.write(oprot)
+            oprot.writeFieldEnd()
         if self.seqOp is not None:
-            oprot.writeFieldBegin('seqOp', TType.STRUCT, 1)
+            oprot.writeFieldBegin('seqOp', TType.STRUCT, 2)
             self.seqOp.write(oprot)
             oprot.writeFieldEnd()
         if self.combOp is not None:
-            oprot.writeFieldBegin('combOp', TType.STRUCT, 2)
+            oprot.writeFieldBegin('combOp', TType.STRUCT, 3)
             self.combOp.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -1239,8 +1561,9 @@ class aggregate_args(object):
 all_structs.append(aggregate_args)
 aggregate_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'seqOp', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
-    (2, TType.STRUCT, 'combOp', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 2
+    (1, TType.STRUCT, 'zero', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
+    (2, TType.STRUCT, 'seqOp', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 2
+    (3, TType.STRUCT, 'combOp', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 3
 )
 
 
@@ -1310,17 +1633,17 @@ aggregate_result.thrift_spec = (
 class treeAggregate_args(object):
     """
     Attributes:
+     - zero
      - seqOp
      - combOp
-     - depth
 
     """
 
 
-    def __init__(self, seqOp=None, combOp=None, depth=None,):
+    def __init__(self, zero=None, seqOp=None, combOp=None,):
+        self.zero = zero
         self.seqOp = seqOp
         self.combOp = combOp
-        self.depth = depth
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -1333,19 +1656,20 @@ class treeAggregate_args(object):
                 break
             if fid == 1:
                 if ftype == TType.STRUCT:
-                    self.seqOp = ignis.rpc.source.ttypes.ISource()
-                    self.seqOp.read(iprot)
+                    self.zero = ignis.rpc.source.ttypes.ISource()
+                    self.zero.read(iprot)
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.STRUCT:
-                    self.combOp = ignis.rpc.source.ttypes.ISource()
-                    self.combOp.read(iprot)
+                    self.seqOp = ignis.rpc.source.ttypes.ISource()
+                    self.seqOp.read(iprot)
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
-                if ftype == TType.I64:
-                    self.depth = iprot.readI64()
+                if ftype == TType.STRUCT:
+                    self.combOp = ignis.rpc.source.ttypes.ISource()
+                    self.combOp.read(iprot)
                 else:
                     iprot.skip(ftype)
             else:
@@ -1358,17 +1682,17 @@ class treeAggregate_args(object):
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
         oprot.writeStructBegin('treeAggregate_args')
+        if self.zero is not None:
+            oprot.writeFieldBegin('zero', TType.STRUCT, 1)
+            self.zero.write(oprot)
+            oprot.writeFieldEnd()
         if self.seqOp is not None:
-            oprot.writeFieldBegin('seqOp', TType.STRUCT, 1)
+            oprot.writeFieldBegin('seqOp', TType.STRUCT, 2)
             self.seqOp.write(oprot)
             oprot.writeFieldEnd()
         if self.combOp is not None:
-            oprot.writeFieldBegin('combOp', TType.STRUCT, 2)
+            oprot.writeFieldBegin('combOp', TType.STRUCT, 3)
             self.combOp.write(oprot)
-            oprot.writeFieldEnd()
-        if self.depth is not None:
-            oprot.writeFieldBegin('depth', TType.I64, 3)
-            oprot.writeI64(self.depth)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -1389,9 +1713,9 @@ class treeAggregate_args(object):
 all_structs.append(treeAggregate_args)
 treeAggregate_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'seqOp', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
-    (2, TType.STRUCT, 'combOp', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 2
-    (3, TType.I64, 'depth', None, None, ),  # 3
+    (1, TType.STRUCT, 'zero', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
+    (2, TType.STRUCT, 'seqOp', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 2
+    (3, TType.STRUCT, 'combOp', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 3
 )
 
 
@@ -1461,12 +1785,14 @@ treeAggregate_result.thrift_spec = (
 class fold_args(object):
     """
     Attributes:
+     - zero
      - src
 
     """
 
 
-    def __init__(self, src=None,):
+    def __init__(self, zero=None, src=None,):
+        self.zero = zero
         self.src = src
 
     def read(self, iprot):
@@ -1479,6 +1805,12 @@ class fold_args(object):
             if ftype == TType.STOP:
                 break
             if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.zero = ignis.rpc.source.ttypes.ISource()
+                    self.zero.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
                 if ftype == TType.STRUCT:
                     self.src = ignis.rpc.source.ttypes.ISource()
                     self.src.read(iprot)
@@ -1494,8 +1826,12 @@ class fold_args(object):
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
         oprot.writeStructBegin('fold_args')
+        if self.zero is not None:
+            oprot.writeFieldBegin('zero', TType.STRUCT, 1)
+            self.zero.write(oprot)
+            oprot.writeFieldEnd()
         if self.src is not None:
-            oprot.writeFieldBegin('src', TType.STRUCT, 1)
+            oprot.writeFieldBegin('src', TType.STRUCT, 2)
             self.src.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -1517,7 +1853,8 @@ class fold_args(object):
 all_structs.append(fold_args)
 fold_args.thrift_spec = (
     None,  # 0
-    (1, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
+    (1, TType.STRUCT, 'zero', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
+    (2, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 2
 )
 
 
@@ -1579,6 +1916,145 @@ class fold_result(object):
         return not (self == other)
 all_structs.append(fold_result)
 fold_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class treeFold_args(object):
+    """
+    Attributes:
+     - zero
+     - src
+
+    """
+
+
+    def __init__(self, zero=None, src=None,):
+        self.zero = zero
+        self.src = src
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.zero = ignis.rpc.source.ttypes.ISource()
+                    self.zero.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self.src = ignis.rpc.source.ttypes.ISource()
+                    self.src.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('treeFold_args')
+        if self.zero is not None:
+            oprot.writeFieldBegin('zero', TType.STRUCT, 1)
+            self.zero.write(oprot)
+            oprot.writeFieldEnd()
+        if self.src is not None:
+            oprot.writeFieldBegin('src', TType.STRUCT, 2)
+            self.src.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(treeFold_args)
+treeFold_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'zero', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
+    (2, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 2
+)
+
+
+class treeFold_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('treeFold_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(treeFold_result)
+treeFold_result.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
 )
@@ -2219,6 +2695,481 @@ class top2_result(object):
         return not (self == other)
 all_structs.append(top2_result)
 top2_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class takeOrdered_args(object):
+    """
+    Attributes:
+     - num
+
+    """
+
+
+    def __init__(self, num=None,):
+        self.num = num
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I64:
+                    self.num = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('takeOrdered_args')
+        if self.num is not None:
+            oprot.writeFieldBegin('num', TType.I64, 1)
+            oprot.writeI64(self.num)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(takeOrdered_args)
+takeOrdered_args.thrift_spec = (
+    None,  # 0
+    (1, TType.I64, 'num', None, None, ),  # 1
+)
+
+
+class takeOrdered_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('takeOrdered_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(takeOrdered_result)
+takeOrdered_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class takeOrdered2_args(object):
+    """
+    Attributes:
+     - num
+     - cmp
+
+    """
+
+
+    def __init__(self, num=None, cmp=None,):
+        self.num = num
+        self.cmp = cmp
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I64:
+                    self.num = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self.cmp = ignis.rpc.source.ttypes.ISource()
+                    self.cmp.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('takeOrdered2_args')
+        if self.num is not None:
+            oprot.writeFieldBegin('num', TType.I64, 1)
+            oprot.writeI64(self.num)
+            oprot.writeFieldEnd()
+        if self.cmp is not None:
+            oprot.writeFieldBegin('cmp', TType.STRUCT, 2)
+            self.cmp.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(takeOrdered2_args)
+takeOrdered2_args.thrift_spec = (
+    None,  # 0
+    (1, TType.I64, 'num', None, None, ),  # 1
+    (2, TType.STRUCT, 'cmp', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 2
+)
+
+
+class takeOrdered2_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('takeOrdered2_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(takeOrdered2_result)
+takeOrdered2_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class keys_args(object):
+
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('keys_args')
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(keys_args)
+keys_args.thrift_spec = (
+)
+
+
+class keys_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('keys_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(keys_result)
+keys_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class values_args(object):
+
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('values_args')
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(values_args)
+values_args.thrift_spec = (
+)
+
+
+class values_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('values_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(values_result)
+values_result.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
 )

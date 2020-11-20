@@ -25,6 +25,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('')
     print('Functions:')
     print('  i64 saveContext()')
+    print('  void clearContext()')
     print('  void loadContext(i64 id)')
     print('  void cache(i64 id, i8 level)')
     print('  void loadCache(i64 id)')
@@ -112,6 +113,12 @@ if cmd == 'saveContext':
         print('saveContext requires 0 args')
         sys.exit(1)
     pp.pprint(client.saveContext())
+
+elif cmd == 'clearContext':
+    if len(args) != 0:
+        print('clearContext requires 0 args')
+        sys.exit(1)
+    pp.pprint(client.clearContext())
 
 elif cmd == 'loadContext':
     if len(args) != 1:

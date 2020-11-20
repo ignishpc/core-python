@@ -68,20 +68,22 @@ class Iface(object):
         """
         pass
 
-    def parallelize(self, id, dataId):
+    def parallelize(self, id, dataId, partitions):
         """
         Parameters:
          - id
          - dataId
+         - partitions
 
         """
         pass
 
-    def parallelize3(self, id, dataId, src):
+    def parallelize4(self, id, dataId, partitions, src):
         """
         Parameters:
          - id
          - dataId
+         - partitions
          - src
 
         """
@@ -388,21 +390,23 @@ class Client(Iface):
             raise result.ex
         return
 
-    def parallelize(self, id, dataId):
+    def parallelize(self, id, dataId, partitions):
         """
         Parameters:
          - id
          - dataId
+         - partitions
 
         """
-        self.send_parallelize(id, dataId)
+        self.send_parallelize(id, dataId, partitions)
         return self.recv_parallelize()
 
-    def send_parallelize(self, id, dataId):
+    def send_parallelize(self, id, dataId, partitions):
         self._oprot.writeMessageBegin('parallelize', TMessageType.CALL, self._seqid)
         args = parallelize_args()
         args.id = id
         args.dataId = dataId
+        args.partitions = partitions
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -424,28 +428,30 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "parallelize failed: unknown result")
 
-    def parallelize3(self, id, dataId, src):
+    def parallelize4(self, id, dataId, partitions, src):
         """
         Parameters:
          - id
          - dataId
+         - partitions
          - src
 
         """
-        self.send_parallelize3(id, dataId, src)
-        return self.recv_parallelize3()
+        self.send_parallelize4(id, dataId, partitions, src)
+        return self.recv_parallelize4()
 
-    def send_parallelize3(self, id, dataId, src):
-        self._oprot.writeMessageBegin('parallelize3', TMessageType.CALL, self._seqid)
-        args = parallelize3_args()
+    def send_parallelize4(self, id, dataId, partitions, src):
+        self._oprot.writeMessageBegin('parallelize4', TMessageType.CALL, self._seqid)
+        args = parallelize4_args()
         args.id = id
         args.dataId = dataId
+        args.partitions = partitions
         args.src = src
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_parallelize3(self):
+    def recv_parallelize4(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -453,14 +459,14 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = parallelize3_result()
+        result = parallelize4_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.success is not None:
             return result.success
         if result.ex is not None:
             raise result.ex
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "parallelize3 failed: unknown result")
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "parallelize4 failed: unknown result")
 
     def importDataFrame(self, id, data):
         """
@@ -885,7 +891,7 @@ class Processor(Iface, TProcessor):
         self._processMap["newInstance4"] = Processor.process_newInstance4
         self._processMap["setName"] = Processor.process_setName
         self._processMap["parallelize"] = Processor.process_parallelize
-        self._processMap["parallelize3"] = Processor.process_parallelize3
+        self._processMap["parallelize4"] = Processor.process_parallelize4
         self._processMap["importDataFrame"] = Processor.process_importDataFrame
         self._processMap["importDataFrame3a"] = Processor.process_importDataFrame3a
         self._processMap["importDataFrame3b"] = Processor.process_importDataFrame3b
@@ -1055,7 +1061,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = parallelize_result()
         try:
-            result.success = self._handler.parallelize(args.id, args.dataId)
+            result.success = self._handler.parallelize(args.id, args.dataId, args.partitions)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -1075,13 +1081,13 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_parallelize3(self, seqid, iprot, oprot):
-        args = parallelize3_args()
+    def process_parallelize4(self, seqid, iprot, oprot):
+        args = parallelize4_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = parallelize3_result()
+        result = parallelize4_result()
         try:
-            result.success = self._handler.parallelize3(args.id, args.dataId, args.src)
+            result.success = self._handler.parallelize4(args.id, args.dataId, args.partitions, args.src)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -1096,7 +1102,7 @@ class Processor(Iface, TProcessor):
             logging.exception('Unexpected exception in handler')
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("parallelize3", msg_type, seqid)
+        oprot.writeMessageBegin("parallelize4", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -2177,13 +2183,15 @@ class parallelize_args(object):
     Attributes:
      - id
      - dataId
+     - partitions
 
     """
 
 
-    def __init__(self, id=None, dataId=None,):
+    def __init__(self, id=None, dataId=None, partitions=None,):
         self.id = id
         self.dataId = dataId
+        self.partitions = partitions
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -2205,6 +2213,11 @@ class parallelize_args(object):
                     self.dataId = iprot.readI64()
                 else:
                     iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I64:
+                    self.partitions = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -2222,6 +2235,10 @@ class parallelize_args(object):
         if self.dataId is not None:
             oprot.writeFieldBegin('dataId', TType.I64, 2)
             oprot.writeI64(self.dataId)
+            oprot.writeFieldEnd()
+        if self.partitions is not None:
+            oprot.writeFieldBegin('partitions', TType.I64, 3)
+            oprot.writeI64(self.partitions)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -2244,6 +2261,7 @@ parallelize_args.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'id', [IWorkerId, None], None, ),  # 1
     (2, TType.I64, 'dataId', None, None, ),  # 2
+    (3, TType.I64, 'partitions', None, None, ),  # 3
 )
 
 
@@ -2322,19 +2340,21 @@ parallelize_result.thrift_spec = (
 )
 
 
-class parallelize3_args(object):
+class parallelize4_args(object):
     """
     Attributes:
      - id
      - dataId
+     - partitions
      - src
 
     """
 
 
-    def __init__(self, id=None, dataId=None, src=None,):
+    def __init__(self, id=None, dataId=None, partitions=None, src=None,):
         self.id = id
         self.dataId = dataId
+        self.partitions = partitions
         self.src = src
 
     def read(self, iprot):
@@ -2358,6 +2378,11 @@ class parallelize3_args(object):
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
+                if ftype == TType.I64:
+                    self.partitions = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
                 if ftype == TType.STRUCT:
                     self.src = ignis.rpc.source.ttypes.ISource()
                     self.src.read(iprot)
@@ -2372,7 +2397,7 @@ class parallelize3_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('parallelize3_args')
+        oprot.writeStructBegin('parallelize4_args')
         if self.id is not None:
             oprot.writeFieldBegin('id', TType.STRUCT, 1)
             self.id.write(oprot)
@@ -2381,8 +2406,12 @@ class parallelize3_args(object):
             oprot.writeFieldBegin('dataId', TType.I64, 2)
             oprot.writeI64(self.dataId)
             oprot.writeFieldEnd()
+        if self.partitions is not None:
+            oprot.writeFieldBegin('partitions', TType.I64, 3)
+            oprot.writeI64(self.partitions)
+            oprot.writeFieldEnd()
         if self.src is not None:
-            oprot.writeFieldBegin('src', TType.STRUCT, 3)
+            oprot.writeFieldBegin('src', TType.STRUCT, 4)
             self.src.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -2401,16 +2430,17 @@ class parallelize3_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(parallelize3_args)
-parallelize3_args.thrift_spec = (
+all_structs.append(parallelize4_args)
+parallelize4_args.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'id', [IWorkerId, None], None, ),  # 1
     (2, TType.I64, 'dataId', None, None, ),  # 2
-    (3, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 3
+    (3, TType.I64, 'partitions', None, None, ),  # 3
+    (4, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 4
 )
 
 
-class parallelize3_result(object):
+class parallelize4_result(object):
     """
     Attributes:
      - success
@@ -2453,7 +2483,7 @@ class parallelize3_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('parallelize3_result')
+        oprot.writeStructBegin('parallelize4_result')
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.STRUCT, 0)
             self.success.write(oprot)
@@ -2478,8 +2508,8 @@ class parallelize3_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(parallelize3_result)
-parallelize3_result.thrift_spec = (
+all_structs.append(parallelize4_result)
+parallelize4_result.thrift_spec = (
     (0, TType.STRUCT, 'success', [ignis.rpc.driver.dataframe.ttypes.IDataFrameId, None], None, ),  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.driver.exception.ttypes.IDriverException, None], None, ),  # 1
 )

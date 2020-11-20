@@ -43,6 +43,14 @@ class Iface(object):
         """
         pass
 
+    def keyBy(self, src):
+        """
+        Parameters:
+         - src
+
+        """
+        pass
+
     def mapPartitions(self, src, preservesPartitioning):
         """
         Parameters:
@@ -61,7 +69,7 @@ class Iface(object):
         """
         pass
 
-    def applyPartition(self, src):
+    def mapExecutor(self, src):
         """
         Parameters:
          - src
@@ -69,7 +77,7 @@ class Iface(object):
         """
         pass
 
-    def groupBy(self, src):
+    def mapExecutorTo(self, src):
         """
         Parameters:
          - src
@@ -77,7 +85,7 @@ class Iface(object):
         """
         pass
 
-    def groupBy2(self, src, numPartitions):
+    def groupBy(self, src, numPartitions):
         """
         Parameters:
          - src
@@ -113,6 +121,108 @@ class Iface(object):
         pass
 
     def sortBy3(self, src, ascending, numPartitions):
+        """
+        Parameters:
+         - src
+         - ascending
+         - numPartitions
+
+        """
+        pass
+
+    def flatMapValues(self, src):
+        """
+        Parameters:
+         - src
+
+        """
+        pass
+
+    def mapValues(self, src):
+        """
+        Parameters:
+         - src
+
+        """
+        pass
+
+    def groupByKey(self, numPartitions):
+        """
+        Parameters:
+         - numPartitions
+
+        """
+        pass
+
+    def reduceByKey(self, src, numPartitions, localReduce):
+        """
+        Parameters:
+         - src
+         - numPartitions
+         - localReduce
+
+        """
+        pass
+
+    def aggregateByKey(self, zero, seqOp, numPartitions):
+        """
+        Parameters:
+         - zero
+         - seqOp
+         - numPartitions
+
+        """
+        pass
+
+    def aggregateByKey4(self, zero, seqOp, combOp, numPartitions):
+        """
+        Parameters:
+         - zero
+         - seqOp
+         - combOp
+         - numPartitions
+
+        """
+        pass
+
+    def foldByKey(self, zero, src, numPartitions, localFold):
+        """
+        Parameters:
+         - zero
+         - src
+         - numPartitions
+         - localFold
+
+        """
+        pass
+
+    def sortByKey(self, ascending):
+        """
+        Parameters:
+         - ascending
+
+        """
+        pass
+
+    def sortByKey2a(self, ascending, numPartitions):
+        """
+        Parameters:
+         - ascending
+         - numPartitions
+
+        """
+        pass
+
+    def sortByKey2b(self, src, ascending):
+        """
+        Parameters:
+         - src
+         - ascending
+
+        """
+        pass
+
+    def sortByKey3(self, src, ascending, numPartitions):
         """
         Parameters:
          - src
@@ -226,6 +336,38 @@ class Client(Iface):
             raise result.ex
         return
 
+    def keyBy(self, src):
+        """
+        Parameters:
+         - src
+
+        """
+        self.send_keyBy(src)
+        self.recv_keyBy()
+
+    def send_keyBy(self, src):
+        self._oprot.writeMessageBegin('keyBy', TMessageType.CALL, self._seqid)
+        args = keyBy_args()
+        args.src = src
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_keyBy(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = keyBy_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
     def mapPartitions(self, src, preservesPartitioning):
         """
         Parameters:
@@ -294,24 +436,24 @@ class Client(Iface):
             raise result.ex
         return
 
-    def applyPartition(self, src):
+    def mapExecutor(self, src):
         """
         Parameters:
          - src
 
         """
-        self.send_applyPartition(src)
-        self.recv_applyPartition()
+        self.send_mapExecutor(src)
+        self.recv_mapExecutor()
 
-    def send_applyPartition(self, src):
-        self._oprot.writeMessageBegin('applyPartition', TMessageType.CALL, self._seqid)
-        args = applyPartition_args()
+    def send_mapExecutor(self, src):
+        self._oprot.writeMessageBegin('mapExecutor', TMessageType.CALL, self._seqid)
+        args = mapExecutor_args()
         args.src = src
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_applyPartition(self):
+    def recv_mapExecutor(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -319,26 +461,60 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = applyPartition_result()
+        result = mapExecutor_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.ex is not None:
             raise result.ex
         return
 
-    def groupBy(self, src):
+    def mapExecutorTo(self, src):
         """
         Parameters:
          - src
 
         """
-        self.send_groupBy(src)
+        self.send_mapExecutorTo(src)
+        self.recv_mapExecutorTo()
+
+    def send_mapExecutorTo(self, src):
+        self._oprot.writeMessageBegin('mapExecutorTo', TMessageType.CALL, self._seqid)
+        args = mapExecutorTo_args()
+        args.src = src
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_mapExecutorTo(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = mapExecutorTo_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def groupBy(self, src, numPartitions):
+        """
+        Parameters:
+         - src
+         - numPartitions
+
+        """
+        self.send_groupBy(src, numPartitions)
         self.recv_groupBy()
 
-    def send_groupBy(self, src):
+    def send_groupBy(self, src, numPartitions):
         self._oprot.writeMessageBegin('groupBy', TMessageType.CALL, self._seqid)
         args = groupBy_args()
         args.src = src
+        args.numPartitions = numPartitions
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -352,40 +528,6 @@ class Client(Iface):
             iprot.readMessageEnd()
             raise x
         result = groupBy_result()
-        result.read(iprot)
-        iprot.readMessageEnd()
-        if result.ex is not None:
-            raise result.ex
-        return
-
-    def groupBy2(self, src, numPartitions):
-        """
-        Parameters:
-         - src
-         - numPartitions
-
-        """
-        self.send_groupBy2(src, numPartitions)
-        self.recv_groupBy2()
-
-    def send_groupBy2(self, src, numPartitions):
-        self._oprot.writeMessageBegin('groupBy2', TMessageType.CALL, self._seqid)
-        args = groupBy2_args()
-        args.src = src
-        args.numPartitions = numPartitions
-        args.write(self._oprot)
-        self._oprot.writeMessageEnd()
-        self._oprot.trans.flush()
-
-    def recv_groupBy2(self):
-        iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
-        if mtype == TMessageType.EXCEPTION:
-            x = TApplicationException()
-            x.read(iprot)
-            iprot.readMessageEnd()
-            raise x
-        result = groupBy2_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.ex is not None:
@@ -528,6 +670,386 @@ class Client(Iface):
             raise result.ex
         return
 
+    def flatMapValues(self, src):
+        """
+        Parameters:
+         - src
+
+        """
+        self.send_flatMapValues(src)
+        self.recv_flatMapValues()
+
+    def send_flatMapValues(self, src):
+        self._oprot.writeMessageBegin('flatMapValues', TMessageType.CALL, self._seqid)
+        args = flatMapValues_args()
+        args.src = src
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_flatMapValues(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = flatMapValues_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def mapValues(self, src):
+        """
+        Parameters:
+         - src
+
+        """
+        self.send_mapValues(src)
+        self.recv_mapValues()
+
+    def send_mapValues(self, src):
+        self._oprot.writeMessageBegin('mapValues', TMessageType.CALL, self._seqid)
+        args = mapValues_args()
+        args.src = src
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_mapValues(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = mapValues_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def groupByKey(self, numPartitions):
+        """
+        Parameters:
+         - numPartitions
+
+        """
+        self.send_groupByKey(numPartitions)
+        self.recv_groupByKey()
+
+    def send_groupByKey(self, numPartitions):
+        self._oprot.writeMessageBegin('groupByKey', TMessageType.CALL, self._seqid)
+        args = groupByKey_args()
+        args.numPartitions = numPartitions
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_groupByKey(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = groupByKey_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def reduceByKey(self, src, numPartitions, localReduce):
+        """
+        Parameters:
+         - src
+         - numPartitions
+         - localReduce
+
+        """
+        self.send_reduceByKey(src, numPartitions, localReduce)
+        self.recv_reduceByKey()
+
+    def send_reduceByKey(self, src, numPartitions, localReduce):
+        self._oprot.writeMessageBegin('reduceByKey', TMessageType.CALL, self._seqid)
+        args = reduceByKey_args()
+        args.src = src
+        args.numPartitions = numPartitions
+        args.localReduce = localReduce
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_reduceByKey(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = reduceByKey_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def aggregateByKey(self, zero, seqOp, numPartitions):
+        """
+        Parameters:
+         - zero
+         - seqOp
+         - numPartitions
+
+        """
+        self.send_aggregateByKey(zero, seqOp, numPartitions)
+        self.recv_aggregateByKey()
+
+    def send_aggregateByKey(self, zero, seqOp, numPartitions):
+        self._oprot.writeMessageBegin('aggregateByKey', TMessageType.CALL, self._seqid)
+        args = aggregateByKey_args()
+        args.zero = zero
+        args.seqOp = seqOp
+        args.numPartitions = numPartitions
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_aggregateByKey(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = aggregateByKey_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def aggregateByKey4(self, zero, seqOp, combOp, numPartitions):
+        """
+        Parameters:
+         - zero
+         - seqOp
+         - combOp
+         - numPartitions
+
+        """
+        self.send_aggregateByKey4(zero, seqOp, combOp, numPartitions)
+        self.recv_aggregateByKey4()
+
+    def send_aggregateByKey4(self, zero, seqOp, combOp, numPartitions):
+        self._oprot.writeMessageBegin('aggregateByKey4', TMessageType.CALL, self._seqid)
+        args = aggregateByKey4_args()
+        args.zero = zero
+        args.seqOp = seqOp
+        args.combOp = combOp
+        args.numPartitions = numPartitions
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_aggregateByKey4(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = aggregateByKey4_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def foldByKey(self, zero, src, numPartitions, localFold):
+        """
+        Parameters:
+         - zero
+         - src
+         - numPartitions
+         - localFold
+
+        """
+        self.send_foldByKey(zero, src, numPartitions, localFold)
+        self.recv_foldByKey()
+
+    def send_foldByKey(self, zero, src, numPartitions, localFold):
+        self._oprot.writeMessageBegin('foldByKey', TMessageType.CALL, self._seqid)
+        args = foldByKey_args()
+        args.zero = zero
+        args.src = src
+        args.numPartitions = numPartitions
+        args.localFold = localFold
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_foldByKey(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = foldByKey_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def sortByKey(self, ascending):
+        """
+        Parameters:
+         - ascending
+
+        """
+        self.send_sortByKey(ascending)
+        self.recv_sortByKey()
+
+    def send_sortByKey(self, ascending):
+        self._oprot.writeMessageBegin('sortByKey', TMessageType.CALL, self._seqid)
+        args = sortByKey_args()
+        args.ascending = ascending
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_sortByKey(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = sortByKey_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def sortByKey2a(self, ascending, numPartitions):
+        """
+        Parameters:
+         - ascending
+         - numPartitions
+
+        """
+        self.send_sortByKey2a(ascending, numPartitions)
+        self.recv_sortByKey2a()
+
+    def send_sortByKey2a(self, ascending, numPartitions):
+        self._oprot.writeMessageBegin('sortByKey2a', TMessageType.CALL, self._seqid)
+        args = sortByKey2a_args()
+        args.ascending = ascending
+        args.numPartitions = numPartitions
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_sortByKey2a(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = sortByKey2a_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def sortByKey2b(self, src, ascending):
+        """
+        Parameters:
+         - src
+         - ascending
+
+        """
+        self.send_sortByKey2b(src, ascending)
+        self.recv_sortByKey2b()
+
+    def send_sortByKey2b(self, src, ascending):
+        self._oprot.writeMessageBegin('sortByKey2b', TMessageType.CALL, self._seqid)
+        args = sortByKey2b_args()
+        args.src = src
+        args.ascending = ascending
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_sortByKey2b(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = sortByKey2b_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def sortByKey3(self, src, ascending, numPartitions):
+        """
+        Parameters:
+         - src
+         - ascending
+         - numPartitions
+
+        """
+        self.send_sortByKey3(src, ascending, numPartitions)
+        self.recv_sortByKey3()
+
+    def send_sortByKey3(self, src, ascending, numPartitions):
+        self._oprot.writeMessageBegin('sortByKey3', TMessageType.CALL, self._seqid)
+        args = sortByKey3_args()
+        args.src = src
+        args.ascending = ascending
+        args.numPartitions = numPartitions
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_sortByKey3(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = sortByKey3_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
 
 class Processor(Iface, TProcessor):
     def __init__(self, handler):
@@ -536,15 +1058,27 @@ class Processor(Iface, TProcessor):
         self._processMap["map_"] = Processor.process_map_
         self._processMap["filter"] = Processor.process_filter
         self._processMap["flatmap"] = Processor.process_flatmap
+        self._processMap["keyBy"] = Processor.process_keyBy
         self._processMap["mapPartitions"] = Processor.process_mapPartitions
         self._processMap["mapPartitionsWithIndex"] = Processor.process_mapPartitionsWithIndex
-        self._processMap["applyPartition"] = Processor.process_applyPartition
+        self._processMap["mapExecutor"] = Processor.process_mapExecutor
+        self._processMap["mapExecutorTo"] = Processor.process_mapExecutorTo
         self._processMap["groupBy"] = Processor.process_groupBy
-        self._processMap["groupBy2"] = Processor.process_groupBy2
         self._processMap["sort"] = Processor.process_sort
         self._processMap["sort2"] = Processor.process_sort2
         self._processMap["sortBy"] = Processor.process_sortBy
         self._processMap["sortBy3"] = Processor.process_sortBy3
+        self._processMap["flatMapValues"] = Processor.process_flatMapValues
+        self._processMap["mapValues"] = Processor.process_mapValues
+        self._processMap["groupByKey"] = Processor.process_groupByKey
+        self._processMap["reduceByKey"] = Processor.process_reduceByKey
+        self._processMap["aggregateByKey"] = Processor.process_aggregateByKey
+        self._processMap["aggregateByKey4"] = Processor.process_aggregateByKey4
+        self._processMap["foldByKey"] = Processor.process_foldByKey
+        self._processMap["sortByKey"] = Processor.process_sortByKey
+        self._processMap["sortByKey2a"] = Processor.process_sortByKey2a
+        self._processMap["sortByKey2b"] = Processor.process_sortByKey2b
+        self._processMap["sortByKey3"] = Processor.process_sortByKey3
         self._on_message_begin = None
 
     def on_message_begin(self, func):
@@ -645,6 +1179,32 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
+    def process_keyBy(self, seqid, iprot, oprot):
+        args = keyBy_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = keyBy_result()
+        try:
+            self._handler.keyBy(args.src)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("keyBy", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
     def process_mapPartitions(self, seqid, iprot, oprot):
         args = mapPartitions_args()
         args.read(iprot)
@@ -697,13 +1257,13 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_applyPartition(self, seqid, iprot, oprot):
-        args = applyPartition_args()
+    def process_mapExecutor(self, seqid, iprot, oprot):
+        args = mapExecutor_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = applyPartition_result()
+        result = mapExecutor_result()
         try:
-            self._handler.applyPartition(args.src)
+            self._handler.mapExecutor(args.src)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -718,7 +1278,33 @@ class Processor(Iface, TProcessor):
             logging.exception('Unexpected exception in handler')
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("applyPartition", msg_type, seqid)
+        oprot.writeMessageBegin("mapExecutor", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_mapExecutorTo(self, seqid, iprot, oprot):
+        args = mapExecutorTo_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = mapExecutorTo_result()
+        try:
+            self._handler.mapExecutorTo(args.src)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("mapExecutorTo", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -729,7 +1315,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = groupBy_result()
         try:
-            self._handler.groupBy(args.src)
+            self._handler.groupBy(args.src, args.numPartitions)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -745,32 +1331,6 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
         oprot.writeMessageBegin("groupBy", msg_type, seqid)
-        result.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
-
-    def process_groupBy2(self, seqid, iprot, oprot):
-        args = groupBy2_args()
-        args.read(iprot)
-        iprot.readMessageEnd()
-        result = groupBy2_result()
-        try:
-            self._handler.groupBy2(args.src, args.numPartitions)
-            msg_type = TMessageType.REPLY
-        except TTransport.TTransportException:
-            raise
-        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
-            msg_type = TMessageType.REPLY
-            result.ex = ex
-        except TApplicationException as ex:
-            logging.exception('TApplication exception in handler')
-            msg_type = TMessageType.EXCEPTION
-            result = ex
-        except Exception:
-            logging.exception('Unexpected exception in handler')
-            msg_type = TMessageType.EXCEPTION
-            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("groupBy2", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -875,6 +1435,292 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
         oprot.writeMessageBegin("sortBy3", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_flatMapValues(self, seqid, iprot, oprot):
+        args = flatMapValues_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = flatMapValues_result()
+        try:
+            self._handler.flatMapValues(args.src)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("flatMapValues", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_mapValues(self, seqid, iprot, oprot):
+        args = mapValues_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = mapValues_result()
+        try:
+            self._handler.mapValues(args.src)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("mapValues", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_groupByKey(self, seqid, iprot, oprot):
+        args = groupByKey_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = groupByKey_result()
+        try:
+            self._handler.groupByKey(args.numPartitions)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("groupByKey", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_reduceByKey(self, seqid, iprot, oprot):
+        args = reduceByKey_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = reduceByKey_result()
+        try:
+            self._handler.reduceByKey(args.src, args.numPartitions, args.localReduce)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("reduceByKey", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_aggregateByKey(self, seqid, iprot, oprot):
+        args = aggregateByKey_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = aggregateByKey_result()
+        try:
+            self._handler.aggregateByKey(args.zero, args.seqOp, args.numPartitions)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("aggregateByKey", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_aggregateByKey4(self, seqid, iprot, oprot):
+        args = aggregateByKey4_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = aggregateByKey4_result()
+        try:
+            self._handler.aggregateByKey4(args.zero, args.seqOp, args.combOp, args.numPartitions)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("aggregateByKey4", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_foldByKey(self, seqid, iprot, oprot):
+        args = foldByKey_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = foldByKey_result()
+        try:
+            self._handler.foldByKey(args.zero, args.src, args.numPartitions, args.localFold)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("foldByKey", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_sortByKey(self, seqid, iprot, oprot):
+        args = sortByKey_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = sortByKey_result()
+        try:
+            self._handler.sortByKey(args.ascending)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("sortByKey", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_sortByKey2a(self, seqid, iprot, oprot):
+        args = sortByKey2a_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = sortByKey2a_result()
+        try:
+            self._handler.sortByKey2a(args.ascending, args.numPartitions)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("sortByKey2a", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_sortByKey2b(self, seqid, iprot, oprot):
+        args = sortByKey2b_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = sortByKey2b_result()
+        try:
+            self._handler.sortByKey2b(args.src, args.ascending)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("sortByKey2b", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_sortByKey3(self, seqid, iprot, oprot):
+        args = sortByKey3_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = sortByKey3_result()
+        try:
+            self._handler.sortByKey3(args.src, args.ascending, args.numPartitions)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("sortByKey3", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -1260,6 +2106,132 @@ flatmap_result.thrift_spec = (
 )
 
 
+class keyBy_args(object):
+    """
+    Attributes:
+     - src
+
+    """
+
+
+    def __init__(self, src=None,):
+        self.src = src
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.src = ignis.rpc.source.ttypes.ISource()
+                    self.src.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('keyBy_args')
+        if self.src is not None:
+            oprot.writeFieldBegin('src', TType.STRUCT, 1)
+            self.src.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(keyBy_args)
+keyBy_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
+)
+
+
+class keyBy_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('keyBy_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(keyBy_result)
+keyBy_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
 class mapPartitions_args(object):
     """
     Attributes:
@@ -1536,7 +2508,7 @@ mapPartitionsWithIndex_result.thrift_spec = (
 )
 
 
-class applyPartition_args(object):
+class mapExecutor_args(object):
     """
     Attributes:
      - src
@@ -1571,7 +2543,7 @@ class applyPartition_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('applyPartition_args')
+        oprot.writeStructBegin('mapExecutor_args')
         if self.src is not None:
             oprot.writeFieldBegin('src', TType.STRUCT, 1)
             self.src.write(oprot)
@@ -1592,14 +2564,14 @@ class applyPartition_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(applyPartition_args)
-applyPartition_args.thrift_spec = (
+all_structs.append(mapExecutor_args)
+mapExecutor_args.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
 )
 
 
-class applyPartition_result(object):
+class mapExecutor_result(object):
     """
     Attributes:
      - ex
@@ -1634,7 +2606,7 @@ class applyPartition_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('applyPartition_result')
+        oprot.writeStructBegin('mapExecutor_result')
         if self.ex is not None:
             oprot.writeFieldBegin('ex', TType.STRUCT, 1)
             self.ex.write(oprot)
@@ -1655,14 +2627,14 @@ class applyPartition_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(applyPartition_result)
-applyPartition_result.thrift_spec = (
+all_structs.append(mapExecutor_result)
+mapExecutor_result.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
 )
 
 
-class groupBy_args(object):
+class mapExecutorTo_args(object):
     """
     Attributes:
      - src
@@ -1697,10 +2669,147 @@ class groupBy_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
+        oprot.writeStructBegin('mapExecutorTo_args')
+        if self.src is not None:
+            oprot.writeFieldBegin('src', TType.STRUCT, 1)
+            self.src.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(mapExecutorTo_args)
+mapExecutorTo_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
+)
+
+
+class mapExecutorTo_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('mapExecutorTo_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(mapExecutorTo_result)
+mapExecutorTo_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class groupBy_args(object):
+    """
+    Attributes:
+     - src
+     - numPartitions
+
+    """
+
+
+    def __init__(self, src=None, numPartitions=None,):
+        self.src = src
+        self.numPartitions = numPartitions
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.src = ignis.rpc.source.ttypes.ISource()
+                    self.src.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I64:
+                    self.numPartitions = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
         oprot.writeStructBegin('groupBy_args')
         if self.src is not None:
             oprot.writeFieldBegin('src', TType.STRUCT, 1)
             self.src.write(oprot)
+            oprot.writeFieldEnd()
+        if self.numPartitions is not None:
+            oprot.writeFieldBegin('numPartitions', TType.I64, 2)
+            oprot.writeI64(self.numPartitions)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -1722,6 +2831,7 @@ all_structs.append(groupBy_args)
 groupBy_args.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
+    (2, TType.I64, 'numPartitions', None, None, ),  # 2
 )
 
 
@@ -1783,144 +2893,6 @@ class groupBy_result(object):
         return not (self == other)
 all_structs.append(groupBy_result)
 groupBy_result.thrift_spec = (
-    None,  # 0
-    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
-)
-
-
-class groupBy2_args(object):
-    """
-    Attributes:
-     - src
-     - numPartitions
-
-    """
-
-
-    def __init__(self, src=None, numPartitions=None,):
-        self.src = src
-        self.numPartitions = numPartitions
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.STRUCT:
-                    self.src = ignis.rpc.source.ttypes.ISource()
-                    self.src.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            elif fid == 2:
-                if ftype == TType.I64:
-                    self.numPartitions = iprot.readI64()
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('groupBy2_args')
-        if self.src is not None:
-            oprot.writeFieldBegin('src', TType.STRUCT, 1)
-            self.src.write(oprot)
-            oprot.writeFieldEnd()
-        if self.numPartitions is not None:
-            oprot.writeFieldBegin('numPartitions', TType.I64, 2)
-            oprot.writeI64(self.numPartitions)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(groupBy2_args)
-groupBy2_args.thrift_spec = (
-    None,  # 0
-    (1, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
-    (2, TType.I64, 'numPartitions', None, None, ),  # 2
-)
-
-
-class groupBy2_result(object):
-    """
-    Attributes:
-     - ex
-
-    """
-
-
-    def __init__(self, ex=None,):
-        self.ex = ex
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.STRUCT:
-                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException()
-                    self.ex.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('groupBy2_result')
-        if self.ex is not None:
-            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
-            self.ex.write(oprot)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(groupBy2_result)
-groupBy2_result.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
 )
@@ -2471,6 +3443,1561 @@ class sortBy3_result(object):
         return not (self == other)
 all_structs.append(sortBy3_result)
 sortBy3_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class flatMapValues_args(object):
+    """
+    Attributes:
+     - src
+
+    """
+
+
+    def __init__(self, src=None,):
+        self.src = src
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.src = ignis.rpc.source.ttypes.ISource()
+                    self.src.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('flatMapValues_args')
+        if self.src is not None:
+            oprot.writeFieldBegin('src', TType.STRUCT, 1)
+            self.src.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(flatMapValues_args)
+flatMapValues_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
+)
+
+
+class flatMapValues_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('flatMapValues_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(flatMapValues_result)
+flatMapValues_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class mapValues_args(object):
+    """
+    Attributes:
+     - src
+
+    """
+
+
+    def __init__(self, src=None,):
+        self.src = src
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.src = ignis.rpc.source.ttypes.ISource()
+                    self.src.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('mapValues_args')
+        if self.src is not None:
+            oprot.writeFieldBegin('src', TType.STRUCT, 1)
+            self.src.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(mapValues_args)
+mapValues_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
+)
+
+
+class mapValues_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('mapValues_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(mapValues_result)
+mapValues_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class groupByKey_args(object):
+    """
+    Attributes:
+     - numPartitions
+
+    """
+
+
+    def __init__(self, numPartitions=None,):
+        self.numPartitions = numPartitions
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I64:
+                    self.numPartitions = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('groupByKey_args')
+        if self.numPartitions is not None:
+            oprot.writeFieldBegin('numPartitions', TType.I64, 1)
+            oprot.writeI64(self.numPartitions)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(groupByKey_args)
+groupByKey_args.thrift_spec = (
+    None,  # 0
+    (1, TType.I64, 'numPartitions', None, None, ),  # 1
+)
+
+
+class groupByKey_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('groupByKey_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(groupByKey_result)
+groupByKey_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class reduceByKey_args(object):
+    """
+    Attributes:
+     - src
+     - numPartitions
+     - localReduce
+
+    """
+
+
+    def __init__(self, src=None, numPartitions=None, localReduce=None,):
+        self.src = src
+        self.numPartitions = numPartitions
+        self.localReduce = localReduce
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.src = ignis.rpc.source.ttypes.ISource()
+                    self.src.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I64:
+                    self.numPartitions = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.BOOL:
+                    self.localReduce = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('reduceByKey_args')
+        if self.src is not None:
+            oprot.writeFieldBegin('src', TType.STRUCT, 1)
+            self.src.write(oprot)
+            oprot.writeFieldEnd()
+        if self.numPartitions is not None:
+            oprot.writeFieldBegin('numPartitions', TType.I64, 2)
+            oprot.writeI64(self.numPartitions)
+            oprot.writeFieldEnd()
+        if self.localReduce is not None:
+            oprot.writeFieldBegin('localReduce', TType.BOOL, 3)
+            oprot.writeBool(self.localReduce)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(reduceByKey_args)
+reduceByKey_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
+    (2, TType.I64, 'numPartitions', None, None, ),  # 2
+    (3, TType.BOOL, 'localReduce', None, None, ),  # 3
+)
+
+
+class reduceByKey_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('reduceByKey_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(reduceByKey_result)
+reduceByKey_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class aggregateByKey_args(object):
+    """
+    Attributes:
+     - zero
+     - seqOp
+     - numPartitions
+
+    """
+
+
+    def __init__(self, zero=None, seqOp=None, numPartitions=None,):
+        self.zero = zero
+        self.seqOp = seqOp
+        self.numPartitions = numPartitions
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.zero = ignis.rpc.source.ttypes.ISource()
+                    self.zero.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self.seqOp = ignis.rpc.source.ttypes.ISource()
+                    self.seqOp.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I64:
+                    self.numPartitions = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('aggregateByKey_args')
+        if self.zero is not None:
+            oprot.writeFieldBegin('zero', TType.STRUCT, 1)
+            self.zero.write(oprot)
+            oprot.writeFieldEnd()
+        if self.seqOp is not None:
+            oprot.writeFieldBegin('seqOp', TType.STRUCT, 2)
+            self.seqOp.write(oprot)
+            oprot.writeFieldEnd()
+        if self.numPartitions is not None:
+            oprot.writeFieldBegin('numPartitions', TType.I64, 3)
+            oprot.writeI64(self.numPartitions)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(aggregateByKey_args)
+aggregateByKey_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'zero', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
+    (2, TType.STRUCT, 'seqOp', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 2
+    (3, TType.I64, 'numPartitions', None, None, ),  # 3
+)
+
+
+class aggregateByKey_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('aggregateByKey_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(aggregateByKey_result)
+aggregateByKey_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class aggregateByKey4_args(object):
+    """
+    Attributes:
+     - zero
+     - seqOp
+     - combOp
+     - numPartitions
+
+    """
+
+
+    def __init__(self, zero=None, seqOp=None, combOp=None, numPartitions=None,):
+        self.zero = zero
+        self.seqOp = seqOp
+        self.combOp = combOp
+        self.numPartitions = numPartitions
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.zero = ignis.rpc.source.ttypes.ISource()
+                    self.zero.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self.seqOp = ignis.rpc.source.ttypes.ISource()
+                    self.seqOp.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRUCT:
+                    self.combOp = ignis.rpc.source.ttypes.ISource()
+                    self.combOp.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.I64:
+                    self.numPartitions = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('aggregateByKey4_args')
+        if self.zero is not None:
+            oprot.writeFieldBegin('zero', TType.STRUCT, 1)
+            self.zero.write(oprot)
+            oprot.writeFieldEnd()
+        if self.seqOp is not None:
+            oprot.writeFieldBegin('seqOp', TType.STRUCT, 2)
+            self.seqOp.write(oprot)
+            oprot.writeFieldEnd()
+        if self.combOp is not None:
+            oprot.writeFieldBegin('combOp', TType.STRUCT, 3)
+            self.combOp.write(oprot)
+            oprot.writeFieldEnd()
+        if self.numPartitions is not None:
+            oprot.writeFieldBegin('numPartitions', TType.I64, 4)
+            oprot.writeI64(self.numPartitions)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(aggregateByKey4_args)
+aggregateByKey4_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'zero', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
+    (2, TType.STRUCT, 'seqOp', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 2
+    (3, TType.STRUCT, 'combOp', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 3
+    (4, TType.I64, 'numPartitions', None, None, ),  # 4
+)
+
+
+class aggregateByKey4_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('aggregateByKey4_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(aggregateByKey4_result)
+aggregateByKey4_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class foldByKey_args(object):
+    """
+    Attributes:
+     - zero
+     - src
+     - numPartitions
+     - localFold
+
+    """
+
+
+    def __init__(self, zero=None, src=None, numPartitions=None, localFold=None,):
+        self.zero = zero
+        self.src = src
+        self.numPartitions = numPartitions
+        self.localFold = localFold
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.zero = ignis.rpc.source.ttypes.ISource()
+                    self.zero.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self.src = ignis.rpc.source.ttypes.ISource()
+                    self.src.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I64:
+                    self.numPartitions = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.BOOL:
+                    self.localFold = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('foldByKey_args')
+        if self.zero is not None:
+            oprot.writeFieldBegin('zero', TType.STRUCT, 1)
+            self.zero.write(oprot)
+            oprot.writeFieldEnd()
+        if self.src is not None:
+            oprot.writeFieldBegin('src', TType.STRUCT, 2)
+            self.src.write(oprot)
+            oprot.writeFieldEnd()
+        if self.numPartitions is not None:
+            oprot.writeFieldBegin('numPartitions', TType.I64, 3)
+            oprot.writeI64(self.numPartitions)
+            oprot.writeFieldEnd()
+        if self.localFold is not None:
+            oprot.writeFieldBegin('localFold', TType.BOOL, 4)
+            oprot.writeBool(self.localFold)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(foldByKey_args)
+foldByKey_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'zero', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
+    (2, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 2
+    (3, TType.I64, 'numPartitions', None, None, ),  # 3
+    (4, TType.BOOL, 'localFold', None, None, ),  # 4
+)
+
+
+class foldByKey_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('foldByKey_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(foldByKey_result)
+foldByKey_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class sortByKey_args(object):
+    """
+    Attributes:
+     - ascending
+
+    """
+
+
+    def __init__(self, ascending=None,):
+        self.ascending = ascending
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.BOOL:
+                    self.ascending = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('sortByKey_args')
+        if self.ascending is not None:
+            oprot.writeFieldBegin('ascending', TType.BOOL, 1)
+            oprot.writeBool(self.ascending)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(sortByKey_args)
+sortByKey_args.thrift_spec = (
+    None,  # 0
+    (1, TType.BOOL, 'ascending', None, None, ),  # 1
+)
+
+
+class sortByKey_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('sortByKey_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(sortByKey_result)
+sortByKey_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class sortByKey2a_args(object):
+    """
+    Attributes:
+     - ascending
+     - numPartitions
+
+    """
+
+
+    def __init__(self, ascending=None, numPartitions=None,):
+        self.ascending = ascending
+        self.numPartitions = numPartitions
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.BOOL:
+                    self.ascending = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I64:
+                    self.numPartitions = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('sortByKey2a_args')
+        if self.ascending is not None:
+            oprot.writeFieldBegin('ascending', TType.BOOL, 1)
+            oprot.writeBool(self.ascending)
+            oprot.writeFieldEnd()
+        if self.numPartitions is not None:
+            oprot.writeFieldBegin('numPartitions', TType.I64, 2)
+            oprot.writeI64(self.numPartitions)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(sortByKey2a_args)
+sortByKey2a_args.thrift_spec = (
+    None,  # 0
+    (1, TType.BOOL, 'ascending', None, None, ),  # 1
+    (2, TType.I64, 'numPartitions', None, None, ),  # 2
+)
+
+
+class sortByKey2a_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('sortByKey2a_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(sortByKey2a_result)
+sortByKey2a_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class sortByKey2b_args(object):
+    """
+    Attributes:
+     - src
+     - ascending
+
+    """
+
+
+    def __init__(self, src=None, ascending=None,):
+        self.src = src
+        self.ascending = ascending
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.src = ignis.rpc.source.ttypes.ISource()
+                    self.src.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.BOOL:
+                    self.ascending = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('sortByKey2b_args')
+        if self.src is not None:
+            oprot.writeFieldBegin('src', TType.STRUCT, 1)
+            self.src.write(oprot)
+            oprot.writeFieldEnd()
+        if self.ascending is not None:
+            oprot.writeFieldBegin('ascending', TType.BOOL, 2)
+            oprot.writeBool(self.ascending)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(sortByKey2b_args)
+sortByKey2b_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
+    (2, TType.BOOL, 'ascending', None, None, ),  # 2
+)
+
+
+class sortByKey2b_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('sortByKey2b_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(sortByKey2b_result)
+sortByKey2b_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class sortByKey3_args(object):
+    """
+    Attributes:
+     - src
+     - ascending
+     - numPartitions
+
+    """
+
+
+    def __init__(self, src=None, ascending=None, numPartitions=None,):
+        self.src = src
+        self.ascending = ascending
+        self.numPartitions = numPartitions
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.src = ignis.rpc.source.ttypes.ISource()
+                    self.src.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.BOOL:
+                    self.ascending = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I64:
+                    self.numPartitions = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('sortByKey3_args')
+        if self.src is not None:
+            oprot.writeFieldBegin('src', TType.STRUCT, 1)
+            self.src.write(oprot)
+            oprot.writeFieldEnd()
+        if self.ascending is not None:
+            oprot.writeFieldBegin('ascending', TType.BOOL, 2)
+            oprot.writeBool(self.ascending)
+            oprot.writeFieldEnd()
+        if self.numPartitions is not None:
+            oprot.writeFieldBegin('numPartitions', TType.I64, 3)
+            oprot.writeI64(self.numPartitions)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(sortByKey3_args)
+sortByKey3_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
+    (2, TType.BOOL, 'ascending', None, None, ),  # 2
+    (3, TType.I64, 'numPartitions', None, None, ),  # 3
+)
+
+
+class sortByKey3_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('sortByKey3_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(sortByKey3_result)
+sortByKey3_result.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
 )

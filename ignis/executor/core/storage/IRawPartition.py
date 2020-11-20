@@ -272,17 +272,17 @@ class IHeaderTypeBinary(IHeaderType):
 		if header_tp is None:
 			header_tp = IReader._readTypeAux(protocol)
 		elems = IReader._readSizeAux(protocol)
-		return elems, None
+		return elems, IEnumTypes.I_I08.value
 
 	def write(self, protocol, elems, tp):
-		protocol._writeTypeAux(IEnumTypes.I_BINARY.value)
+		IWriter._writeTypeAux(protocol, IEnumTypes.I_BINARY.value)
 		IWriter._writeSizeAux(protocol, elems)
 
 	def getElemRead(self, tp):
-		return IObjectProtocol.readByte
+		return lambda protocol: protocol.readByte() + 128
 
 	def getElemWrite(self, obj):
-		return IObjectProtocol.writeByte
+		return lambda protocol, obj: protocol.writeByte(obj - 128), IEnumTypes.I_I08.value
 
 
 class IHeaderTypeNative(IHeaderType):

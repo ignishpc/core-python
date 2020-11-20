@@ -24,6 +24,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('Usage: ' + sys.argv[0] + ' [-h host[:port]] [-u url] [-f[ramed]] [-s[sl]] [-novalidate] [-ca_certs certs] [-keyfile keyfile] [-certfile certfile] function [arg1 [arg2...]]')
     print('')
     print('Functions:')
+    print('  void loadClass(ISource src)')
     print('  i64 partitionCount()')
     print('  i64 partitionApproxSize()')
     print('  void textFile(string path)')
@@ -115,7 +116,13 @@ protocol = TBinaryProtocol(transport)
 client = IIOModule.Client(protocol)
 transport.open()
 
-if cmd == 'partitionCount':
+if cmd == 'loadClass':
+    if len(args) != 1:
+        print('loadClass requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.loadClass(eval(args[0]),))
+
+elif cmd == 'partitionCount':
     if len(args) != 0:
         print('partitionCount requires 0 args')
         sys.exit(1)

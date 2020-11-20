@@ -1,8 +1,9 @@
-from thrift.transport.TTransport import TTransportBase, CReadableTransport, TTransportException
-from enum import Enum
-import sys
 import ctypes
 import ctypes.util
+import sys
+from enum import Enum
+
+from thrift.transport.TTransport import TTransportBase, CReadableTransport, TTransportException
 
 
 class IBuffer:
@@ -17,9 +18,13 @@ class IBuffer:
 	__free.argtypes = [ctypes.c_void_p]
 	__free.restype = None
 
-	def __init__(self, sz):
+	def __init__(self, sz, address=None):
 		self.__sz = sz
-		self.__address = self.__malloc(sz)
+		self.__own = address is None
+		if self.__own:
+			self.__address = self.__malloc(sz)
+		else:
+			self.__address = address
 
 	def __len__(self):
 		return self.__sz
@@ -33,14 +38,21 @@ class IBuffer:
 		ctypes.memmove(self.__address + index.start, value, index.stop - index.start)
 
 	def realloc(self, sz):
-		self.__sz = sz
-		self.__address = self.__realloc(self.__address, sz)
+		if self.__own:
+			self.__sz = sz
+			self.__address = self.__realloc(self.__address, sz)
+		else:
+			raise BufferError("no buffer own")
 
 	def free(self):
-		self.__free(self.__address)
+		if self.__own:
+			self.__free(self.__address)
 
 	def address(self, offset=0):
 		return (ctypes.c_byte * (self.__sz - offset)).from_address(self.__address + offset)
+
+	def offset(self, n):
+		return IBuffer(self.__sz - n, self.__address + n)
 
 	__del__ = free
 
@@ -231,7 +243,7 @@ class IMemoryBuffer(TTransportBase, CReadableTransport):
 	def __initCommon(self, buf, size, owner, wPos):
 		self.__maxBufferSize = sys.maxsize
 
-		if buf is None and size != 0:
+		if buf is None:
 			buf = IBuffer(size)
 		self.__buffer = buf
 		self.__rBase = wPos

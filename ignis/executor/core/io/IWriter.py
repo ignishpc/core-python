@@ -93,7 +93,9 @@ class IWriterTypeIt(IWriterType):
 		IWriterType.__init__(self, id, write)
 
 	def get(self, obj):
-		return self._getWriter(type(next(iter(obj))))
+		if obj:
+			return self._getWriter(type(next(iter(obj))))
+		return self._getWriter(None)
 
 
 IWriter[type(None)] = IWriterType(IEnumTypes.I_VOID, lambda protocol, obj: None)
@@ -158,7 +160,7 @@ def __writePair(protocol, obj):
 def __writeBytes(protocol, obj):
 	IWriter._writeSizeAux(protocol, len(obj))
 	for b in obj:
-		protocol.writeByte(b)
+		protocol.writeByte(b - 128)
 
 
 IWriter[list] = IWriterTypeIt(IEnumTypes.I_LIST, __writeList)

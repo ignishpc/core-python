@@ -17,7 +17,7 @@ class IExecutorData:
 		self.__properties = IPropertyParser(self.__context.props())
 		self.__library_loader = ILibraryLoader()
 		self.__partition_tools = IPartitionTools(self.__properties, self.__context)
-		self.__mpi = IMpi(self.__properties, self.__context)
+		self.__mpi = IMpi(self.__properties, self.__partition_tools, self.__context)
 		self.__partitions = None
 		self.__variables = dict()
 
@@ -28,6 +28,9 @@ class IExecutorData:
 		old = self.__partitions
 		self.__partitions = group
 		return old
+
+	def hasPartitions(self):
+		return self.__partitions is not None
 
 	def deletePartitions(self):
 		self.__partitions = None
@@ -45,7 +48,7 @@ class IExecutorData:
 		self.__variables.clear()
 
 	def infoDirectory(self):
-		info = self.__properties.jobDirectory() + "/info"
+		info = self.__properties.executorDirectory() + "/info"
 		self.__partition_tools.createDirectoryIfNotExists(info)
 		return info
 

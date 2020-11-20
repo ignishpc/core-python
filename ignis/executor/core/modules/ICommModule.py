@@ -2,6 +2,7 @@ from ignis.executor.core.modules.IModule import IModule
 from ignis.rpc.executor.comm.ICommModule import Iface as ICommModuleIface, Processor as ICommModuleProcessor
 from ignis.executor.core.transport.IBytesTransport import IBytesTransport
 from ignis.executor.core.transport.IMemoryBuffer import IMemoryBuffer
+from ignis.executor.core.protocol.IObjectProtocol import IObjectProtocol
 from ignis.executor.core.IMpi import MPI
 import logging
 import ctypes
@@ -171,15 +172,19 @@ class ICommModule(IModule, ICommModuleIface):
 		except Exception as ex:
 			self._pack_exception(ex)
 
-	def getPartitions(self):
+	def getProtocol(self):
+		return IObjectProtocol.PYTHON_PROTOCOL
+
+	def getPartitions(self, protocol):
 		try:
 			partitions = list()
 			group = self._executor_data.getPartitions()
 			cmp = self._executor_data.getProperties().msgCompression()
+			native = self.getProtocol() == protocol and self._executor_data.getProperties().nativeSerialization()
 			buffer = IMemoryBuffer()
 			for part in group:
 				buffer.resetBuffer()
-				part.write(part, cmp)
+				part.write(part, cmp, native)
 				partitions.append(buffer.getBufferAsBytes())
 			return partitions
 		except Exception as ex:
@@ -210,13 +215,13 @@ class ICommModule(IModule, ICommModuleIface):
 		except Exception as ex:
 			self._pack_exception(ex)
 
-	def driverScatter(self, id, dataId):
+	def driverScatter(self, id):
 		try:
 			raise NotImplementedError()
 		except Exception as ex:
 			self._pack_exception(ex)
 
-	def driverScatter3(self, id, dataId, src):
+	def driverScatter2(self, id, src):
 		try:
 			raise NotImplementedError()
 		except Exception as ex:
