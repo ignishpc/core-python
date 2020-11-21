@@ -1,10 +1,12 @@
 import logging
 import threading
-from ignis.executor.core.modules.IModule import IModule
+
 from thrift.TMultiplexedProcessor import TMultiplexedProcessor
+from thrift.protocol.TCompactProtocol import TCompactProtocolFactory
 from thrift.server.TServer import TServer
 from thrift.transport.TSocket import TServerSocket
-from thrift.protocol.TCompactProtocol import TCompactProtocolFactory
+
+from ignis.executor.core.modules.IModule import IModule
 from ignis.executor.core.transport.IZlibTransport import IZlibTransportFactory
 from ignis.rpc.executor.server.IExecutorServerModule import Iface as IExecutorServerModuleIface, \
 	Processor as IExecutorServerModuleProcessor
@@ -63,7 +65,7 @@ class IThreadedServer(TServer):
 class IExecutorServerModule(IModule, IExecutorServerModuleIface):
 
 	def __init__(self, executor_data):
-		IModule.__init__(self, executor_data)
+		IModule.__init__(self, executor_data, logger)
 		self.__server = None
 		self.__processor = None
 
@@ -78,16 +80,16 @@ class IExecutorServerModule(IModule, IExecutorServerModuleIface):
 			)
 
 			self.__processor.registerProcessor(name, IExecutorServerModuleProcessor(self))
-			logger.info("ServerModule: cpp executor started")
+			logger.info("ServerModule: python executor started")
 			self.__server.serve()
-			logger.info("ServerModule: cpp executor stopped")
+			logger.info("ServerModule: python executor stopped")
 			self.__server.stop()
 
 	def start(self, properties):
 		try:
 			self._executor_data.getContext().props.update(properties)
 			self._createServices(self.__processor)
-			logger.info("ServerModule: cpp executor ready")
+			logger.info("ServerModule: python executor ready")
 		except Exception as ex:
 			self._pack_exception(ex)
 

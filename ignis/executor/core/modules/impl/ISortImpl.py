@@ -1,18 +1,22 @@
-from ignis.executor.core.modules.impl.IBaseImpl import IBaseImpl
-from ignis.executor.core.IMpi import MPI
+import functools
 import logging
 import math
-import functools
+
+from ignis.executor.core.IMpi import MPI
+from ignis.executor.core.modules.impl.IBaseImpl import IBaseImpl
 
 logger = logging.getLogger(__name__)
 
 
 class ISortImpl(IBaseImpl):
 
-	def sort(self, ascending, numPartitions):
+	def __init__(self, executor_data):
+		IBaseImpl.__init__(self, executor_data)
+
+	def sort(self, ascending, numPartitions=-1):
 		self.__sortImpl(None, ascending, numPartitions)
 
-	def sortBy(self, f, ascending, numPartitions):
+	def sortBy(self, f, ascending, numPartitions=-1):
 		context = self._executor_data.getContext()
 		f.before(context)
 		self.__sortImpl(lambda a, b: f.call(a, b, context), ascending, numPartitions)

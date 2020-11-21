@@ -1,6 +1,6 @@
+from ignis.executor.core.protocol.IObjectProtocol import IObjectProtocol
 from ignis.executor.core.storage.IRawPartition import IRawPartition
 from ignis.executor.core.transport.IMemoryBuffer import IMemoryBuffer
-from ignis.executor.core.protocol.IObjectProtocol import IObjectProtocol
 
 
 class IRawMemoryPartition(IRawPartition):

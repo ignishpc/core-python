@@ -492,11 +492,30 @@ class Iface(object):
         """
         pass
 
-    def groupByKey2(self, id, numPartitions):
+    def groupByKey2a(self, id, numPartitions):
         """
         Parameters:
          - id
          - numPartitions
+
+        """
+        pass
+
+    def groupByKey2b(self, id, src):
+        """
+        Parameters:
+         - id
+         - src
+
+        """
+        pass
+
+    def groupByKey3(self, id, numPartitions, src):
+        """
+        Parameters:
+         - id
+         - numPartitions
+         - src
 
         """
         pass
@@ -658,18 +677,20 @@ class Iface(object):
         """
         pass
 
-    def countByKey(self, id):
+    def countByKey(self, id, tp):
         """
         Parameters:
          - id
+         - tp
 
         """
         pass
 
-    def countByValue(self, id):
+    def countByValue(self, id, tp):
         """
         Parameters:
          - id
+         - tp
 
         """
         pass
@@ -2488,26 +2509,26 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "groupByKey failed: unknown result")
 
-    def groupByKey2(self, id, numPartitions):
+    def groupByKey2a(self, id, numPartitions):
         """
         Parameters:
          - id
          - numPartitions
 
         """
-        self.send_groupByKey2(id, numPartitions)
-        return self.recv_groupByKey2()
+        self.send_groupByKey2a(id, numPartitions)
+        return self.recv_groupByKey2a()
 
-    def send_groupByKey2(self, id, numPartitions):
-        self._oprot.writeMessageBegin('groupByKey2', TMessageType.CALL, self._seqid)
-        args = groupByKey2_args()
+    def send_groupByKey2a(self, id, numPartitions):
+        self._oprot.writeMessageBegin('groupByKey2a', TMessageType.CALL, self._seqid)
+        args = groupByKey2a_args()
         args.id = id
         args.numPartitions = numPartitions
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_groupByKey2(self):
+    def recv_groupByKey2a(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -2515,14 +2536,88 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = groupByKey2_result()
+        result = groupByKey2a_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.success is not None:
             return result.success
         if result.ex is not None:
             raise result.ex
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "groupByKey2 failed: unknown result")
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "groupByKey2a failed: unknown result")
+
+    def groupByKey2b(self, id, src):
+        """
+        Parameters:
+         - id
+         - src
+
+        """
+        self.send_groupByKey2b(id, src)
+        return self.recv_groupByKey2b()
+
+    def send_groupByKey2b(self, id, src):
+        self._oprot.writeMessageBegin('groupByKey2b', TMessageType.CALL, self._seqid)
+        args = groupByKey2b_args()
+        args.id = id
+        args.src = src
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_groupByKey2b(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = groupByKey2b_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.ex is not None:
+            raise result.ex
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "groupByKey2b failed: unknown result")
+
+    def groupByKey3(self, id, numPartitions, src):
+        """
+        Parameters:
+         - id
+         - numPartitions
+         - src
+
+        """
+        self.send_groupByKey3(id, numPartitions, src)
+        return self.recv_groupByKey3()
+
+    def send_groupByKey3(self, id, numPartitions, src):
+        self._oprot.writeMessageBegin('groupByKey3', TMessageType.CALL, self._seqid)
+        args = groupByKey3_args()
+        args.id = id
+        args.numPartitions = numPartitions
+        args.src = src
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_groupByKey3(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = groupByKey3_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.ex is not None:
+            raise result.ex
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "groupByKey3 failed: unknown result")
 
     def reduceByKey(self, id, src, localReduce):
         """
@@ -3108,19 +3203,21 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "sampleByKey failed: unknown result")
 
-    def countByKey(self, id):
+    def countByKey(self, id, tp):
         """
         Parameters:
          - id
+         - tp
 
         """
-        self.send_countByKey(id)
+        self.send_countByKey(id, tp)
         return self.recv_countByKey()
 
-    def send_countByKey(self, id):
+    def send_countByKey(self, id, tp):
         self._oprot.writeMessageBegin('countByKey', TMessageType.CALL, self._seqid)
         args = countByKey_args()
         args.id = id
+        args.tp = tp
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -3142,19 +3239,21 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "countByKey failed: unknown result")
 
-    def countByValue(self, id):
+    def countByValue(self, id, tp):
         """
         Parameters:
          - id
+         - tp
 
         """
-        self.send_countByValue(id)
+        self.send_countByValue(id, tp)
         return self.recv_countByValue()
 
-    def send_countByValue(self, id):
+    def send_countByValue(self, id, tp):
         self._oprot.writeMessageBegin('countByValue', TMessageType.CALL, self._seqid)
         args = countByValue_args()
         args.id = id
+        args.tp = tp
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -3230,7 +3329,9 @@ class Processor(Iface, TProcessor):
         self._processMap["flatMapValues"] = Processor.process_flatMapValues
         self._processMap["mapValues"] = Processor.process_mapValues
         self._processMap["groupByKey"] = Processor.process_groupByKey
-        self._processMap["groupByKey2"] = Processor.process_groupByKey2
+        self._processMap["groupByKey2a"] = Processor.process_groupByKey2a
+        self._processMap["groupByKey2b"] = Processor.process_groupByKey2b
+        self._processMap["groupByKey3"] = Processor.process_groupByKey3
         self._processMap["reduceByKey"] = Processor.process_reduceByKey
         self._processMap["reduceByKey4"] = Processor.process_reduceByKey4
         self._processMap["aggregateByKey"] = Processor.process_aggregateByKey
@@ -4544,13 +4645,13 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_groupByKey2(self, seqid, iprot, oprot):
-        args = groupByKey2_args()
+    def process_groupByKey2a(self, seqid, iprot, oprot):
+        args = groupByKey2a_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = groupByKey2_result()
+        result = groupByKey2a_result()
         try:
-            result.success = self._handler.groupByKey2(args.id, args.numPartitions)
+            result.success = self._handler.groupByKey2a(args.id, args.numPartitions)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -4565,7 +4666,59 @@ class Processor(Iface, TProcessor):
             logging.exception('Unexpected exception in handler')
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("groupByKey2", msg_type, seqid)
+        oprot.writeMessageBegin("groupByKey2a", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_groupByKey2b(self, seqid, iprot, oprot):
+        args = groupByKey2b_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = groupByKey2b_result()
+        try:
+            result.success = self._handler.groupByKey2b(args.id, args.src)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("groupByKey2b", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_groupByKey3(self, seqid, iprot, oprot):
+        args = groupByKey3_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = groupByKey3_result()
+        try:
+            result.success = self._handler.groupByKey3(args.id, args.numPartitions, args.src)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("groupByKey3", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -4966,7 +5119,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = countByKey_result()
         try:
-            result.success = self._handler.countByKey(args.id)
+            result.success = self._handler.countByKey(args.id, args.tp)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -4992,7 +5145,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = countByValue_result()
         try:
-            result.success = self._handler.countByValue(args.id)
+            result.success = self._handler.countByValue(args.id, args.tp)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -12635,7 +12788,7 @@ groupByKey_result.thrift_spec = (
 )
 
 
-class groupByKey2_args(object):
+class groupByKey2a_args(object):
     """
     Attributes:
      - id
@@ -12677,7 +12830,7 @@ class groupByKey2_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('groupByKey2_args')
+        oprot.writeStructBegin('groupByKey2a_args')
         if self.id is not None:
             oprot.writeFieldBegin('id', TType.STRUCT, 1)
             self.id.write(oprot)
@@ -12702,15 +12855,15 @@ class groupByKey2_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(groupByKey2_args)
-groupByKey2_args.thrift_spec = (
+all_structs.append(groupByKey2a_args)
+groupByKey2a_args.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'id', [IDataFrameId, None], None, ),  # 1
     (2, TType.I64, 'numPartitions', None, None, ),  # 2
 )
 
 
-class groupByKey2_result(object):
+class groupByKey2a_result(object):
     """
     Attributes:
      - success
@@ -12753,7 +12906,7 @@ class groupByKey2_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('groupByKey2_result')
+        oprot.writeStructBegin('groupByKey2a_result')
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.STRUCT, 0)
             self.success.write(oprot)
@@ -12778,8 +12931,322 @@ class groupByKey2_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(groupByKey2_result)
-groupByKey2_result.thrift_spec = (
+all_structs.append(groupByKey2a_result)
+groupByKey2a_result.thrift_spec = (
+    (0, TType.STRUCT, 'success', [IDataFrameId, None], None, ),  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.driver.exception.ttypes.IDriverException, None], None, ),  # 1
+)
+
+
+class groupByKey2b_args(object):
+    """
+    Attributes:
+     - id
+     - src
+
+    """
+
+
+    def __init__(self, id=None, src=None,):
+        self.id = id
+        self.src = src
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.id = IDataFrameId()
+                    self.id.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self.src = ignis.rpc.source.ttypes.ISource()
+                    self.src.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('groupByKey2b_args')
+        if self.id is not None:
+            oprot.writeFieldBegin('id', TType.STRUCT, 1)
+            self.id.write(oprot)
+            oprot.writeFieldEnd()
+        if self.src is not None:
+            oprot.writeFieldBegin('src', TType.STRUCT, 2)
+            self.src.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(groupByKey2b_args)
+groupByKey2b_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'id', [IDataFrameId, None], None, ),  # 1
+    (2, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 2
+)
+
+
+class groupByKey2b_result(object):
+    """
+    Attributes:
+     - success
+     - ex
+
+    """
+
+
+    def __init__(self, success=None, ex=None,):
+        self.success = success
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = IDataFrameId()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.driver.exception.ttypes.IDriverException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('groupByKey2b_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(groupByKey2b_result)
+groupByKey2b_result.thrift_spec = (
+    (0, TType.STRUCT, 'success', [IDataFrameId, None], None, ),  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.driver.exception.ttypes.IDriverException, None], None, ),  # 1
+)
+
+
+class groupByKey3_args(object):
+    """
+    Attributes:
+     - id
+     - numPartitions
+     - src
+
+    """
+
+
+    def __init__(self, id=None, numPartitions=None, src=None,):
+        self.id = id
+        self.numPartitions = numPartitions
+        self.src = src
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.id = IDataFrameId()
+                    self.id.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I64:
+                    self.numPartitions = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRUCT:
+                    self.src = ignis.rpc.source.ttypes.ISource()
+                    self.src.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('groupByKey3_args')
+        if self.id is not None:
+            oprot.writeFieldBegin('id', TType.STRUCT, 1)
+            self.id.write(oprot)
+            oprot.writeFieldEnd()
+        if self.numPartitions is not None:
+            oprot.writeFieldBegin('numPartitions', TType.I64, 2)
+            oprot.writeI64(self.numPartitions)
+            oprot.writeFieldEnd()
+        if self.src is not None:
+            oprot.writeFieldBegin('src', TType.STRUCT, 3)
+            self.src.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(groupByKey3_args)
+groupByKey3_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'id', [IDataFrameId, None], None, ),  # 1
+    (2, TType.I64, 'numPartitions', None, None, ),  # 2
+    (3, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 3
+)
+
+
+class groupByKey3_result(object):
+    """
+    Attributes:
+     - success
+     - ex
+
+    """
+
+
+    def __init__(self, success=None, ex=None,):
+        self.success = success
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = IDataFrameId()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.driver.exception.ttypes.IDriverException()
+                    self.ex.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('groupByKey3_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(groupByKey3_result)
+groupByKey3_result.thrift_spec = (
     (0, TType.STRUCT, 'success', [IDataFrameId, None], None, ),  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.driver.exception.ttypes.IDriverException, None], None, ),  # 1
 )
@@ -15322,12 +15789,14 @@ class countByKey_args(object):
     """
     Attributes:
      - id
+     - tp
 
     """
 
 
-    def __init__(self, id=None,):
+    def __init__(self, id=None, tp=None,):
         self.id = id
+        self.tp = tp
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -15344,6 +15813,12 @@ class countByKey_args(object):
                     self.id.read(iprot)
                 else:
                     iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self.tp = ignis.rpc.source.ttypes.ISource()
+                    self.tp.read(iprot)
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -15357,6 +15832,10 @@ class countByKey_args(object):
         if self.id is not None:
             oprot.writeFieldBegin('id', TType.STRUCT, 1)
             self.id.write(oprot)
+            oprot.writeFieldEnd()
+        if self.tp is not None:
+            oprot.writeFieldBegin('tp', TType.STRUCT, 2)
+            self.tp.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -15378,6 +15857,7 @@ all_structs.append(countByKey_args)
 countByKey_args.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'id', [IDataFrameId, None], None, ),  # 1
+    (2, TType.STRUCT, 'tp', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 2
 )
 
 
@@ -15459,12 +15939,14 @@ class countByValue_args(object):
     """
     Attributes:
      - id
+     - tp
 
     """
 
 
-    def __init__(self, id=None,):
+    def __init__(self, id=None, tp=None,):
         self.id = id
+        self.tp = tp
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -15481,6 +15963,12 @@ class countByValue_args(object):
                     self.id.read(iprot)
                 else:
                     iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self.tp = ignis.rpc.source.ttypes.ISource()
+                    self.tp.read(iprot)
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -15494,6 +15982,10 @@ class countByValue_args(object):
         if self.id is not None:
             oprot.writeFieldBegin('id', TType.STRUCT, 1)
             self.id.write(oprot)
+            oprot.writeFieldEnd()
+        if self.tp is not None:
+            oprot.writeFieldBegin('tp', TType.STRUCT, 2)
+            self.tp.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -15515,6 +16007,7 @@ all_structs.append(countByValue_args)
 countByValue_args.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'id', [IDataFrameId, None], None, ),  # 1
+    (2, TType.STRUCT, 'tp', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 2
 )
 
 

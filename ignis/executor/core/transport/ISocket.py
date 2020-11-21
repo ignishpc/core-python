@@ -1,7 +1,8 @@
-from thrift.transport.TSocket import TSocket,TServerSocket, TTransportException
-import socket
 import errno
+import socket
 import sys
+
+from thrift.transport.TSocket import TSocket, TServerSocket, TTransportException
 
 
 class ISocket(TSocket):
@@ -38,4 +39,3 @@ class IServerSocket(TServerSocket):
 		result = ISocket()
 		result.setHandle(client)
 		return result
-

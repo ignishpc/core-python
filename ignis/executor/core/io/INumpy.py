@@ -1,6 +1,7 @@
+import numpy
+
 from ignis.executor.core.io.IReader import IReader, IEnumTypes, IReaderType
 from ignis.executor.core.io.IWriter import IWriter
-import numpy
 
 __NUMPY_TYPES = {
 	IEnumTypes.I_BOOL: numpy.bool_,

@@ -1,6 +1,6 @@
-from ignis.executor.core.io.IWriter import IWriter, IWriterType, IEnumTypes
-from ignis.executor.core.io.IReader import IReader, IReaderType
 from ignis.executor.core.io.IJsonWriter import IJsonWriter
+from ignis.executor.core.io.IReader import IReader, IReaderType
+from ignis.executor.core.io.IWriter import IWriter, IWriterType, IEnumTypes
 
 
 class IJsonValue:

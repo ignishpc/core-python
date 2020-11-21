@@ -73,7 +73,9 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  IDataFrameId flatMapValues(IDataFrameId id, ISource src)')
     print('  IDataFrameId mapValues(IDataFrameId id, ISource src)')
     print('  IDataFrameId groupByKey(IDataFrameId id)')
-    print('  IDataFrameId groupByKey2(IDataFrameId id, i64 numPartitions)')
+    print('  IDataFrameId groupByKey2a(IDataFrameId id, i64 numPartitions)')
+    print('  IDataFrameId groupByKey2b(IDataFrameId id, ISource src)')
+    print('  IDataFrameId groupByKey3(IDataFrameId id, i64 numPartitions, ISource src)')
     print('  IDataFrameId reduceByKey(IDataFrameId id, ISource src, bool localReduce)')
     print('  IDataFrameId reduceByKey4(IDataFrameId id, ISource src, i64 numPartitions, bool localReduce)')
     print('  IDataFrameId aggregateByKey(IDataFrameId id, ISource zero, ISource seqOp)')
@@ -89,8 +91,8 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  i64 keys(IDataFrameId id, ISource tp)')
     print('  i64 values(IDataFrameId id, ISource tp)')
     print('  IDataFrameId sampleByKey(IDataFrameId id, bool withReplacement, ISource fractions, i32 seed)')
-    print('  i64 countByKey(IDataFrameId id)')
-    print('  i64 countByValue(IDataFrameId id)')
+    print('  i64 countByKey(IDataFrameId id, ISource tp)')
+    print('  i64 countByValue(IDataFrameId id, ISource tp)')
     print('')
     sys.exit(0)
 
@@ -464,11 +466,23 @@ elif cmd == 'groupByKey':
         sys.exit(1)
     pp.pprint(client.groupByKey(eval(args[0]),))
 
-elif cmd == 'groupByKey2':
+elif cmd == 'groupByKey2a':
     if len(args) != 2:
-        print('groupByKey2 requires 2 args')
+        print('groupByKey2a requires 2 args')
         sys.exit(1)
-    pp.pprint(client.groupByKey2(eval(args[0]), eval(args[1]),))
+    pp.pprint(client.groupByKey2a(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'groupByKey2b':
+    if len(args) != 2:
+        print('groupByKey2b requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.groupByKey2b(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'groupByKey3':
+    if len(args) != 3:
+        print('groupByKey3 requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.groupByKey3(eval(args[0]), eval(args[1]), eval(args[2]),))
 
 elif cmd == 'reduceByKey':
     if len(args) != 3:
@@ -561,16 +575,16 @@ elif cmd == 'sampleByKey':
     pp.pprint(client.sampleByKey(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
 
 elif cmd == 'countByKey':
-    if len(args) != 1:
-        print('countByKey requires 1 args')
+    if len(args) != 2:
+        print('countByKey requires 2 args')
         sys.exit(1)
-    pp.pprint(client.countByKey(eval(args[0]),))
+    pp.pprint(client.countByKey(eval(args[0]), eval(args[1]),))
 
 elif cmd == 'countByValue':
-    if len(args) != 1:
-        print('countByValue requires 1 args')
+    if len(args) != 2:
+        print('countByValue requires 2 args')
         sys.exit(1)
-    pp.pprint(client.countByValue(eval(args[0]),))
+    pp.pprint(client.countByValue(eval(args[0]), eval(args[1]),))
 
 else:
     print('Unrecognized method %s' % cmd)

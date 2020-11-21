@@ -1,5 +1,5 @@
 from thrift.transport.TTransport import TFileObjectTransport
-import os
+
 
 class IFileObjectTransport(TFileObjectTransport):
 

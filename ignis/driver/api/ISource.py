@@ -1,8 +1,9 @@
+from types import FunctionType
+
 import ignis.rpc.source.ttypes
+from ignis.executor.core.ILibraryLoader import ILibraryLoader
 from ignis.executor.core.protocol.IObjectProtocol import IObjectProtocol
 from ignis.executor.core.transport.IMemoryBuffer import IMemoryBuffer
-from ignis.executor.core.ILibraryLoader import ILibraryLoader
-from types import FunctionType
 
 
 class _IFunctionLambda:

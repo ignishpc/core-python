@@ -1,5 +1,5 @@
-import json
 import collections.abc
+import json
 
 
 class __IJsonWriterAbs(type):
@@ -35,6 +35,7 @@ class IJsonWriter(json.JSONEncoder, metaclass=__IJsonWriterAbs):
 
 				def __len__(self):
 					return 1
+
 			return StreamArray()
 		else:
 			return o.__dict__

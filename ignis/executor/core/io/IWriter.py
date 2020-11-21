@@ -173,7 +173,7 @@ IWriter[bytearray] = IWriterType(IEnumTypes.I_BINARY, __writeBytes)
 
 def __writePairList(protocol, obj):
 	size = len(obj)
-	IWriter._writeSizeAux(protocol,size)
+	IWriter._writeSizeAux(protocol, size)
 	if size == 0:
 		firstWriter = IWriter._getWriterType(None)
 		secondWriter = firstWriter

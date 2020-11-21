@@ -15,7 +15,7 @@ def main(path, parallel):
 	cov.start()
 	import ignis.executor.core.ILog as Ilog
 	Ilog.enable(False)
-	tests = unittest.TestLoader().discover(path + '/executor/core/storage', pattern='*Test.py')
+	tests = unittest.TestLoader().discover(path + '/executor/core', pattern='*Test.py')
 	if parallel:
 		tests.addTests(unittest.TestLoader().discover(path + '/executor/core', pattern='IMpiTest2.py'))
 	else:

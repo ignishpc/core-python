@@ -1,20 +1,19 @@
 import traceback
-import logging
-from ignis.rpc.executor.exception.ttypes import IExecutorException
 
-logger = logging.getLogger(__name__)
+from ignis.rpc.executor.exception.ttypes import IExecutorException
 
 
 class IModule:
 
-	def __init__(self, executor_data):
+	def __init__(self, executor_data, logger):
 		self._executor_data = executor_data
+		self.__logger = logger
 
 	def _pack_exception(self, ex):
 		message = str(ex)
-		stack = ''.join(traceback.format_tb(ex.__traceback__))
+		stack = traceback.format_exc()
 		cause = ex.__class__.__name__ + ': ' + message + "\nCaused by: \n" + stack
-		logger.error(cause)
+		self.__logger.error(cause)
 		raise IExecutorException(message=message, cause=cause)
 
 	def _use_source(self, src):

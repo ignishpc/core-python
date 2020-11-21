@@ -1,9 +1,9 @@
 import subprocess
 import threading
 
-from ignis.driver.core.IClientPool import IClientPool
-from ignis.driver.core.ICallBack import ICallBack
 from ignis.driver.api.IDriverException import IDriverException
+from ignis.driver.core.ICallBack import ICallBack
+from ignis.driver.core.IClientPool import IClientPool
 
 
 class Ignis:

@@ -1,10 +1,12 @@
-from thrift.protocol.TCompactProtocol import TCompactProtocol, CompactType, makeZigZag
-from struct import pack, unpack
 import collections.abc
-from ignis.executor.core.io.IWriter import IWriter
+from struct import pack, unpack
+
+from thrift.protocol.TCompactProtocol import TCompactProtocol, CompactType, makeZigZag
+
+from ignis.executor.core.io.INativeReader import INativeReader
 from ignis.executor.core.io.INativeWriter import INativeWriter
 from ignis.executor.core.io.IReader import IReader
-from ignis.executor.core.io.INativeReader import INativeReader
+from ignis.executor.core.io.IWriter import IWriter
 
 
 class IObjectProtocol(TCompactProtocol):

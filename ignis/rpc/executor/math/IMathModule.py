@@ -19,17 +19,7 @@ all_structs = []
 
 
 class Iface(object):
-    def sample(self, withReplacement, fraction, seed):
-        """
-        Parameters:
-         - withReplacement
-         - fraction
-         - seed
-
-        """
-        pass
-
-    def takeSample(self, withReplacement, num, seed):
+    def sample(self, withReplacement, num, seed):
         """
         Parameters:
          - withReplacement
@@ -88,22 +78,22 @@ class Client(Iface):
             self._oprot = oprot
         self._seqid = 0
 
-    def sample(self, withReplacement, fraction, seed):
+    def sample(self, withReplacement, num, seed):
         """
         Parameters:
          - withReplacement
-         - fraction
+         - num
          - seed
 
         """
-        self.send_sample(withReplacement, fraction, seed)
+        self.send_sample(withReplacement, num, seed)
         self.recv_sample()
 
-    def send_sample(self, withReplacement, fraction, seed):
+    def send_sample(self, withReplacement, num, seed):
         self._oprot.writeMessageBegin('sample', TMessageType.CALL, self._seqid)
         args = sample_args()
         args.withReplacement = withReplacement
-        args.fraction = fraction
+        args.num = num
         args.seed = seed
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
@@ -118,42 +108,6 @@ class Client(Iface):
             iprot.readMessageEnd()
             raise x
         result = sample_result()
-        result.read(iprot)
-        iprot.readMessageEnd()
-        if result.ex is not None:
-            raise result.ex
-        return
-
-    def takeSample(self, withReplacement, num, seed):
-        """
-        Parameters:
-         - withReplacement
-         - num
-         - seed
-
-        """
-        self.send_takeSample(withReplacement, num, seed)
-        self.recv_takeSample()
-
-    def send_takeSample(self, withReplacement, num, seed):
-        self._oprot.writeMessageBegin('takeSample', TMessageType.CALL, self._seqid)
-        args = takeSample_args()
-        args.withReplacement = withReplacement
-        args.num = num
-        args.seed = seed
-        args.write(self._oprot)
-        self._oprot.writeMessageEnd()
-        self._oprot.trans.flush()
-
-    def recv_takeSample(self):
-        iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
-        if mtype == TMessageType.EXCEPTION:
-            x = TApplicationException()
-            x.read(iprot)
-            iprot.readMessageEnd()
-            raise x
-        result = takeSample_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.ex is not None:
@@ -398,7 +352,6 @@ class Processor(Iface, TProcessor):
         self._handler = handler
         self._processMap = {}
         self._processMap["sample"] = Processor.process_sample
-        self._processMap["takeSample"] = Processor.process_takeSample
         self._processMap["count"] = Processor.process_count
         self._processMap["max"] = Processor.process_max
         self._processMap["min"] = Processor.process_min
@@ -435,7 +388,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = sample_result()
         try:
-            self._handler.sample(args.withReplacement, args.fraction, args.seed)
+            self._handler.sample(args.withReplacement, args.num, args.seed)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -451,32 +404,6 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
         oprot.writeMessageBegin("sample", msg_type, seqid)
-        result.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
-
-    def process_takeSample(self, seqid, iprot, oprot):
-        args = takeSample_args()
-        args.read(iprot)
-        iprot.readMessageEnd()
-        result = takeSample_result()
-        try:
-            self._handler.takeSample(args.withReplacement, args.num, args.seed)
-            msg_type = TMessageType.REPLY
-        except TTransport.TTransportException:
-            raise
-        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
-            msg_type = TMessageType.REPLY
-            result.ex = ex
-        except TApplicationException as ex:
-            logging.exception('TApplication exception in handler')
-            msg_type = TMessageType.EXCEPTION
-            result = ex
-        except Exception:
-            logging.exception('Unexpected exception in handler')
-            msg_type = TMessageType.EXCEPTION
-            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("takeSample", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -696,15 +623,15 @@ class sample_args(object):
     """
     Attributes:
      - withReplacement
-     - fraction
+     - num
      - seed
 
     """
 
 
-    def __init__(self, withReplacement=None, fraction=None, seed=None,):
+    def __init__(self, withReplacement=None, num=None, seed=None,):
         self.withReplacement = withReplacement
-        self.fraction = fraction
+        self.num = num
         self.seed = seed
 
     def read(self, iprot):
@@ -722,8 +649,13 @@ class sample_args(object):
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
-                if ftype == TType.DOUBLE:
-                    self.fraction = iprot.readDouble()
+                if ftype == TType.LIST:
+                    self.num = []
+                    (_etype3, _size0) = iprot.readListBegin()
+                    for _i4 in range(_size0):
+                        _elem5 = iprot.readI64()
+                        self.num.append(_elem5)
+                    iprot.readListEnd()
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
@@ -745,9 +677,12 @@ class sample_args(object):
             oprot.writeFieldBegin('withReplacement', TType.BOOL, 1)
             oprot.writeBool(self.withReplacement)
             oprot.writeFieldEnd()
-        if self.fraction is not None:
-            oprot.writeFieldBegin('fraction', TType.DOUBLE, 2)
-            oprot.writeDouble(self.fraction)
+        if self.num is not None:
+            oprot.writeFieldBegin('num', TType.LIST, 2)
+            oprot.writeListBegin(TType.I64, len(self.num))
+            for iter6 in self.num:
+                oprot.writeI64(iter6)
+            oprot.writeListEnd()
             oprot.writeFieldEnd()
         if self.seed is not None:
             oprot.writeFieldBegin('seed', TType.I32, 3)
@@ -773,7 +708,7 @@ all_structs.append(sample_args)
 sample_args.thrift_spec = (
     None,  # 0
     (1, TType.BOOL, 'withReplacement', None, None, ),  # 1
-    (2, TType.DOUBLE, 'fraction', None, None, ),  # 2
+    (2, TType.LIST, 'num', (TType.I64, None, False), None, ),  # 2
     (3, TType.I32, 'seed', None, None, ),  # 3
 )
 
@@ -836,155 +771,6 @@ class sample_result(object):
         return not (self == other)
 all_structs.append(sample_result)
 sample_result.thrift_spec = (
-    None,  # 0
-    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
-)
-
-
-class takeSample_args(object):
-    """
-    Attributes:
-     - withReplacement
-     - num
-     - seed
-
-    """
-
-
-    def __init__(self, withReplacement=None, num=None, seed=None,):
-        self.withReplacement = withReplacement
-        self.num = num
-        self.seed = seed
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.BOOL:
-                    self.withReplacement = iprot.readBool()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 2:
-                if ftype == TType.I64:
-                    self.num = iprot.readI64()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 3:
-                if ftype == TType.I32:
-                    self.seed = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('takeSample_args')
-        if self.withReplacement is not None:
-            oprot.writeFieldBegin('withReplacement', TType.BOOL, 1)
-            oprot.writeBool(self.withReplacement)
-            oprot.writeFieldEnd()
-        if self.num is not None:
-            oprot.writeFieldBegin('num', TType.I64, 2)
-            oprot.writeI64(self.num)
-            oprot.writeFieldEnd()
-        if self.seed is not None:
-            oprot.writeFieldBegin('seed', TType.I32, 3)
-            oprot.writeI32(self.seed)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(takeSample_args)
-takeSample_args.thrift_spec = (
-    None,  # 0
-    (1, TType.BOOL, 'withReplacement', None, None, ),  # 1
-    (2, TType.I64, 'num', None, None, ),  # 2
-    (3, TType.I32, 'seed', None, None, ),  # 3
-)
-
-
-class takeSample_result(object):
-    """
-    Attributes:
-     - ex
-
-    """
-
-
-    def __init__(self, ex=None,):
-        self.ex = ex
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.STRUCT:
-                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException()
-                    self.ex.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('takeSample_result')
-        if self.ex is not None:
-            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
-            self.ex.write(oprot)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(takeSample_result)
-takeSample_result.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
 )

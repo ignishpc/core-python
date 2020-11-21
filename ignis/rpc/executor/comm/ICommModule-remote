@@ -39,6 +39,9 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  void driverGather0(string id, ISource src)')
     print('  void driverScatter(string id, i64 partitions)')
     print('  void driverScatter3(string id, i64 partitions, ISource src)')
+    print('  void send(string id, i64 partition, i64 dest, i64 tag)')
+    print('  void recv(string id, i64 partition, i64 source, i64 tag)')
+    print('  void recv5(string id, i64 partition, i64 source, i64 tag, ISource src)')
     print('')
     sys.exit(0)
 
@@ -207,6 +210,24 @@ elif cmd == 'driverScatter3':
         print('driverScatter3 requires 3 args')
         sys.exit(1)
     pp.pprint(client.driverScatter3(args[0], eval(args[1]), eval(args[2]),))
+
+elif cmd == 'send':
+    if len(args) != 4:
+        print('send requires 4 args')
+        sys.exit(1)
+    pp.pprint(client.send(args[0], eval(args[1]), eval(args[2]), eval(args[3]),))
+
+elif cmd == 'recv':
+    if len(args) != 4:
+        print('recv requires 4 args')
+        sys.exit(1)
+    pp.pprint(client.recv(args[0], eval(args[1]), eval(args[2]), eval(args[3]),))
+
+elif cmd == 'recv5':
+    if len(args) != 5:
+        print('recv5 requires 5 args')
+        sys.exit(1)
+    pp.pprint(client.recv5(args[0], eval(args[1]), eval(args[2]), eval(args[3]), eval(args[4]),))
 
 else:
     print('Unrecognized method %s' % cmd)

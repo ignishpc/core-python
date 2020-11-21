@@ -1,5 +1,6 @@
-from thrift.transport.TZlibTransport import TZlibTransport, BufferIO
 import zlib
+
+from thrift.transport.TZlibTransport import TZlibTransport, BufferIO
 
 
 class IZlibTransport(TZlibTransport):
@@ -24,8 +25,8 @@ class IZlibTransport(TZlibTransport):
 			self.bytes_out += len(wout)
 			self.bytes_out_comp += len(zbuf)
 		else:
-			zbuf = b''#Fix thrift base error
-		ztail = self._zcomp_write.flush(zlib.Z_FULL_FLUSH)#like c++ Z_FULL_FLUSH make flushed block independents
+			zbuf = b''  # Fix thrift base error
+		ztail = self._zcomp_write.flush(zlib.Z_FULL_FLUSH)  # like c++ Z_FULL_FLUSH make flushed block independents
 		self.bytes_out_comp += len(ztail)
 		if (len(zbuf) + len(ztail)) > 0:
 			self._TZlibTransport__wbuf = BufferIO()

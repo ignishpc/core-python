@@ -26,5 +26,3 @@ class IHeaderTransport(TTransportBase):
 			if consumed == 0:
 				return self.__trans.read(sz)
 		return self.__header[old_pos:self.__pos]
-
-

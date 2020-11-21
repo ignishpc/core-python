@@ -1,4 +1,3 @@
-
 class IDriverException(RuntimeError):
 	def __init__(self, message, cause=None):
 		self.__cause = cause

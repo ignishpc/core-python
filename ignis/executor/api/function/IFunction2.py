@@ -1,5 +1,3 @@
-
-
 class IFunction2:
 
 	def before(self, context):

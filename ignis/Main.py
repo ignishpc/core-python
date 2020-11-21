@@ -1,14 +1,21 @@
-import sys
 import logging
+import sys
+
 from ignis.executor.core import ILog
 from ignis.executor.core.IExecutorData import IExecutorData
-from ignis.executor.core.modules.ICacheContextModule import ICacheContextModule, ICacheContextModuleProcessor
-from ignis.executor.core.modules.ICommModule import ICommModule, ICommModuleProcessor
-from ignis.executor.core.modules.IExecutorServerModule import IExecutorServerModule, IExecutorServerModuleProcessor
-from ignis.executor.core.modules.IGeneralActionModule import IGeneralActionModule, IGeneralActionModuleProcessor
-from ignis.executor.core.modules.IGeneralModule import IGeneralModule, IGeneralModuleProcessor
-from ignis.executor.core.modules.IIOModule import IIOModule, IIOModuleProcessor
-from ignis.executor.core.modules.IMathModule import IMathModule, IMathModuleProcessor
+from ignis.executor.core.modules.ICacheContextModule import ICacheContextModule
+from ignis.executor.core.modules.ICommModule import ICommModule
+from ignis.executor.core.modules.IExecutorServerModule import IExecutorServerModule
+from ignis.executor.core.modules.IGeneralActionModule import IGeneralActionModule
+from ignis.executor.core.modules.IGeneralModule import IGeneralModule
+from ignis.executor.core.modules.IIOModule import IIOModule
+from ignis.executor.core.modules.IMathModule import IMathModule
+from ignis.rpc.executor.cachecontext.ICacheContextModule import Processor as ICacheContextModuleProcessor
+from ignis.rpc.executor.comm.ICommModule import Processor as ICommModuleProcessor
+from ignis.rpc.executor.general.IGeneralModule import Processor as IGeneralModuleProcessor
+from ignis.rpc.executor.general.action.IGeneralActionModule import Processor as IGeneralActionModuleProcessor
+from ignis.rpc.executor.io.IIOModule import Processor as IIOModuleProcessor
+from ignis.rpc.executor.math.IMathModule import Processor as IMathModuleProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -41,12 +48,12 @@ def main(argv):
 			math = IMathModule(executor_data)
 			processor.registerProcessor("IMath", IMathModuleProcessor(math))
 
-
 	executor_data = IExecutorData()
 	server = IExecutorServerModuleImpl(executor_data)
 	server.serve("IExecutorServer", port, compression)
 
 	return 0
+
 
 if __name__ == '__main__':
 	sys.exit(main(sys.argv))

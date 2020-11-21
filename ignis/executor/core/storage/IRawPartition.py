@@ -1,9 +1,9 @@
-from ignis.executor.core.storage.IPartition import IPartition
-from ignis.executor.core.transport.IZlibTransport import IZlibTransport
-from ignis.executor.core.protocol.IObjectProtocol import IObjectProtocol, INativeWriter, IWriter, INativeReader, IReader
-from ignis.executor.core.io.IEnumTypes import IEnumTypes
 from ignis.executor.api.IReadIterator import IReadIterator
 from ignis.executor.api.IWriteIterator import IWriteIterator
+from ignis.executor.core.io.IEnumTypes import IEnumTypes
+from ignis.executor.core.protocol.IObjectProtocol import IObjectProtocol, INativeWriter, IWriter, INativeReader, IReader
+from ignis.executor.core.storage.IPartition import IPartition
+from ignis.executor.core.transport.IZlibTransport import IZlibTransport
 
 
 class IRawPartition(IPartition):

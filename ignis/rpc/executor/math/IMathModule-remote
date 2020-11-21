@@ -24,8 +24,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('Usage: ' + sys.argv[0] + ' [-h host[:port]] [-u url] [-f[ramed]] [-s[sl]] [-novalidate] [-ca_certs certs] [-keyfile keyfile] [-certfile certfile] function [arg1 [arg2...]]')
     print('')
     print('Functions:')
-    print('  void sample(bool withReplacement, double fraction, i32 seed)')
-    print('  void takeSample(bool withReplacement, i64 num, i32 seed)')
+    print('  void sample(bool withReplacement,  num, i32 seed)')
     print('  i64 count()')
     print('  void max()')
     print('  void min()')
@@ -118,12 +117,6 @@ if cmd == 'sample':
         print('sample requires 3 args')
         sys.exit(1)
     pp.pprint(client.sample(eval(args[0]), eval(args[1]), eval(args[2]),))
-
-elif cmd == 'takeSample':
-    if len(args) != 3:
-        print('takeSample requires 3 args')
-        sys.exit(1)
-    pp.pprint(client.takeSample(eval(args[0]), eval(args[1]), eval(args[2]),))
 
 elif cmd == 'count':
     if len(args) != 0:

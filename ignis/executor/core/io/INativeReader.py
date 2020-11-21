@@ -2,7 +2,6 @@ import pickle
 
 
 class INativeReader:
-
 	class __Wrapper:
 
 		def __init__(self, transport):

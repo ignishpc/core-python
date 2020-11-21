@@ -1,13 +1,11 @@
-
-
 class IDriverContext:
 
 	def parallelize(data, partitions, native):
-		#TODO
+		# TODO
 		pass
 
 	def collect(self, id):
-		#TODO
+		# TODO
 		pass
 
 	def collect1(self, id):

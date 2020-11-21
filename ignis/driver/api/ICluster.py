@@ -1,6 +1,6 @@
-from ignis.driver.api.Ignis import Ignis
-from ignis.driver.api.IDriverException import IDriverException
 import ignis.rpc.driver.exception.ttypes
+from ignis.driver.api.IDriverException import IDriverException
+from ignis.driver.api.Ignis import Ignis
 
 
 class ICluster:

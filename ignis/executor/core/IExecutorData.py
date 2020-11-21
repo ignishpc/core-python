@@ -1,11 +1,10 @@
+import logging
+
+from ignis.executor.api.IContext import IContext
 from ignis.executor.core.ILibraryLoader import ILibraryLoader
 from ignis.executor.core.IMpi import IMpi
 from ignis.executor.core.IPartitionTools import IPartitionTools
 from ignis.executor.core.IPropertyParser import IPropertyParser
-from ignis.executor.api.IContext import IContext
-from ignis.rpc.source.ttypes import ISource, IEncoded
-import logging
-import os
 
 logger = logging.getLogger(__name__)
 
@@ -65,25 +64,7 @@ class IExecutorData:
 				self.__context.vars[key] = self.__library_loader.unpickle(value)
 		logger.info("Function loaded")
 
-		with open(self.infoDirectory() + "/sources" + str(self.__context.executorId()) + ".bak", "a") as backup:
-			backup.write(source.obj.name + "\n")
 		return lib
-
-	def reloadLibraries(self):
-		backup_path = self.infoDirectory() + "/sources" + str(self.__context.executorId()) + ".bak", "a"
-		if os.path.isfile(backup_path):
-			logger.info("Function backup found, loading")
-			with open(backup_path, "r") as backup:
-				loaded = set()
-				source = ISource(obj=IEncoded())
-				for line in backup:
-					if line not in loaded:
-						try:
-							source.obj.name = line
-							self.loadLibrary(source)
-							loaded.add(line)
-						except Exception as ex:
-							logger.error(str(ex))
 
 	def getContext(self):
 		return self.__context

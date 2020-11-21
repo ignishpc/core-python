@@ -1,4 +1,3 @@
-
 class ICallBack:
 
 	def __init__(self, port, compression):
