@@ -117,6 +117,13 @@ class IDataFrame:
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
 			raise IDriverException(ex.message, ex._cause)
 
+	def keyBy(self, src):
+		try:
+			with Ignis._pool.getClient() as client:
+				return IPairDataFrame(client.getDataFrameService().keyBy(self._id, ISource.wrap(src).rpc()))
+		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+			raise IDriverException(ex.message, ex._cause)
+
 	def mapPartitions(self, src, preservesPartitioning=True):
 		try:
 			with Ignis._pool.getClient() as client:
@@ -133,10 +140,17 @@ class IDataFrame:
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
 			raise IDriverException(ex.message, ex._cause)
 
-	def applyPartition(self, src):
+	def mapExecutor(self, src):
 		try:
 			with Ignis._pool.getClient() as client:
-				return IDataFrame(client.getDataFrameService().applyPartition(self._id, ISource.wrap(src).rpc()))
+				return IDataFrame(client.getDataFrameService().mapExecutor(self._id, ISource.wrap(src).rpc()))
+		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+			raise IDriverException(ex.message, ex._cause)
+
+	def mapExecutorTo(self, src):
+		try:
+			with Ignis._pool.getClient() as client:
+				return IDataFrame(client.getDataFrameService().mapExecutorTo(self._id, ISource.wrap(src).rpc()))
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
 			raise IDriverException(ex.message, ex._cause)
 
@@ -144,9 +158,9 @@ class IDataFrame:
 		try:
 			with Ignis._pool.getClient() as client:
 				if numPartitions is None:
-					return IDataFrame(client.getDataFrameService().groupBy(self._id, ISource.wrap(src).rpc()))
+					return IPairDataFrame(client.getDataFrameService().groupBy(self._id, ISource.wrap(src).rpc()))
 				else:
-					return IDataFrame(
+					return IPairDataFrame(
 						client.getDataFrameService().groupBy2(self._id, ISource.wrap(src).rpc(), numPartitions))
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
 			raise IDriverException(ex.message, ex._cause)
@@ -176,23 +190,17 @@ class IDataFrame:
 		try:
 			with Ignis._pool.getClient() as client:
 				return Ignis._driverContext().collect1(
-					client.getDataFrameService().reduce(self._id, ISource.wrap(src).rpc(), ISource("").rpc())  # TODO
+					client.getDataFrameService().reduce(self._id, ISource.wrap(src).rpc(), ISource("").rpc())
 				)
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
 			raise IDriverException(ex.message, ex._cause)
 
-	def treeReduce(self, src, depth=None):
+	def treeReduce(self, src):
 		try:
 			with Ignis._pool.getClient() as client:
-				if depth is None:
-					return Ignis._driverContext().collect1(  # TODO
-						client.getDataFrameService().treeReduce(self._id, ISource.wrap(src).rpc(), ISource("").rpc())
-					)
-				else:
-					return Ignis._driverContext().collect1(
-						client.getDataFrameService().treeReduce4(self._id, ISource.wrap(src).rpc(), depth,
-						                                         ISource("").rpc())  # TODO
-					)
+				return Ignis._driverContext().collect1(
+					client.getDataFrameService().treeReduce(self._id, ISource.wrap(src).rpc(), ISource("").rpc())
+				)
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
 			raise IDriverException(ex.message, ex._cause)
 
@@ -200,46 +208,58 @@ class IDataFrame:
 		try:
 			with Ignis._pool.getClient() as client:
 				return Ignis._driverContext().collect(
-					client.getDataFrameService().collect(self._id, ISource("").rpc())  # TODO
+					client.getDataFrameService().collect(self._id, ISource("").rpc())
 				)
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
 			raise IDriverException(ex.message, ex._cause)
 
-	def aggregate(self, seqOp, combOp):
+	def aggregate(self, zero, seqOp, combOp):
 		try:
 			with Ignis._pool.getClient() as client:
 				return Ignis._driverContext().collect1(
-					client.getDataFrameService().aggregate(self._id, ISource.wrap(seqOp).rpc(),
+					client.getDataFrameService().aggregate(self._id,
+					                                       ISource.wrap(zero).rpc(),
+					                                       ISource.wrap(seqOp).rpc(),
 					                                       ISource.wrap(combOp).rpc(),
-					                                       ISource("").rpc())  # TODO
+					                                       ISource("").rpc())
 				)
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
 			raise IDriverException(ex.message, ex._cause)
 
-	def treeAggregate(self, seqOp, combOp, depth=None):
-		try:
-			with Ignis._pool.getClient() as client:
-				if depth is None:
-					return Ignis._driverContext().collect1(
-						client.getDataFrameService().treeAggregate(self._id, ISource.wrap(seqOp).rpc(),
-						                                           ISource.wrap(combOp).rpc(),
-						                                           ISource("").rpc())  # TODO
-					)
-				else:
-					return Ignis._driverContext().collect1(
-						client.getDataFrameService().treeAggregate5(self._id, ISource.wrap(seqOp).rpc(),
-						                                            depth,
-						                                            ISource.wrap(combOp).rpc(),
-						                                            ISource("").rpc())  # TODO
-					)
-		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-			raise IDriverException(ex.message, ex._cause)
-
-	def fold(self):
+	def treeAggregate(self, zero, seqOp, combOp):
 		try:
 			with Ignis._pool.getClient() as client:
 				return Ignis._driverContext().collect1(
-					client.getDataFrameService().fold(self._id, ISource("").rpc())  # TODO
+					client.getDataFrameService().treeAggregate(self._id,
+					                                           ISource.wrap(zero).rpc(),
+					                                           ISource.wrap(seqOp).rpc(),
+					                                           ISource.wrap(combOp).rpc(),
+					                                           ISource("").rpc())
+				)
+
+		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+			raise IDriverException(ex.message, ex._cause)
+
+	def fold(self, zero, src):
+		try:
+			with Ignis._pool.getClient() as client:
+				return Ignis._driverContext().collect1(
+					client.getDataFrameService().fold(self._id,
+					                                  ISource.wrap(zero).rpc(),
+					                                  ISource.wrap(src).rpc(),
+					                                  ISource("").rpc())
+				)
+		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+			raise IDriverException(ex.message, ex._cause)
+
+	def treeFold(self, zero, src):
+		try:
+			with Ignis._pool.getClient() as client:
+				return Ignis._driverContext().collect1(
+					client.getDataFrameService().fold(self._id,
+					                                  ISource.wrap(zero).rpc(),
+					                                  ISource.wrap(src).rpc(),
+					                                  ISource("").rpc())
 				)
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
 			raise IDriverException(ex.message, ex._cause)
@@ -248,7 +268,7 @@ class IDataFrame:
 		try:
 			with Ignis._pool.getClient() as client:
 				return Ignis._driverContext().collect(
-					client.getDataFrameService().take(self._id, num, ISource("").rpc())  # TODO
+					client.getDataFrameService().take(self._id, num, ISource("").rpc())
 				)
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
 			raise IDriverException(ex.message, ex._cause)
@@ -271,12 +291,27 @@ class IDataFrame:
 		try:
 			with Ignis._pool.getClient() as client:
 				if cmp is None:
-					return Ignis._driverContext().collect1(
-						client.getDataFrameService().top(self._id, num, ISource("").rpc())  # TODO
+					return Ignis._driverContext().collect(
+						client.getDataFrameService().top(self._id, num, ISource("").rpc())
 					)
 				else:
-					return Ignis._driverContext().collect1(  # TODO
-						client.getDataFrameService().top(self._id, num, ISource.wrap(cmp).rpc(), ISource("").rpc())
+					return Ignis._driverContext().collect(
+						client.getDataFrameService().top4(self._id, num, ISource.wrap(cmp).rpc(), ISource("").rpc())
+					)
+		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+			raise IDriverException(ex.message, ex._cause)
+
+	def takeOrdered(self, num, cmp=None):
+		try:
+			with Ignis._pool.getClient() as client:
+				if cmp is None:
+					return Ignis._driverContext().collect(
+						client.getDataFrameService().takeOrdered(self._id, num, ISource("").rpc())
+					)
+				else:
+					return Ignis._driverContext().collect(
+						client.getDataFrameService().takeOrdered4(self._id, num, ISource.wrap(cmp).rpc(),
+						                                          ISource("").rpc())
 					)
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
 			raise IDriverException(ex.message, ex._cause)
@@ -291,7 +326,7 @@ class IDataFrame:
 	def takeSample(self, withReplacement, num, seed):
 		try:
 			with Ignis._pool.getClient() as client:
-				return Ignis._driverContext().collect(  # TODO
+				return Ignis._driverContext().collect(
 					client.getDataFrameService().takeSample(self._id, withReplacement, num, seed, ISource("").rpc())
 				)
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
@@ -304,20 +339,244 @@ class IDataFrame:
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
 			raise IDriverException(ex.message, ex._cause)
 
-	def max(self, cmp):
+	def max(self, cmp=None):
 		try:
 			with Ignis._pool.getClient() as client:
-				return Ignis._driverContext().collect1(
-					client.getDataFrameService().max(self._id, ISource.wrap(cmp).rpc(), ISource("").rpc())  # TODO
+				if cmp is None:
+					return Ignis._driverContext().collect1(
+						client.getDataFrameService().max(self._id, ISource("").rpc())
+					)
+				else:
+					return Ignis._driverContext().collect1(
+						client.getDataFrameService().max3(self._id, ISource.wrap(cmp).rpc(), ISource("").rpc())
+					)
+		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+			raise IDriverException(ex.message, ex._cause)
+
+	def min(self, cmp=None):
+		try:
+			with Ignis._pool.getClient() as client:
+				if cmp is None:
+					return Ignis._driverContext().collect1(
+						client.getDataFrameService().min(self._id, ISource("").rpc())
+					)
+				else:
+					return Ignis._driverContext().collect1(
+						client.getDataFrameService().min3(self._id, ISource.wrap(cmp).rpc(), ISource("").rpc())
+					)
+		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+			raise IDriverException(ex.message, ex._cause)
+
+
+class IPairDataFrame(IDataFrame):
+
+	def __init__(self, _id):
+		IDataFrame.__init__(id)
+
+	def flatMapValues(self, src):
+		try:
+			with Ignis._pool.getClient() as client:
+				return IPairDataFrame(client.getDataFrameService().flatMapValues(self._id, ISource.wrap(src).rpc()))
+		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+			raise IDriverException(ex.message, ex._cause)
+
+	def mapValues(self, src):
+		try:
+			with Ignis._pool.getClient() as client:
+				return IPairDataFrame(client.getDataFrameService().mapValues(self._id, ISource.wrap(src).rpc()))
+		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+			raise IDriverException(ex.message, ex._cause)
+
+	def groupByKey(self, numPartitions=None, src=None):
+		try:
+			if numPartitions is None:
+				if src is None:
+					with Ignis._pool.getClient() as client:
+						return IPairDataFrame(client.getDataFrameService().groupByKey(self._id))
+				else:
+					with Ignis._pool.getClient() as client:
+						return IPairDataFrame(
+							client.getDataFrameService().groupByKey2b(self._id, ISource.wrap(src).rpc()))
+			else:
+				if src is None:
+					with Ignis._pool.getClient() as client:
+						return IPairDataFrame(client.getDataFrameService().groupByKey2a(self._id, numPartitions))
+				else:
+					with Ignis._pool.getClient() as client:
+						return IPairDataFrame(
+							client.getDataFrameService().groupByKey3(self._id, numPartitions, ISource.wrap(src).rpc()))
+		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+			raise IDriverException(ex.message, ex._cause)
+
+	def reduceByKey(self, src, numPartitions=None, localReduce=True):
+		try:
+			if numPartitions is None:
+				with Ignis._pool.getClient() as client:
+					return IPairDataFrame(client.getDataFrameService().reduceByKey(self._id, ISource.wrap(src).rpc()),
+					                      localReduce)
+			else:
+				with Ignis._pool.getClient() as client:
+					return IPairDataFrame(client.getDataFrameService().reduceByKey4(self._id, ISource.wrap(src).rpc()),
+					                      numPartitions, localReduce)
+		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+			raise IDriverException(ex.message, ex._cause)
+
+	def aggregateByKey(self, zero, seqOp, combOp=None, numPartitions=None):
+		try:
+			if numPartitions is None:
+				if combOp is None:
+					with Ignis._pool.getClient() as client:
+						return IPairDataFrame(
+							client.getDataFrameService().aggregateByKey(self._id,
+							                                            ISource.wrap(zero).rpc(),
+							                                            ISource.wrap(seqOp).rpc()))
+				else:
+					with Ignis._pool.getClient() as client:
+						return IPairDataFrame(
+							client.getDataFrameService().aggregateByKey4b(self._id,
+							                                              ISource.wrap(zero).rpc(),
+							                                              ISource.wrap(seqOp).rpc(),
+							                                              ISource.wrap(combOp).rpc()))
+			else:
+				if combOp is None:
+					with Ignis._pool.getClient() as client:
+						return IPairDataFrame(
+							client.getDataFrameService().aggregateByKey4a(self._id,
+							                                              ISource.wrap(zero).rpc(),
+							                                              ISource.wrap(seqOp).rpc(),
+							                                              numPartitions))
+				else:
+					with Ignis._pool.getClient() as client:
+						return IPairDataFrame(
+							client.getDataFrameService().aggregateByKey5(self._id,
+							                                             ISource.wrap(zero).rpc(),
+							                                             ISource.wrap(seqOp).rpc(),
+							                                             ISource.wrap(combOp).rpc(),
+							                                             numPartitions))
+		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+			raise IDriverException(ex.message, ex._cause)
+
+	def foldByKey(self, zero, src, numPartitions=None, localFold=True):
+		try:
+			if numPartitions is None:
+				with Ignis._pool.getClient() as client:
+					return IPairDataFrame(
+						client.getDataFrameService().foldByKey(self._id,
+						                                       ISource.wrap(zero).rpc(),
+						                                       ISource.wrap(src).rpc(),
+						                                       localFold))
+			else:
+				with Ignis._pool.getClient() as client:
+					return IPairDataFrame(
+						client.getDataFrameService().foldByKey5(self._id,
+						                                        ISource.wrap(zero).rpc(),
+						                                        ISource.wrap(src).rpc(),
+						                                        numPartitions,
+						                                        localFold))
+		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+			raise IDriverException(ex.message, ex._cause)
+
+	def sortByKey(self, ascending=True, numPartitions=None, src=None):
+		try:
+			if numPartitions is None:
+				if src is None:
+					with Ignis._pool.getClient() as client:
+						return IPairDataFrame(
+							client.getDataFrameService().sortByKey(self._id,
+							                                       ascending))
+				else:
+					with Ignis._pool.getClient() as client:
+						return IPairDataFrame(
+							client.getDataFrameService().sortByKey3b(self._id,
+							                                         ascending,
+							                                         ISource.wrap(src).rpc()))
+			else:
+				if src is None:
+					with Ignis._pool.getClient() as client:
+						return IPairDataFrame(
+							client.getDataFrameService().sortByKey3a(self._id,
+							                                         ascending,
+							                                         numPartitions))
+				else:
+					with Ignis._pool.getClient() as client:
+						return IPairDataFrame(
+							client.getDataFrameService().sortByKey4(self._id,
+							                                        ascending,
+							                                        numPartitions,
+							                                        ISource.wrap(src).rpc()))
+
+		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+			raise IDriverException(ex.message, ex._cause)
+
+	def keys(self):
+		try:
+			with Ignis._pool.getClient() as client:
+				return Ignis._driverContext().collect(
+					client.getDataFrameService().keys(self._id,
+					                                  ISource("").rpc())
 				)
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
 			raise IDriverException(ex.message, ex._cause)
 
-	def min(self, cmp):
+	def values(self):
 		try:
 			with Ignis._pool.getClient() as client:
-				return Ignis._driverContext().collect1(
-					client.getDataFrameService().min(self._id, ISource.wrap(cmp).rpc(), ISource("").rpc())  # TODO
+				return Ignis._driverContext().collect(
+					client.getDataFrameService().values(self._id,
+					                                    ISource("").rpc())
 				)
+		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+			raise IDriverException(ex.message, ex._cause)
+
+	def sampleByKey(self, withReplacement, fractions, seed, native=False):
+		try:
+			fractions_src = ISource("", native)
+			fractions_src.addParam("fractions", fractions)
+			with Ignis._pool.getClient() as client:
+				return IPairDataFrame(
+					client.getDataFrameService().sampleByKey(self._id,
+					                                         withReplacement,
+					                                         fractions_src.rpc(),
+					                                         seed))
+		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+			raise IDriverException(ex.message, ex._cause)
+
+	def countByKey(self, id, tp):
+		try:
+			with Ignis._pool.getClient() as client:
+				counts = Ignis._driverContext().collect(
+					client.getDataFrameService().countByKey(self._id,
+					                                        ISource("").rpc())
+				)
+				i = 1
+				while i < len(counts):
+					for key, value in counts[i]:
+						if key in counts[0]:
+							counts[0][key] += counts[i][key]
+						else:
+							counts[0][key] = counts[i][key]
+					i += 1
+				return counts[0]
+
+		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+			raise IDriverException(ex.message, ex._cause)
+
+	def countByValue(self, id, tp):
+		try:
+			with Ignis._pool.getClient() as client:
+				counts = Ignis._driverContext().collect(
+					client.getDataFrameService().countByValue(self._id,
+					                                          ISource("").rpc())
+				)
+				i = 1
+				while i < len(counts):
+					for key, value in counts[i]:
+						if key in counts[0]:
+							counts[0][key] += counts[i][key]
+						else:
+							counts[0][key] = counts[i][key]
+					i += 1
+				return counts[0]
+
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
 			raise IDriverException(ex.message, ex._cause)

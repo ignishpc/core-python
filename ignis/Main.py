@@ -34,18 +34,21 @@ def main(argv):
 
 	class IExecutorServerModuleImpl(IExecutorServerModule):
 
+		def __init__(self, executor_data):
+			IExecutorServerModule.__init__(self, executor_data)
+
 		def _createServices(self, processor):
-			cache_context = ICacheContextModule(executor_data)
+			cache_context = ICacheContextModule(self._executor_data)
 			processor.registerProcessor("ICacheContext", ICacheContextModuleProcessor(cache_context))
-			comm = ICommModule(executor_data)
+			comm = ICommModule(self._executor_data)
 			processor.registerProcessor("IComm", ICommModuleProcessor(comm))
-			general_action = IGeneralActionModule(executor_data)
-			processor.registerProcessor("IGeneralActio", IGeneralActionModuleProcessor(general_action))
-			general = IGeneralModule(executor_data)
+			general_action = IGeneralActionModule(self._executor_data)
+			processor.registerProcessor("IGeneralAction", IGeneralActionModuleProcessor(general_action))
+			general = IGeneralModule(self._executor_data)
 			processor.registerProcessor("IGeneral", IGeneralModuleProcessor(general))
-			io = IIOModule(executor_data)
+			io = IIOModule(self._executor_data)
 			processor.registerProcessor("IIO", IIOModuleProcessor(io))
-			math = IMathModule(executor_data)
+			math = IMathModule(self._executor_data)
 			processor.registerProcessor("IMath", IMathModuleProcessor(math))
 
 	executor_data = IExecutorData()

@@ -10,8 +10,11 @@ from ignis.executor.core.transport.IZlibTransport import IZlibTransport
 class IMemoryPartition(IPartition):
 	TYPE = "Memory"
 
-	def __init__(self, native, cls=list):
-		self.__elements = cls()
+	def __init__(self, native, cls=list, elements=None):
+		if elements is None:
+			self.__elements = cls()
+		else:
+			self.__elements = elements
 		self.__native = native
 		self.__cls = cls
 

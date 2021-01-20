@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-	name='ignis',
+	name='ignis-core',
 	version='1.0',
 	description='Ignis python core',
 	packages=['ignis'],

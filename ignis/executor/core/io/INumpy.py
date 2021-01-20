@@ -17,9 +17,13 @@ __LIST_READER = None
 
 class INumpyWrapper:
 
-	def __init__(self, sz, dtype):
-		self.array = numpy.empty(shape=sz, dtype=dtype)
-		self.__next = 0
+	def __init__(self, sz=None, dtype=None, array=None):
+		if array is None:
+			self.array = numpy.empty(shape=sz, dtype=dtype)
+			self.__next = 0
+		else:
+			self.array = array
+			self.__next = len(array)
 
 	def __len__(self):
 		return self.__next
