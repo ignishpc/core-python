@@ -37,7 +37,7 @@ class Ignis:
 				if not cls._pool:
 					return
 				with cls._pool.getClient() as client:
-					client.getIBackendService().stop()
+					client.getBackendService().stop()
 				cls.__backend.wait()
 				cls._pool.destroy()
 				cls.__callback.stop()
