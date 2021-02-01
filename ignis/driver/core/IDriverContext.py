@@ -1,7 +1,7 @@
 import logging
 import threading
 
-from ignis import IDriverException
+from ignis.driver.api.IDriverException import IDriverException
 from ignis.executor.core.modules.IModule import IModule
 from ignis.executor.core.storage import IMemoryPartition
 from ignis.rpc.executor.cachecontext.ICacheContextModule import Iface as ICacheContextModuleIface

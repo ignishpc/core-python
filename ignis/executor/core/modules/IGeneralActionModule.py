@@ -19,96 +19,102 @@ class IGeneralActionModule(IModule, IGeneralActionModuleIface):
 
 	def reduce(self, src):
 		try:
-			raise NotImplementedError()
+			self.__reduce_impl.reduce(self._executor_data.loadLibrary(src))
 		except Exception as ex:
 			self._pack_exception(ex)
 
-	def treeReduce(self, src, depth):
+	def treeReduce(self, src):
 		try:
-			raise NotImplementedError()
+			self.__reduce_impl.treeReduce(self._executor_data.loadLibrary(src))
 		except Exception as ex:
 			self._pack_exception(ex)
 
 	def collect(self):
 		try:
-			raise NotImplementedError()
+			pass # Do nothing
 		except Exception as ex:
 			self._pack_exception(ex)
 
-	def aggregate(self, seqOp, combOp):
+	def aggregate(self, zero, seqOp, combOp):
 		try:
-			raise NotImplementedError()
+			self.__reduce_impl.zero(self._executor_data.loadLibrary(zero))
+			self.__reduce_impl.aggregate(self._executor_data.loadLibrary(seqOp))
+			self.__reduce_impl.reduce(self._executor_data.loadLibrary(combOp))
 		except Exception as ex:
 			self._pack_exception(ex)
 
-	def treeAggregate(self, seqOp, combOp, depth):
+	def treeAggregate(self, zero, seqOp, combOp):
 		try:
-			raise NotImplementedError()
+			self.__reduce_impl.zero(self._executor_data.loadLibrary(zero))
+			self.__reduce_impl.aggregate(self._executor_data.loadLibrary(seqOp))
+			self.__reduce_impl.treeReduce(self._executor_data.loadLibrary(combOp))
 		except Exception as ex:
 			self._pack_exception(ex)
 
-	def fold(self, src):
+	def fold(self, zero, src):
 		try:
-			raise NotImplementedError()
+			self.__reduce_impl.zero(self._executor_data.loadLibrary(zero))
+			self.__reduce_impl.fold(self._executor_data.loadLibrary(src))
 		except Exception as ex:
 			self._pack_exception(ex)
 
-	def treeFold(self, src):
+	def treeFold(self, zero, src):
 		try:
-			raise NotImplementedError()
+			self.__reduce_impl.zero(self._executor_data.loadLibrary(zero))
+			self.__reduce_impl.treeFold(self._executor_data.loadLibrary(src))
 		except Exception as ex:
 			self._pack_exception(ex)
 
 	def take(self, num):
 		try:
-			raise NotImplementedError()
+			self.__pipe_impl.take(num)
 		except Exception as ex:
 			self._pack_exception(ex)
 
 	def foreach_(self, src):
 		try:
-			raise NotImplementedError()
+			self.__pipe_impl.foreach(self._executor_data.loadLibrary(src))
 		except Exception as ex:
 			self._pack_exception(ex)
 
 	def foreachPartition(self, src):
 		try:
-			raise NotImplementedError()
+			self.__pipe_impl.foreachPartition(self._executor_data.loadLibrary(src))
 		except Exception as ex:
 			self._pack_exception(ex)
 
 	def top(self, num):
 		try:
-			raise NotImplementedError()
+			self.__sort_impl.top(num)
 		except Exception as ex:
 			self._pack_exception(ex)
 
 	def top2(self, num, comp):
 		try:
-			raise NotImplementedError()
+			self.__sort_impl.top(num, self._executor_data.loadLibrary(comp))
 		except Exception as ex:
 			self._pack_exception(ex)
 
 	def takeOrdered(self, num):
 		try:
-			raise NotImplementedError()
+			self.__sort_impl.takeOrdered(num)
 		except Exception as ex:
 			self._pack_exception(ex)
 
 	def takeOrdered2(self, num, comp):
 		try:
-			raise NotImplementedError()
+			self.__sort_impl.takeOrdered(num, self._executor_data.loadLibrary(comp))
 		except Exception as ex:
 			self._pack_exception(ex)
 
 	def keys(self):
 		try:
-			raise NotImplementedError()
+			self.__pipe_impl.keys()
 		except Exception as ex:
 			self._pack_exception(ex)
 
 	def values(self):
 		try:
-			raise NotImplementedError()
+			self.__pipe_impl.values()
 		except Exception as ex:
 			self._pack_exception(ex)

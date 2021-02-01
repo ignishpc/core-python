@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 def _newNumpyMemoryPartition(sz, native, dtype):
 	from ignis.executor.core.io.INumpy import INumpyWrapper as Wrapper
 	class INumpyWrapper(Wrapper):
-		def __init__(self):
-			Wrapper.__init__(self, sz, dtype)
+		def __init__(self, array=None):
+			Wrapper.__init__(self, sz, dtype, array)
 
 	return IMemoryPartition(native=native, cls=INumpyWrapper)
 
@@ -49,7 +49,7 @@ class IPartitionTools:
 		else:
 			raise ValueError("unknown partition type: " + partitionType)
 
-	def newPartitionGroup(self, partitions=None):
+	def newPartitionGroup(self, partitions=0):
 		group = IPartitionGroup()
 		if isinstance(partitions, int):
 			for i in range(0, partitions):
@@ -130,7 +130,7 @@ class IPartitionTools:
 
 	def isMemory(self, part):
 		if isinstance(part, IPartitionGroup):
-			return len(part) > 0 and part[0] == IMemoryPartition.TYPE
+			return len(part) > 0 and part[0].type() == IMemoryPartition.TYPE
 		return IMemoryPartition.TYPE == part.getType()
 
 	def isRawMemory(self, part):

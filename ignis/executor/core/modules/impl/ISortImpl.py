@@ -1,4 +1,3 @@
-import functools
 import logging
 import math
 
@@ -8,161 +7,303 @@ from ignis.executor.core.modules.impl.IBaseImpl import IBaseImpl
 logger = logging.getLogger(__name__)
 
 
+def cmp_to_key(cmp):
+    class K(object):
+        __slots__ = ['obj']
+
+        def __init__(self, obj, *args):
+            self.obj = obj
+
+        def __lt__(self, other):
+            return cmp(self.obj, other.obj)
+
+    return K
+
+
 class ISortImpl(IBaseImpl):
 
-	def __init__(self, executor_data):
-		IBaseImpl.__init__(self, executor_data)
+    def __init__(self, executor_data):
+        IBaseImpl.__init__(self, executor_data)
 
-	def sort(self, ascending, numPartitions=-1):
-		self.__sortImpl(None, ascending, numPartitions)
+    def sort(self, ascending, numPartitions=-1):
+        self.__sortImpl(None, ascending, numPartitions)
 
-	def sortBy(self, f, ascending, numPartitions=-1):
-		context = self._executor_data.getContext()
-		f.before(context)
-		self.__sortImpl(lambda a, b: f.call(a, b, context), ascending, numPartitions)
-		f.after(context)
+    def sortBy(self, f, ascending, numPartitions=-1):
+        context = self._executor_data.getContext()
+        f.before(context)
+        self.__sortImpl(lambda a, b: f.call(a, b, context), ascending, numPartitions)
+        f.after(context)
 
-	def __sortImpl(self, cmp, ascending, partitions):
-		input = self._executor_data.getPartitions()
-		executors = self._executor_data.mpi().executors()
-		# Copy the data if they are reused
-		if input.cache():  # Work directly on the array to improve performance
-			if self._executor_data.getPartitionTools().isMemory(input):
-				input = input.clone()
-			else:
-				# Only group will be affected
-				input = input.shadowCopy()
-		# Sort each partition
-		logger.info("Sort: sorting " + str(len(input)) + " partitions locally")
-		self.__localSort(input, cmp, ascending)
+    def top(self, num, cmp=None):
+        if cmp is None:
+            self.__take_ordered_impl(comparator=None, ascending=False, n=num)
+        else:
+            context = self._executor_data.getContext()
+            cmp.before(context)
+            self.__take_ordered_impl(comparator=lambda a, b: cmp.call(a, b, context), ascending=False, n=num)
+            cmp.after(context)
 
-		localPartitions = input.partitions()
-		totalPartitions = self._executor_data.mpi().native().allreduce(localPartitions, MPI.SUM)
-		if totalPartitions < 2:
-			self._executor_data.setPartitions(input)
-			return
+    def takeOrdered(self, num, cmp=None):
+        if cmp is None:
+            self.__take_ordered_impl(comparator=None, ascending=True, n=num)
+        else:
+            context = self._executor_data.getContext()
+            cmp.before(context)
+            self.__take_ordered_impl(comparator=lambda a, b: cmp.call(a, b, context), ascending=True, n=num)
+            cmp.after(context)
 
-		# Generates pivots to separate the elements in order
-		samples = self._executor_data.getProperties().sortSamples()
-		if partitions > 0:
-			samples *= int(partitions / len(input) + 1)
-		logger.info("Sort: selecting " + str(samples) + " pivots")
-		pivots = self.__selectPivots(input, samples)
+    def sortByKey(self, ascending, numPartitions=-1):
+        self.__sortImpl(lambda a, b: a[0] < b[0], ascending, numPartitions)
 
-		logger.info("Sort: collecting pivots")
-		self._executor_data.mpi().gather(pivots, 0)
+    def sortByKeyBy(self, f, ascending, numPartitions=-1):
+        context = self._executor_data.getContext()
+        f.before(context)
+        self.__sortImpl(lambda a, b: f.call(a[0], b[0], context), ascending, numPartitions)
+        f.after(context)
 
-		if self._executor_data.mpi().isRoot(0):
-			group = self._executor_data.getPartitionTools().newPartitionGroup(0)
-			group.add(pivots)
-			self.__localSort(group, cmp, ascending)
-			if partitions > 0:
-				samples = partitions - 1
-			else:
-				samples = totalPartitions - 1
+    def max(self, cmp=None):
+        if cmp is None:
+            self.__max_impl(comparator=None, ascending=False)
+        else:
+            context = self._executor_data.getContext()
+            cmp.before(context)
+            self.__max_impl(comparator=lambda a, b: cmp.call(a, b, context), ascending=False)
+            cmp.after(context)
 
-			logger.info("Sort: selecting " + str(samples) + " partition pivots")
-			pivots = self.__selectPivots(group, samples)
+    def min(self, cmp=None):
+        if cmp is None:
+            self.__max_impl(comparator=None, ascending=True)
+        else:
+            context = self._executor_data.getContext()
+            cmp.before(context)
+            self.__max_impl(comparator=lambda a, b: cmp.call(a, b, context), ascending=True)
+            cmp.after(context)
 
-		logger.info("Sort: broadcasting pivots ranges")
-		self._executor_data.mpi().bcast(pivots, 0)
+    def __sortImpl(self, cmp, ascending, partitions):
+        input = self._executor_data.getPartitions()
+        executors = self._executor_data.mpi().executors()
+        # Copy the data if they are reused
+        if input.cache():  # Work directly on the array to improve performance
+            if self._executor_data.getPartitionTools().isMemory(input):
+                input = input.clone()
+            else:
+                # Only group will be affected
+                input = input.shadowCopy()
+        # Sort each partition
+        logger.info("Sort: sorting " + str(len(input)) + " partitions locally")
+        self.__localSort(input, cmp, ascending)
 
-		ranges = self.__generateRanges(input, pivots, cmp)
-		output = self._executor_data.getPartitionTools().newPartitionGroup()
-		executor_ranges = math.ceil(len(ranges) / executors)
-		target = -1
-		logger.info("Sort: exchanging ranges")
-		for p in range(len(ranges)):
-			if p % executor_ranges == 0:
-				target += 1
-			self._executor_data.mpi().gather(ranges[p], target)
-			if self._executor_data.mpi().isRoot(target):
-				output.add(ranges[p])
-			else:
-				ranges[p] = None
+        localPartitions = input.partitions()
+        totalPartitions = self._executor_data.mpi().native().allreduce(localPartitions, MPI.SUM)
+        if totalPartitions < 2:
+            self._executor_data.setPartitions(input)
+            return
 
-		# Sort final partitions
-		logger.info("Sort: sorting again " + str(len(output)) + " partitions locally")
-		self.__localSort(output, cmp, ascending)
-		self._executor_data.setPartitions(output)
+        # Generates pivots to separate the elements in order
+        samples = self._executor_data.getProperties().sortSamples()
+        if partitions > 0:
+            samples *= int(partitions / len(input) + 1)
+        logger.info("Sort: selecting " + str(samples) + " pivots")
+        pivots = self.__selectPivots(input, samples)
 
-	def __localSort(self, group, cmp, ascending):
-		inMemory = self._executor_data.getPartitionTools().isMemory(group)
+        logger.info("Sort: collecting pivots")
+        self._executor_data.mpi().gather(pivots, 0)
 
-		for i in range(0, len(group)):
-			part = group[i]
-			if not inMemory:
-				new_part = self._executor_data.getPartitionTools().newMemoryPartition(part.size())
-				part.moveTo(new_part)
-				part = new_part
+        if self._executor_data.mpi().isRoot(0):
+            group = self._executor_data.getPartitionTools().newPartitionGroup(0)
+            group.add(pivots)
+            self.__localSort(group, cmp, ascending)
+            if partitions > 0:
+                samples = partitions - 1
+            else:
+                samples = totalPartitions - 1
 
-			elems = part._IMemoryPartition__elements
+            logger.info("Sort: selecting " + str(samples) + " partition pivots")
+            pivots = self.__selectPivots(group, samples)
 
-			if isinstance(elems, bytearray):
-				if cmp:
-					part._IMemoryPartition__elements = bytearray(
-						sorted(elems, key=functools.cmp_to_key(cmp), reverse=not ascending))
-				else:
-					part._IMemoryPartition__elements = bytearray(sorted(elems, reverse=not ascending))
-			elif type(elems).__name__ == 'INumpyWrapperCl':
-				if cmp:
-					raise TypeError("ndarray does not support sortBy")
-				else:
-					if ascending:
-						elems.array.sort()
-					else:
-						elems.array[::-1].sort()
-			else:
-				if cmp:
-					elems.sort(key=functools.cmp_to_key(cmp), reverse=not ascending)
-				else:
-					elems.sort(reverse=not ascending)
+        logger.info("Sort: broadcasting pivots ranges")
+        self._executor_data.mpi().bcast(pivots, 0)
 
-			if not inMemory:
-				part.moveTo(group[i])
+        ranges = self.__generateRanges(input, pivots, cmp, ascending)
+        output = self._executor_data.getPartitionTools().newPartitionGroup()
+        executor_ranges = math.ceil(len(ranges) / executors)
+        target = -1
+        logger.info("Sort: exchanging ranges")
+        for p in range(len(ranges)):
+            if p % executor_ranges == 0:
+                target += 1
+            self._executor_data.mpi().gather(ranges[p], target)
+            if self._executor_data.mpi().isRoot(target):
+                output.add(ranges[p])
+            else:
+                ranges[p] = None
 
-	def __selectPivots(self, group, samples):
-		pivots = self._executor_data.getPartitionTools().newMemoryPartition()
-		inMemory = self._executor_data.getPartitionTools().isMemory(group)
-		writer = pivots.writeIterator()
-		for part in group:
-			skip = int((len(part) - samples) / (samples + 1))
-			if inMemory:
-				pos = skip
-				for n in range(0, samples):
-					writer.write(part[pos])
-					pos += skip + 1
-			else:
-				reader = part.readIterator()
-				for n in range(0, samples):
-					for i in range(skip):
-						reader.next()
-					writer.write(reader.next())
+        # Sort final partitions
+        logger.info("Sort: sorting again " + str(len(output)) + " partitions locally")
+        self.__localSort(output, cmp, ascending)
+        self._executor_data.setPartitions(output)
 
-		return pivots
+    def __localSort(self, group, cmp, ascending):
+        inMemory = self._executor_data.getPartitionTools().isMemory(group)
 
-	def __generateRanges(self, input, pivots, cmp):
-		ranges = self._executor_data.getPartitionTools().newPartitionGroup(len(pivots) + 1)
-		writers = map(lambda p: p.writeIterator(), ranges)
+        for i in range(0, len(group)):
+            part = group[i]
+            if not inMemory:
+                new_part = self._executor_data.getPartitionTools().newMemoryPartition(part.size())
+                part.moveTo(new_part)
+                part = new_part
 
-		for part in input:
-			for elem in part:
-				writers[self.__searchRange(elem, pivots, cmp)].write(elem)
-			part.clear()
+            elems = part._IMemoryPartition__elements
 
-		input.clear()
-		return ranges
+            if isinstance(elems, bytearray):
+                if cmp:
+                    part._IMemoryPartition__elements = bytearray(
+                        sorted(elems, key=cmp_to_key(cmp), reverse=not ascending))
+                else:
+                    part._IMemoryPartition__elements = bytearray(sorted(elems, reverse=not ascending))
+            elif type(elems).__name__ == 'INumpyWrapper':
+                if cmp:
+                    import numpy
+                    elems.array = numpy.array(sorted(elems.usedArray(), key=cmp_to_key(cmp), reverse=not ascending))
+                else:
+                    if ascending:
+                        elems.usedArray().sort()
+                    else:
+                        elems.usedArray()[::-1].sort()
+            else:
+                if cmp:
+                    elems.sort(key=cmp_to_key(cmp), reverse=not ascending)
+                else:
+                    elems.sort(reverse=not ascending)
 
-	def __searchRange(self, elem, pivots, cmp):
-		start = 0
-		end = len(pivots) - 1
-		while start < end:
-			mid = int((start + end) / 2)
-			if cmp(elem, pivots[mid]):
-				end = mid - 1
-			else:
-				start = mid + 1
-		if cmp(elem, pivots[start]):
-			return start
-		else:
-			return start + 1
+            if not inMemory:
+                group[i] = self._executor_data.getPartitionTools().newPartition()
+                part.moveTo(group[i])
+
+    def __selectPivots(self, group, samples):
+        pivots = self._executor_data.getPartitionTools().newMemoryPartition()
+        inMemory = self._executor_data.getPartitionTools().isMemory(group)
+        writer = pivots.writeIterator()
+        for part in group:
+            skip = int((len(part) - samples) / (samples + 1))
+            if inMemory:
+                pos = skip
+                for n in range(0, samples):
+                    writer.write(part[pos])
+                    pos += skip + 1
+            else:
+                reader = part.readIterator()
+                for n in range(0, samples):
+                    for i in range(skip):
+                        reader.next()
+                    writer.write(reader.next())
+
+        return pivots
+
+    def __generateRanges(self, input, pivots, cmp, ascending):
+        if cmp is None:
+            cmp = lambda a, b: a < b
+        ranges = self._executor_data.getPartitionTools().newPartitionGroup(len(pivots) + 1)
+        writers = [p.writeIterator() for p in ranges]
+
+        for part in input:
+            for elem in part:
+                writers[self.__searchRange(elem, pivots, cmp, ascending)].write(elem)
+            part.clear()
+
+        input.clear()
+        return ranges
+
+    def __searchRange(self, elem, pivots, cmp, ascending):
+        start = 0
+        end = len(pivots) - 1
+        while start < end:
+            mid = int((start + end) / 2)
+            if cmp(elem, pivots[mid]) == ascending:
+                end = mid - 1
+            else:
+                start = mid + 1
+        if cmp(elem, pivots[start]) == ascending:
+            return start
+        else:
+            return start + 1
+
+    def __take_ordered_impl(self, comparator, ascending, n):
+        input = self._executor_data.getPartitions()
+        output = self._executor_data.getPartitionTools().newPartitionGroup()
+
+        logger.info("Sort: top/takeOrdered " + str(n) + " elemens")
+        top = self._executor_data.getPartitionTools().newMemoryPartition(n * len(input))
+        logger.info("Sort: local partition top/takeOrdered")
+        cmp = comparator if comparator is not None else lambda a, b: a < b
+        for part in input:
+            for item in part:
+                self.__take_ordered_add(cmp, ascending, top, item, n)
+
+        # logger.info("Sort: local executor top/takeOrdered")
+        logger.info("Sort: global top/takeOrdered")
+        self._executor_data.mpi().gather(top, 0)
+
+        if self._executor_data.mpi().isRoot(0):
+            tmp = self._executor_data.getPartitionTools().newPartitionGroup()
+            tmp.add(top)
+            self.__localSort(tmp, comparator, ascending)
+            self.resizeMemoryPartition(top, n)
+            output.add(top)
+
+        self._executor_data.setPartitions(output)
+
+    def __take_ordered_add(self, comparator, ascending, top, elem, n):
+        inner = top._inner()
+        if len(inner) == 0:
+            inner.append(elem)
+            return
+        if len(inner) == n:
+            if comparator(inner[-1], elem) == ascending:
+                return
+            i = self.__searchRange(elem, top, comparator, ascending)
+        else:
+            i = self.__searchRange(elem, top, comparator, ascending)
+            inner.append(elem)
+
+        inner[i + 1:len(inner)] = inner[i:len(inner) - 1]
+        inner[i] = elem
+
+    def __max_impl(self, comparator, ascending):
+        input = self._executor_data.getPartitions()
+        output = self._executor_data.getPartitionTools().newPartitionGroup()
+
+        logger.info("Sort: max/min")
+        elem = None
+        for part in input:
+            if part:
+                elem = part.readIterator().next()
+                break
+
+        if elem is None:
+            self._executor_data.setPartitions(output)
+            return
+
+        if comparator is None:
+            comparator = lambda a, b: a < b
+
+        logger.info("Sort: local max/min")
+        for part in input:
+            for item in part:
+                if comparator(item, elem) == ascending:
+                    elem = item
+
+        logger.info("Sort: global max/min")
+        result = self._executor_data.getPartitionTools().newMemoryPartition()
+        result.writeIterator().write(elem)
+        self._executor_data.mpi().gather(result, 0)
+        if self._executor_data.mpi().isRoot(0):
+            for part in input:
+                for item in part:
+                    if comparator(item, elem) == ascending:
+                        elem = item
+            result.clear()
+            result.writeIterator().write(elem)
+            output.add(result)
+
+        self._executor_data.setPartitions(output)

@@ -25,6 +25,9 @@ class INumpyWrapper:
 			self.array = array
 			self.__next = len(array)
 
+	def usedArray(self):
+		return self.array[0:self.__next]
+
 	def __len__(self):
 		return self.__next
 
