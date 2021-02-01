@@ -110,4 +110,4 @@ class IDriverContext(IModule, ICacheContextModuleIface):
             raise IDriverException(str(ex)) from ex
 
     def collect1(self, id):
-        return self.collect(id)[0];
+        return self.collect(id)[0]

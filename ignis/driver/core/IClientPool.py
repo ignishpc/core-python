@@ -34,9 +34,9 @@ class IClientPool:
 				if self.__queue:
 					self.__client = self.__queue.pop()
 			if not self.__client:
-				client = IClient(self.__port, self.__compression)
+				self.__client = IClient(self.__port, self.__compression)
 				with self.__lock:
-					self.__clients.append(client)
+					self.__clients.append(self.__client)
 			return self.__client
 
 		def __exit__(self, exc_type, exc_val, exc_tb):

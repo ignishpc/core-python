@@ -37,9 +37,9 @@ class IZlibTransport(TZlibTransport):
 		super().__init__(self.__trans, self.compresslevel)
 
 
-class IZlibTransportFactory(object):
+class IZlibTransportFactory:
 
-	def __innit__(self, compression=6):
+	def __init__(self, compression=6):
 		self.__compression = compression
 
 	def getTransport(self, trans):

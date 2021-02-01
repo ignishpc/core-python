@@ -34,19 +34,19 @@ class IClient:
 		self.__dataframeService = IDataFrameService.Client(TMultiplexedProtocol(protocol, "IDataFrame"))
 
 	def getBackendService(self):
-		return self.__backendService;
+		return self.__backendService
 
 	def getPropertiesService(self):
-		return self.__propertiesService;
+		return self.__propertiesService
 
 	def getClusterService(self):
-		return self.__clusterService;
+		return self.__clusterService
 
 	def getWorkerService(self):
-		return self.__workerService;
+		return self.__workerService
 
 	def getDataFrameService(self):
-		return self.__dataframeService;
+		return self.__dataframeService
 
 	def _close(self):
 		self.__transport.close()
