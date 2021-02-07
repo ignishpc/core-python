@@ -100,9 +100,19 @@ class ISortImpl(IBaseImpl):
             return
 
         # Generates pivots to separate the elements in order
-        samples = self._executor_data.getProperties().sortSamples()
+        sr = self._executor_data.getProperties().sortSamples()
+        if sr > 1:
+            samples = int(sr)
+        else:
+            send = [0 , 0]
+            send[0] = len(input)
+            for part in input:
+                send[1] += len(part)
+            rcv = self._executor_data.mpi().native().allreduce(send, MPI.SUM)
+            samples = math.ceil(rcv[1] / rcv[0] * sr)
+
         if partitions > 0:
-            samples *= int(partitions / len(input) + 1)
+            samples *= math.ceil(partitions / len(input) + 1)
         logger.info("Sort: selecting " + str(samples) + " pivots")
         pivots = self.__selectPivots(input, samples)
 
@@ -185,6 +195,11 @@ class ISortImpl(IBaseImpl):
         inMemory = self._executor_data.getPartitionTools().isMemory(group)
         writer = pivots.writeIterator()
         for part in group:
+            if len(part) < samples:
+                part.copyTo(pivots)
+                writer = pivots.writeIterator()
+                continue
+
             skip = int((len(part) - samples) / (samples + 1))
             if inMemory:
                 pos = skip

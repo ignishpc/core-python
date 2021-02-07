@@ -16,7 +16,7 @@ class IPropertyParser:
 		return self.getSize("ignis.partition.minimal")
 
 	def sortSamples(self):
-		return self.getMinNumber("ignis.modules.sort.samples", 1)
+		return self.getMinFloat("ignis.modules.sort.samples", 0)
 
 	def ioOverwrite(self):
 		return self.getBoolean("ignis.modules.io.overwrite")
@@ -54,6 +54,9 @@ class IPropertyParser:
 	def getNumber(self, key):
 		return int(self.getString(key))
 
+	def getFloat(self, key):
+		return float(self.getString(key))
+
 	def getRangeNumber(self, key, min, max):
 		value = self.getNumber(key)
 		if min is not None and value < min:
@@ -67,6 +70,20 @@ class IPropertyParser:
 
 	def getMinNumber(self, key, min):
 		return self.getRangeNumber(key, min, None)
+
+	def getRangeFloat(self, key, min, max):
+		value = self.getFloat(key)
+		if min is not None and value < min:
+			raise ValueError(key + " error " + value + " is less than " + value)
+		if max is not None and value > max:
+			raise ValueError(key + " error " + value + " is greater than " + value)
+		return value
+
+	def getMaxFloat(self, key, max):
+		return self.getRangeFloat(key, None, max)
+
+	def getMinFloat(self, key, min):
+		return self.getRangeFloat(key, min, None)
 
 	def __parseError(self, key, value, pos):
 		raise ValueError(key + " parsing error " + value[pos] + "(" + pos + 1 + ") in " + value)

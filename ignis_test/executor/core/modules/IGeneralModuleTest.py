@@ -13,7 +13,7 @@ class IGeneralModuleTest(IModuleTest, unittest.TestCase):
         unittest.TestCase.__init__(self, *args, **kwargs)
         self.__general = IGeneralModule(self._executor_data)
         props = self._executor_data.getContext().props()
-        props["ignis.modules.sort.samples"] = "2"
+        props["ignis.modules.sort.samples"] = "0.1"
 
     def test_mapInt(self):
         self.__mapTest("MapInt", "Memory", IElementsInt)
