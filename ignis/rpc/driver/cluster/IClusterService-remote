@@ -24,6 +24,8 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('Usage: ' + sys.argv[0] + ' [-h host[:port]] [-u url] [-f[ramed]] [-s[sl]] [-novalidate] [-ca_certs certs] [-keyfile keyfile] [-certfile certfile] function [arg1 [arg2...]]')
     print('')
     print('Functions:')
+    print('  void start(i64 id)')
+    print('  void destroy(i64 id)')
     print('  i64 newInstance0()')
     print('  i64 newInstance1a(string name)')
     print('  i64 newInstance1b(i64 properties)')
@@ -112,7 +114,19 @@ protocol = TBinaryProtocol(transport)
 client = IClusterService.Client(protocol)
 transport.open()
 
-if cmd == 'newInstance0':
+if cmd == 'start':
+    if len(args) != 1:
+        print('start requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.start(eval(args[0]),))
+
+elif cmd == 'destroy':
+    if len(args) != 1:
+        print('destroy requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.destroy(eval(args[0]),))
+
+elif cmd == 'newInstance0':
     if len(args) != 0:
         print('newInstance0 requires 0 args')
         sys.exit(1)

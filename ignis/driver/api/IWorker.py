@@ -24,6 +24,20 @@ class IWorker:
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
 			raise IDriverException(ex.message, ex._cause)
 
+	def start(self):
+		try:
+			with Ignis._pool.getClient() as client:
+				client.getWorkerService().start(self._id)
+		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+			raise IDriverException(ex.message, ex._cause)
+
+	def destroy(self):
+		try:
+			with Ignis._pool.getClient() as client:
+				client.getWorkerService().destroy(self._id)
+		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+			raise IDriverException(ex.message, ex._cause)
+
 	def getCluster(self):
 		return self.__cluster
 
