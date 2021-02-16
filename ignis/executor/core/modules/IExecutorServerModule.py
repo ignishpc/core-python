@@ -87,7 +87,7 @@ class IExecutorServerModule(IModule, IExecutorServerModuleIface):
 
 	def start(self, properties):
 		try:
-			self._executor_data.getContext().props.update(properties)
+			self._executor_data.getContext().props().update(properties)
 			self._createServices(self.__processor)
 			logger.info("ServerModule: python executor ready")
 		except Exception as ex:
