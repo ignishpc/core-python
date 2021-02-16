@@ -103,6 +103,7 @@ class IExecutorServerModule(IModule, IExecutorServerModuleIface):
 	def test(self):
 		try:
 			logger.info("ServerModule: test ok")
+			return True
 		except Exception as ex:
 			self._pack_exception(ex)
 
