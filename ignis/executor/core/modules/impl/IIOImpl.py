@@ -45,7 +45,7 @@ class IIOImpl(IBaseImpl):
 
 			partitionGroup = self._executor_data.getPartitionTools().newPartitionGroup()
 			self._executor_data.setPartitions(partitionGroup)
-			partition = self._executor_data.getPartitionTools().newPartition < ()
+			partition = self._executor_data.getPartitionTools().newPartition()
 			write_iterator = partition.writeIterator()
 			partitionGroup.add(partition)
 			partitionInit = ex_chunk_init
