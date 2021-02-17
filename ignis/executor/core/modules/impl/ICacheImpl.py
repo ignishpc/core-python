@@ -39,7 +39,7 @@ class ICacheImpl(IBaseImpl):
 	def loadContext(self, id):
 		value = self.__context.get(id, None)
 		if value and value == self._executor_data.getPartitions():
-			del self.__context.get[id]
+			del self.__context[id]
 			return
 		logger.info("CacheContext: loading context " + str(id))
 
@@ -47,7 +47,7 @@ class ICacheImpl(IBaseImpl):
 			raise ValueError("context " + str(id) + " not found")
 		self._executor_data.setPartitions(value)
 		self._executor_data.clearVariables()
-		del self.__context.get[id]
+		del self.__context[id]
 
 	def cache(self, id, level):
 		if level == 0:  # NO_CACHE

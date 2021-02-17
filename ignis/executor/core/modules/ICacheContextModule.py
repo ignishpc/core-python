@@ -21,7 +21,7 @@ class ICacheContextModule(IModule, ICacheContextModuleIface):
 
 	def saveContext(self):
 		try:
-			self.__impl.saveContext()
+			return self.__impl.saveContext()
 		except Exception as ex:
 			self._pack_exception(ex)
 
