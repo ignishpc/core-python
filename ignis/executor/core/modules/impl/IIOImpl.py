@@ -114,7 +114,6 @@ class IIOImpl(IBaseImpl):
 	def saveAsObjectFile(self, path, compression, first):
 		logger.info("IO: saving as object file")
 		group = self._executor_data.getPartitions()
-		self._executor_data.deletePartitions()
 		native = self._executor_data.getProperties().nativeSerialization()
 
 		for i in range(len(group)):
@@ -129,7 +128,6 @@ class IIOImpl(IBaseImpl):
 	def saveAsTextFile(self, path, first):
 		logger.info("IO: saving as text file")
 		group = self._executor_data.getPartitions()
-		self._executor_data.deletePartitions()
 
 		for i in range(len(group)):
 			file_name = self.__partitionFileName(path, first + i)
@@ -141,7 +139,6 @@ class IIOImpl(IBaseImpl):
 	def saveAsJsonFile(self, path, first, pretty):
 		logger.info("IO: saving as json file")
 		group = self._executor_data.getPartitions()
-		self._executor_data.deletePartitions()
 
 		for i in range(len(group)):
 			file_name = self.__partitionFileName(path, first + i)
