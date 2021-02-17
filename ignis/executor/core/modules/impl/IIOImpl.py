@@ -1,5 +1,6 @@
 import json
 import logging
+import pathlib
 import math
 import os
 
@@ -21,7 +22,7 @@ class IIOImpl(IBaseImpl):
 
 	def textFile(self, path, minPartitions=1):
 		logger.info("IO: reading text file")
-		with self.__openFileRead(path) as file:
+		with self.__openFileRead(path, binary=True) as file:
 			size = os.path.getsize(path)
 			executorId = self._executor_data.getContext().executorId()
 			executors = self._executor_data.getContext().executors()
@@ -49,19 +50,22 @@ class IIOImpl(IBaseImpl):
 			write_iterator = partition.writeIterator()
 			partitionGroup.add(partition)
 			partitionInit = ex_chunk_init
+			filepos = ex_chunk_init
 			elements = 0
-			while file.tell() < ex_chunk_end:
-				if (file.tell() - partitionInit) > minPartitionSize:
+			while filepos < ex_chunk_end:
+				if (filepos - partitionInit) > minPartitionSize:
 					partition = self._executor_data.getPartitionTools().newPartition()
 					write_iterator = partition.writeIterator()
 					partitionGroup.add(partition)
-					partitionInit = file.tell()
+					partitionInit = filepos
 
-				write_iterator.write(file.readline())
+				bb = file.readline()
+				write_iterator.write(bb[:-1].decode("utf-8"))
 				elements += 1
+				filepos += len(bb)
 			ex_chunk_end = file.tell()
 
-			logger.info("IO: created  " + len(partitionGroup) + " partitions, " + elements + " lines and " +
+			logger.info("IO: created  " + str(len(partitionGroup)) + " partitions, " + str(elements) + " lines and " +
 			            str(ex_chunk_end - ex_chunk_init) + " Bytes read ")
 
 	def partitionObjectFile(self, path, first, partitions):
@@ -154,7 +158,7 @@ class IIOImpl(IBaseImpl):
 	def __partitionFileName(self, path, index):
 		if not os.path.isdir(path):
 			try:
-				os.path.Path(path).mkdir(parents=True, exist_ok=True)
+				pathlib.Path(path).mkdir(parents=True, exist_ok=True)
 			except Exception as ex:
 				raise ValueError("Unable to create directory " + path + " " + str(ex))
 

@@ -14,7 +14,7 @@ class IModule:
 		stack = traceback.format_exc()
 		cause = ex.__class__.__name__ + ': ' + message + "\nCaused by: \n" + stack
 		self.__logger.error(cause)
-		raise IExecutorException(message=message, cause=cause)
+		raise IExecutorException(message=message, _cause=cause)
 
 	def _use_source(self, src):
 		try:
