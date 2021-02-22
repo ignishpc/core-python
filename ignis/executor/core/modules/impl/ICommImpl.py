@@ -46,7 +46,7 @@ class ICommImpl(IBaseImpl):
 
             handle = Handle()
 
-            for i in range(0, size):
+            for i in range(1, size):
                 client_comm = MPI.COMM_SELF.Accept(group_name, MPI.INFO_NULL, 0)
                 pos = ctypes.c_longlong(0)
                 client_comm.Recv((pos, 1, MPI.LONG_LONG), 0, 1963)
@@ -54,7 +54,7 @@ class ICommImpl(IBaseImpl):
                 client_comms[pos.value] = client_comm
             logger.info("Comm: all members found")
 
-            for i in range(0, size):
+            for i in range(1, size):
                 client_comm = client_comms[i]
                 client_comm.Send((flag, 1, MPI.BOOL), 0, 1963)
                 info_comm = group.Accept(group_name, MPI.INFO_NULL, 0)
