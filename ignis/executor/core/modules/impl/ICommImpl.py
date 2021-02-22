@@ -74,7 +74,7 @@ class ICommImpl(IBaseImpl):
             pos = ctypes.c_longlong(id)
             client_comm.Send((pos, 1, MPI.LONG_LONG), 0, 1963)
             client_comm.Recv((flag, 1, MPI.BOOL), 0, 1963)
-            info_comm = MPI.COMM_SELF.Connect(group_name.c_str(), MPI.INFO_NULL, 0)
+            info_comm = MPI.COMM_SELF.Connect(group_name, MPI.INFO_NULL, 0)
             group = self.__addComm(group, client_comm, MPI.COMM_SELF, False)
             logger.info("Comm: joined to the group")
             client_comm.Free()
