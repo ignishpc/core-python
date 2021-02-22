@@ -38,12 +38,12 @@ class IMemoryPartition(IPartition):
             for elem in new_elems:
                 it.write(elem)
 
-    def write(self, transport, compression=0, native=None):
+    def write(self, transport, compression=0, native=None, listHeader=True):
         if native is None:
             native = self.__native
         zlib_trans = IZlibTransport(transport, compression)
         proto = IObjectProtocol(zlib_trans)
-        proto.writeObject(self.__elements, native, listHeader=True)
+        proto.writeObject(self.__elements, native, listHeader)
         zlib_trans.flush()
 
     def clone(self):

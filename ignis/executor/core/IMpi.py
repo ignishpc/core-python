@@ -48,7 +48,8 @@ class IMpi:
 			else:
 				buffer = IMemoryBuffer(part.bytes())
 				if self.isRoot(root):
-					part.write(buffer, self.__propertyParser.msgCompression())
+					native = self.__propertyParser.nativeSerialization()
+					part.write(buffer, self.__propertyParser.msgCompression(), native, listHeader=False)
 				sz = self.native().bcast(buffer.writeEnd(), root)
 				if not self.isRoot(root):
 					buffer.setBufferSize(sz)
@@ -390,7 +391,8 @@ class IMpi:
 			else:
 				if root != rank:
 					buffer = IMemoryBuffer(part.bytes())
-					part.write(buffer, self.__propertyParser.msgCompression())
+					native = self.__propertyParser.nativeSerialization() and same_protocol
+					part.write(buffer, self.__propertyParser.msgCompression(), native, listHeader=False)
 					sz = buffer.writeEnd()
 					buffer.resetBuffer()
 				else:
@@ -580,7 +582,8 @@ class IMpi:
 			else:
 				buffer = IMemoryBuffer(part.bytes())
 				if id == source:
-					part.write(buffer, self.__propertyParser.msgCompression())
+					native = self.__propertyParser.nativeSerialization() and same_protocol
+					part.write(buffer, self.__propertyParser.msgCompression(), native, listHeader=False)
 					sz = buffer.writeEnd()
 					buffer.resetBuffer()
 					group.Send((c_int(sz), 1, MPI.INT), dest, tag)
