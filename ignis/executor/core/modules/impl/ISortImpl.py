@@ -79,7 +79,7 @@ class ISortImpl(IBaseImpl):
             self.__max_impl(comparator=lambda a, b: cmp.call(a, b, context), ascending=True)
             cmp.after(context)
 
-    def __sortImpl(self, cmp, ascending, partitions):
+    def __sortImpl(self, cmp, ascending, partitions, local_sort=True):
         input = self._executor_data.getPartitions()
         executors = self._executor_data.mpi().executors()
         # Copy the data if they are reused
@@ -90,46 +90,63 @@ class ISortImpl(IBaseImpl):
                 # Only group will be affected
                 input = input.shadowCopy()
         # Sort each partition
-        logger.info("Sort: sorting " + str(len(input)) + " partitions locally")
-        self.__localSort(input, cmp, ascending)
+        if local_sort:
+            logger.info("Sort: sorting " + str(len(input)) + " partitions locally")
+            self.__localSort(input, cmp, ascending)
 
         localPartitions = input.partitions()
         totalPartitions = self._executor_data.mpi().native().allreduce(localPartitions, MPI.SUM)
         if totalPartitions < 2:
             self._executor_data.setPartitions(input)
             return
+        if partitions < 0:
+            partitions = totalPartitions
 
         # Generates pivots to separate the elements in order
         sr = self._executor_data.getProperties().sortSamples()
         if sr > 1:
             samples = int(sr)
         else:
-            send = [0 , 0]
+            send = [0, 0]
             send[0] = len(input)
             for part in input:
                 send[1] += len(part)
             rcv = self._executor_data.mpi().native().allreduce(send, MPI.SUM)
             samples = math.ceil(rcv[1] / rcv[0] * sr)
 
-        if partitions > 0:
-            samples *= math.ceil(partitions / len(input) + 1)
+        samples = max(partitions, samples)
         logger.info("Sort: selecting " + str(samples) + " pivots")
         pivots = self.__selectPivots(input, samples)
 
-        logger.info("Sort: collecting pivots")
-        self._executor_data.mpi().gather(pivots, 0)
+        resampling = self._executor_data.getProperties().sortResampling()
+        if sr < 1 and resampling and executors > 1 and local_sort:
+            logger.info("Sort: -- resampling pivots begin --")
+            tmp = self._executor_data.getPartitionTools().newPartitionGroup(0)
+            tmp.add(pivots)
+            self._executor_data.setPartitions(tmp)
+            self.__sortImpl(cmp, ascending, partitions, False)
+            tmp = self._executor_data.getPartitions()
+            logger.info("Sort: -- resampling pivots end --")
 
-        if self._executor_data.mpi().isRoot(0):
-            group = self._executor_data.getPartitionTools().newPartitionGroup(0)
-            group.add(pivots)
-            self.__localSort(group, cmp, ascending)
-            if partitions > 0:
-                samples = partitions - 1
-            else:
-                samples = totalPartitions - 1
-
+            samples = partitions - 1
             logger.info("Sort: selecting " + str(samples) + " partition pivots")
-            pivots = self.__selectPivots(group, samples)
+            id = self._executor_data.getContext().executorId()
+            pivots = self.__selectPivots(tmp, int(samples / executors) + (1 if samples % executors < id else 0))
+
+            logger.info("Sort: collecting pivots")
+            self._executor_data.mpi().gather(pivots, 0)
+        else:
+            logger.info("Sort: collecting pivots")
+            self._executor_data.mpi().gather(pivots, 0)
+
+            if self._executor_data.mpi().isRoot(0):
+                group = self._executor_data.getPartitionTools().newPartitionGroup(0)
+                group.add(pivots)
+                self.__localSort(group, cmp, ascending)
+                samples = partitions - 1
+
+                logger.info("Sort: selecting " + str(samples) + " partition pivots")
+                pivots = self.__selectPivots(group, samples)
 
         logger.info("Sort: broadcasting pivots ranges")
         self._executor_data.mpi().bcast(pivots, 0)
@@ -218,6 +235,8 @@ class ISortImpl(IBaseImpl):
     def __generateRanges(self, input, pivots, cmp, ascending):
         if cmp is None:
             cmp = lambda a, b: a < b
+        if self._executor_data.getPartitionTools().isMemory(input):
+            return self.__generateMemoryRanges(input, pivots, cmp, ascending)
         ranges = self._executor_data.getPartitionTools().newPartitionGroup(len(pivots) + 1)
         writers = [p.writeIterator() for p in ranges]
 
@@ -227,6 +246,43 @@ class ISortImpl(IBaseImpl):
             part.clear()
 
         input.clear()
+        return ranges
+
+    def __generateMemoryRanges(self, input, pivots, cmp, ascending):
+        ranges = self._executor_data.getPartitionTools().newPartitionGroup(len(pivots) + 1)
+        writers = [p.writeIterator() for p in ranges]
+
+        for part in input:
+            elems_stack = list()
+            ranges_stack = list()
+
+            elems_stack.append((0, len(part) - 1))
+            ranges_stack.append((0, len(pivots)))
+
+            while len(elems_stack) > 0:
+                (start, end) = elems_stack.pop()
+                mid = int((start + end) / 2)
+
+                (first, last) = ranges_stack.pop()
+
+                r = self.__searchRange(part[mid], pivots, cmp, ascending)
+                writers[r].write(part[mid])
+
+                if first == r:
+                    for i in range(start, mid):
+                        writers[r].write(part[i])
+                elif start < mid:
+                    elems_stack.append((start, mid - 1))
+                    ranges_stack.append((first, r))
+
+                if r == last:
+                    for i in range(mid + 1, end + 1):
+                        writers[r].write(part[i])
+                elif mid < end:
+                    elems_stack.append((mid + 1, end))
+                    ranges_stack.append((r, last))
+
+            part.clear()
         return ranges
 
     def __searchRange(self, elem, pivots, cmp, ascending):

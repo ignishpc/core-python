@@ -14,6 +14,7 @@ class IGeneralModuleTest(IModuleTest, unittest.TestCase):
         self.__general = IGeneralModule(self._executor_data)
         props = self._executor_data.getContext().props()
         props["ignis.modules.sort.samples"] = "0.1"
+        props["ignis.modules.sort.resampling"] = "False"
 
     def test_mapInt(self):
         self.__mapTest("MapInt", "Memory", IElementsInt)
@@ -46,11 +47,14 @@ class IGeneralModuleTest(IModuleTest, unittest.TestCase):
         self.__sortTest(None, "Memory", IElementsInt)
 
     def test_sortInt(self):
-        self.__sortTest("SortInt", "Memory", IElementsInt)
+        self.__sortTest("SortInt", "RawMemory", IElementsInt)
 
     def test_sortIntBytes(self):
         self._executor_data.getContext().vars()['STORAGE_CLASS'] = bytearray
         self.__sortTest("SortInt", "Memory", IElementsBytes)
+
+    def test_resamplingSortInt(self):
+        self.__sortTest("SortInt", "Memory", IElementsInt, True)
 
     def test_sortIntNumpy(self):
         INumpy.enable()
@@ -192,8 +196,9 @@ class IGeneralModuleTest(IModuleTest, unittest.TestCase):
             for item in result:
                 self.assertEqual(counts[item[0]], len(item[1]))
 
-    def __sortTest(self, name, partitionType, IElements):
+    def __sortTest(self, name, partitionType, IElements, rs=False):
         self._executor_data.getContext().props()["ignis.partition.type"] = partitionType
+        self._executor_data.getContext().props()["ignis.modules.sort.resampling"] = "True" if rs else "False"
         np = self._executor_data.getContext().executors()
         elems = IElements().create(100 * 4 * np, 0)
         local_elems = self.rankVector(elems)

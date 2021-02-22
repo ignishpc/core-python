@@ -18,6 +18,9 @@ class IPropertyParser:
 	def sortSamples(self):
 		return self.getMinFloat("ignis.modules.sort.samples", 0)
 
+	def sortResampling(self):
+		return self.getBoolean("ignis.modules.sort.resampling")
+
 	def ioOverwrite(self):
 		return self.getBoolean("ignis.modules.io.overwrite")
 

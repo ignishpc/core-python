@@ -60,17 +60,15 @@ class IIOModuleTest(IModuleTest, unittest.TestCase):
 	def __saveAsTextFileTest(self, n):
 		random.seed(0)
 		alphanum = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-		path = "./tmpfile.txt"
 		id = self._executor_data.getContext().executorId()
 		lines = list()
-		with open(path, "w") as file:
-			for l in range(10000):
-				lc = random.randint(0, 100)
-				line = ""
-				for l in range(lc):
-					line += alphanum[random.randint(0, len(alphanum) - 1)]
-				file.write(line)
-				lines.append(line)
+
+		for l in range(10000):
+			lc = random.randint(0, 100)
+			line = ""
+			for l in range(lc):
+				line += alphanum[random.randint(0, len(alphanum) - 1)]
+			lines.append(line)
 
 		self.loadToPartitions(lines, n)
 		self.__io.saveAsTextFile("./tmpsave", id)

@@ -26,7 +26,7 @@ class IIOImpl(IBaseImpl):
 			size = os.path.getsize(path)
 			executorId = self._executor_data.getContext().executorId()
 			executors = self._executor_data.getContext().executors()
-			ex_chunk = size / executors
+			ex_chunk = int(size / executors)
 			ex_chunk_init = executorId * ex_chunk
 			ex_chunk_end = ex_chunk_init + ex_chunk
 			minPartitionSize = self._executor_data.getProperties().partitionMinimal()
@@ -134,7 +134,7 @@ class IIOImpl(IBaseImpl):
 			with self.__openFileWrite(file_name) as file:
 				logger.info("IO: saving text file " + file_name)
 				for elem in group[i]:
-					file.write(elem.__repr__())
+					print(elem, file=file)
 
 	def saveAsJsonFile(self, path, first, pretty):
 		logger.info("IO: saving as json file")
