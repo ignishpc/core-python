@@ -223,13 +223,14 @@ class IMpi:
 
 			else:
 				elems = src._IMemoryPartition__elements
+				native = self.__propertyParser.nativeSerialization() and same_protocol
 				cmp = self.__propertyParser.msgCompression()
 				buffer = IMemoryBuffer()
 				zlib = IZlibTransport(buffer, cmp)
 				proto = IObjectProtocol(zlib)
 				wrote = 0
 				for i in range(execs_parts, len(partsv)):
-					proto.writeObject(elems[offset:offset + partsv[i]])
+					proto.writeObject(elems[offset:offset + partsv[i]], native)
 					offset += partsv[i]
 					zlib.flush()
 					zlib.reset()
