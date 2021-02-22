@@ -49,7 +49,7 @@ class ICommImpl(IBaseImpl):
             for i in range(0, size):
                 client_comm = MPI.COMM_SELF.Accept(group_name, MPI.INFO_NULL, 0)
                 pos = ctypes.c_longlong(0)
-                client_comm.Recv((pos, 1, MPI.LONG_LONG_INT), 0, 1963)
+                client_comm.Recv((pos, 1, MPI.LONG_LONG), 0, 1963)
                 logger.info("Comm: member " + str(id) + " found")
                 client_comms[pos.value] = client_comm
             logger.info("Comm: all members found")
@@ -72,7 +72,7 @@ class ICommImpl(IBaseImpl):
             client_comm = MPI.COMM_SELF.Connect(group_name, MPI.INFO_NULL, 0)
             logger.info("Comm: connected to the group, waiting for my turn")
             pos = ctypes.c_longlong(id)
-            client_comm.Send((pos, 1, MPI.LONG_LONG_INT), 0, 1963)
+            client_comm.Send((pos, 1, MPI.LONG_LONG), 0, 1963)
             client_comm.Recv((flag, 1, MPI.BOOL), 0, 1963)
             info_comm = MPI.COMM_SELF.Connect(group_name.c_str(), MPI.INFO_NULL, 0)
             group = self.__addComm(group, client_comm, MPI.COMM_SELF, False)
