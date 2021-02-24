@@ -291,4 +291,5 @@ class IReduceImpl(IBaseImpl):
                 output.add(part)
             else:
                 part.clear()
+            toSend -= 1
         self._executor_data.setPartitions(output)
