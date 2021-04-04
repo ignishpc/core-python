@@ -5,6 +5,6 @@ setup(
 	version='1.0',
 	description='Ignis python core',
 	packages=['ignis'],
-	install_requires=['thrift==0.13.0', 'cloudpickle', 'mpi4py'],
+	install_requires=['thrift', 'cloudpickle', 'mpi4py'],
 	tests_require=['coverage']
 )
