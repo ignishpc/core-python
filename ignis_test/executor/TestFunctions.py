@@ -2,7 +2,18 @@ from ignis.executor.api.function.IFunction import IFunction
 from ignis.executor.api.function.IFunction0 import IFunction0
 from ignis.executor.api.function.IFunction2 import IFunction2
 from ignis.executor.api.function.IVoidFunction import IVoidFunction
+from ignis.executor.api.function.IVoidFunction0 import IVoidFunction0
 
+
+class IntSequence(IFunction0):
+
+    def call(self, context):
+        return [list(range(100))]
+
+class NoneFunction(IVoidFunction0):
+
+    def call(self, context):
+        context.vars()["test"] = True
 
 class MapInt(IFunction):
 
@@ -112,10 +123,16 @@ class ZeroString(IFunction0):
 
 class ForeachInt(IVoidFunction):
     def call(self, v, context):
-        pass
+        context.vars()["test"] = True
 
 
 class ForeachPartitionString(IVoidFunction):
     def call(self, it, context):
         for i in it:
             pass
+        context.vars()["test"] = True
+
+
+class ForeachExecutorString(IVoidFunction):
+    def call(self, parts, context):
+        context.vars()["test"] = True

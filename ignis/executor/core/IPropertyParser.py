@@ -12,6 +12,9 @@ class IPropertyParser:
 	def cores(self):
 		return self.getNumber("ignis.executor.cores")
 
+	def transportCores(self):
+		return self.getMinFloat("ignis.transport.cores", 0)
+
 	def partitionMinimal(self):
 		return self.getSize("ignis.partition.minimal")
 

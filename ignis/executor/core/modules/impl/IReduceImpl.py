@@ -9,20 +9,22 @@ logger = logging.getLogger(__name__)
 class IReduceImpl(IBaseImpl):
 
     def __init__(self, executor_data):
-        IBaseImpl.__init__(self, executor_data)
+        IBaseImpl.__init__(self, executor_data, logger)
 
     def __basicReduce(self, f, result):
-        input = self._executor_data.getPartitions()
+        input = self._executor_data.getAndDeletePartitions()
         logger.info("Reduce: reducing " + str(len(input)) + " partitions locally")
 
         acum = None
-        for part in input:
+        for i in range(len(input)):
+            part = input[i]
             if len(part) == 0:
                 continue
             if acum:
                 acum = self.__aggregatePartition(f, part, acum)
             else:
                 acum = self.__reducePartition(f, part)
+            input[i] = None
         result.writeIterator().write(acum)
 
     def reduce(self, f):
@@ -51,15 +53,17 @@ class IReduceImpl(IBaseImpl):
         context = self._executor_data.getContext()
         f.before(context)
         output = self._executor_data.getPartitionTools().newPartitionGroup()
-        input = self._executor_data.getPartitions()
+        input = self._executor_data.getAndDeletePartitions()
         partial_reduce = self._executor_data.getPartitionTools().newMemoryPartition(1)
         logger.info("Reduce: aggregating " + str(len(input)) + " partitions locally")
 
         acum = self._executor_data.getVariable("zero")
-        for part in input:
+        for i in range(len(input)):
+            part = input[i]
             if len(part) == 0:
                 continue
             acum = self.__aggregatePartition(f, part, acum)
+            input[i] = None
 
         partial_reduce.writeIterator().write(acum)
         output.add(partial_reduce)
@@ -68,15 +72,17 @@ class IReduceImpl(IBaseImpl):
     def fold(self, f):
         context = self._executor_data.getContext()
         f.before(context)
-        input = self._executor_data.getPartitions()
+        input = self._executor_data.getAndDeletePartitions()
         partial_reduce = self._executor_data.getPartitionTools().newMemoryPartition(1)
         logger.info("Reduce: folding " + str(len(input)) + " partitions locally")
 
         acum = self._executor_data.getVariable("zero")
-        for part in input:
+        for i in range(len(input)):
+            part = input[i]
             if len(part) == 0:
                 continue
             acum = self.__aggregatePartition(f, part, acum)
+            input[i] = None
 
         partial_reduce.writeIterator().write(acum)
         self.__finalReduce(f, partial_reduce)
@@ -84,15 +90,17 @@ class IReduceImpl(IBaseImpl):
     def treeFold(self, f):
         context = self._executor_data.getContext()
         f.before(context)
-        input = self._executor_data.getPartitions()
+        input = self._executor_data.getAndDeletePartitions()
         partial_reduce = self._executor_data.getPartitionTools().newMemoryPartition(1)
         logger.info("Reduce: folding " + str(len(input)) + " partitions locally")
 
         acum = self._executor_data.getVariable("zero")
-        for part in input:
+        for i in range(len(input)):
+            part = input[i]
             if len(part) == 0:
                 continue
             acum = self.__aggregatePartition(f, part, acum)
+            input[i] = None
 
         partial_reduce.writeIterator().write(acum)
         self.__finalTreeReduce(f, partial_reduce)
@@ -101,7 +109,7 @@ class IReduceImpl(IBaseImpl):
         self.__keyHashing(numPartitions)
         self.__keyExchanging()
 
-        input = self._executor_data.getPartitions()
+        input = self._executor_data.getAndDeletePartitions()
         output = self._executor_data.getPartitionTools().newPartitionGroup(1)
         logger.info("Reduce: reducing key elements")
 
@@ -112,6 +120,7 @@ class IReduceImpl(IBaseImpl):
                     acum[key].append(value)
                 else:
                     acum[key] = [value]
+            input[p] = None
 
         writer = output[0].writeIterator()
         for item in acum.items():
@@ -233,7 +242,7 @@ class IReduceImpl(IBaseImpl):
         self._executor_data.setPartitions(output)
 
     def __localAggregateByKey(self, f):
-        input = self._executor_data.getPartitions()
+        input = self._executor_data.getAndDeletePartitions()
         output = self._executor_data.getPartitionTools().newPartitionGroup()
         context = self._executor_data.getContext()
         base_acum = self._executor_data.getVariable("zero")
@@ -245,6 +254,7 @@ class IReduceImpl(IBaseImpl):
                     acum[key] = f.call(acum[key], value, context)
                 else:
                     acum[key] = f.call(base_acum, value, context)
+            input[p] = None
 
         output.add(self._executor_data.getPartitionTools().newMemoryPartition())
         writer = output[0].writeIterator()
@@ -254,42 +264,29 @@ class IReduceImpl(IBaseImpl):
         self._executor_data.setPartitions(output)
 
     def __keyHashing(self, numPartitions):
-        input = self._executor_data.getPartitions()
+        input = self._executor_data.getAndDeletePartitions()
         output = self._executor_data.getPartitionTools().newPartitionGroup(numPartitions)
         cache = input.cache()
         logger.info("Reduce: creating " + str(len(input)) + " new partitions with key hashing")
 
         writers = [part.writeIterator() for part in output]
         n = len(writers)
-        for part in input:
+        for i in range(len(input)):
+            part = input[i]
             for elem in part:
                 writers[hash(elem[0]) % n].write(elem)
             if not cache:
                 part.clear()
+            input[i] = None
 
         self._executor_data.setPartitions(output)
 
     def __keyExchanging(self):
         input = self._executor_data.getPartitions()
         output = self._executor_data.getPartitionTools().newPartitionGroup()
-        executors = self._executor_data.mpi().executors()
         numPartitions = len(input)
         logger.info("Reduce: exchanging " + str(numPartitions) + " partitions keys")
-        executor_parts = int(numPartitions / executors)
-        remainder = numPartitions % executors
-        target = -1
-        toSend = 0
 
-        for part in input:
-            if toSend == 0:
-                target += 1
-                toSend = executor_parts
-                if target < remainder:
-                    toSend += 1
-            self._executor_data.mpi().gather(part, target)
-            if self._executor_data.mpi().isRoot(target):
-                output.add(part)
-            else:
-                part.clear()
-            toSend -= 1
+        self.exchange(input, output)
+
         self._executor_data.setPartitions(output)

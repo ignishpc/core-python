@@ -1,6 +1,7 @@
 import unittest
 
 from ignis.executor.core.modules.IGeneralActionModule import IGeneralActionModule
+from ignis.rpc.source.ttypes import IEncoded, ISource
 from ignis_test.executor.core.IElements import IElementsInt, IElementsStr, IElementsPair
 from ignis_test.executor.core.modules.IModuleTest import IModuleTest
 
@@ -11,6 +12,12 @@ class IGeneralActionModuleTest(IModuleTest, unittest.TestCase):
         IModuleTest.__init__(self)
         unittest.TestCase.__init__(self, *args, **kwargs)
         self.__generalAction = IGeneralActionModule(self._executor_data)
+
+    def test_executeNone(self):
+        self.__executeTest("NoneFunction")
+
+    def test_loadAndRefNone(self):
+        self.__loadAndRefTest("NoneFunction")
 
     def test_reduceInt(self):
         self.__reduceTest("ReduceInt", "Memory", IElementsInt)
@@ -43,7 +50,10 @@ class IGeneralActionModuleTest(IModuleTest, unittest.TestCase):
         self.__foreachTest("ForeachInt", "Memory", IElementsInt)
 
     def test_foreachPartitionString(self):
-        self.__foreachPartitionTest("ForeachInt", "RawMemory", IElementsStr)
+        self.__foreachPartitionTest("ForeachPartitionString", "RawMemory", IElementsStr)
+
+    def test_foreachExecutorString(self):
+        self.__foreachPartitionTest("ForeachExecutorString", "Memory", IElementsStr)
 
     def test_topInt(self):
         self.__topTest("Memory", IElementsInt)
@@ -70,6 +80,15 @@ class IGeneralActionModuleTest(IModuleTest, unittest.TestCase):
             return ''.join(sorted(e))
         else:
             return e
+
+    def __executeTest(self, name):
+        self.__generalAction.execute(self.newSource(name))
+        self.assertTrue(self._executor_data.getContext().vars()["test"])
+
+    def __loadAndRefTest(self, name):
+        self.__generalAction._use_source(self.newSource(name))
+        src = ISource(obj=IEncoded(name=name))
+        self.__generalAction.execute(src)
 
     def __reduceTest(self, name, partitionType, IElements):
         self._executor_data.getContext().props()["ignis.partition.type"] = partitionType
@@ -199,12 +218,21 @@ class IGeneralActionModuleTest(IModuleTest, unittest.TestCase):
         elems = IElements().create(100, 0)
         self.loadToPartitions(elems, 2)
         self.__generalAction.foreach_(self.newSource(name))
+        self.assertTrue(self._executor_data.getContext().vars()["test"])
 
     def __foreachPartitionTest(self, name, partitionType, IElements):
         self._executor_data.getContext().props()["ignis.partition.type"] = partitionType
         elems = IElements().create(100, 0)
         self.loadToPartitions(elems, 2)
         self.__generalAction.foreachPartition(self.newSource(name))
+        self.assertTrue(self._executor_data.getContext().vars()["test"])
+
+    def __foreachExecutorTest(self, name, partitionType, IElements):
+        self._executor_data.getContext().props()["ignis.partition.type"] = partitionType
+        elems = IElements().create(100, 0)
+        self.loadToPartitions(elems, 2)
+        self.__generalAction.foreachExecutor(self.newSource(name))
+        self.assertTrue(self._executor_data.getContext().vars()["test"])
 
     def __topTest(self, partitionType, IElements):
         self._executor_data.getContext().props()["ignis.partition.type"] = partitionType

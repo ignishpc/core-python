@@ -14,6 +14,7 @@ class ICacheContextModule(IModule, ICacheContextModuleIface):
 		self.__impl = ICacheImpl(executor_data)
 
 		try:
+			self._executor_data.reloadLibraries()
 			# load partition cache when the executor has previously crashed
 			self.__impl.loadCacheFromDisk()
 		except Exception as ex:

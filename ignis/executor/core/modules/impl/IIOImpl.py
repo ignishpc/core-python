@@ -1,8 +1,8 @@
 import json
 import logging
-import pathlib
 import math
 import os
+import pathlib
 
 from ignis.executor.api.IJsonValue import IJsonValue
 from ignis.executor.core.io.IJsonWriter import IJsonWriter
@@ -15,10 +15,11 @@ logger = logging.getLogger(__name__)
 class IIOImpl(IBaseImpl):
 
 	def __init__(self, executor_data):
-		IBaseImpl.__init__(self, executor_data)
+		IBaseImpl.__init__(self, executor_data, logger)
 
 	def partitionApproxSize(self):
-		raise NotImplementedError()
+		input = self._executor_data.getPartitions()
+		return sum(map(lambda p: p.bytes(), input))
 
 	def textFile(self, path, minPartitions=1):
 		logger.info("IO: reading text file")
@@ -113,7 +114,7 @@ class IIOImpl(IBaseImpl):
 
 	def saveAsObjectFile(self, path, compression, first):
 		logger.info("IO: saving as object file")
-		group = self._executor_data.getPartitions()
+		group = self._executor_data.getAndDeletePartitions()
 		native = self._executor_data.getProperties().nativeSerialization()
 
 		for i in range(len(group)):
@@ -124,10 +125,11 @@ class IIOImpl(IBaseImpl):
 			save = IDiskPartition(file_name, compression, native, True)
 			group[i].copyTo(save)
 			save.sync()
+			group[i] = None
 
 	def saveAsTextFile(self, path, first):
 		logger.info("IO: saving as text file")
-		group = self._executor_data.getPartitions()
+		group = self._executor_data.getAndDeletePartitions()
 
 		for i in range(len(group)):
 			file_name = self.__partitionFileName(path, first + i)
@@ -135,16 +137,18 @@ class IIOImpl(IBaseImpl):
 				logger.info("IO: saving text file " + file_name)
 				for elem in group[i]:
 					print(elem, file=file)
+				group[i] = None
 
 	def saveAsJsonFile(self, path, first, pretty):
 		logger.info("IO: saving as json file")
-		group = self._executor_data.getPartitions()
+		group = self._executor_data.getAndDeletePartitions()
 
 		for i in range(len(group)):
 			file_name = self.__partitionFileName(path, first + i)
 			with self.__openFileWrite(file_name + ".json") as file:
 				logger.info("IO: saving json file " + file_name)
 				json.dump(iter(group[i]), file, cls=IJsonWriter, indent=4 if pretty else None)
+				group[i] = None
 
 		header = path + "/json"
 		with self.__openFileWrite(header) as file:

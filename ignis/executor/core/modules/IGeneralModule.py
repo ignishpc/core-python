@@ -17,6 +17,12 @@ class IGeneralModule(IModule, IGeneralModuleIface):
         self.__sort_impl = ISortImpl(executor_data)
         self.__reduce_impl = IReduceImpl(executor_data)
 
+    def executeTo(self, src):
+        try:
+            self.__pipe_impl.executeTo(self._executor_data.loadLibrary(src))
+        except Exception as ex:
+            self._pack_exception(ex)
+
     def map_(self, src):
         try:
             self.__pipe_impl.map(self._executor_data.loadLibrary(src))

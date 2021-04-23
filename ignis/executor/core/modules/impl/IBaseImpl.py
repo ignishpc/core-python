@@ -2,8 +2,9 @@ from ignis.executor.core.storage import IMemoryPartition
 
 
 class IBaseImpl:
-    def __init__(self, executor_data):
+    def __init__(self, executor_data, logger):
         self._executor_data = executor_data
+        self.__logger = logger
 
     def resizeMemoryPartition(self, part, n):
         inner = part._inner()
@@ -19,3 +20,6 @@ class IBaseImpl:
             it = part.readIterator()
             for i in range(n):
                 writer.write(it.next())
+
+    def exchange(self, input, output):
+        self._executor_data.mpi().exchange(input, output)

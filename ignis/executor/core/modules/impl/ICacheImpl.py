@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class ICacheImpl(IBaseImpl):
 
 	def __init__(self, executor_data):
-		IBaseImpl.__init__(self, executor_data)
+		IBaseImpl.__init__(self, executor_data, logger)
 		self.__next_context_id = 11
 		self.__context = dict()
 		self.__cache = dict()

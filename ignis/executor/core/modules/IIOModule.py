@@ -19,6 +19,12 @@ class IIOModule(IModule, IIOModuleIface):
 		except Exception as ex:
 			self._pack_exception(ex)
 
+	def loadLibrary(self, path):
+		try:
+			self._executor_data.loadLibraryFunctions()
+		except Exception as ex:
+			self._pack_exception(ex)
+
 	def partitionCount(self):
 		try:
 			return len(self._executor_data.getPartitions())

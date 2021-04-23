@@ -17,6 +17,12 @@ class IGeneralActionModule(IModule, IGeneralActionModuleIface):
 		self.__sort_impl = ISortImpl(executor_data)
 		self.__reduce_impl = IReduceImpl(executor_data)
 
+	def execute(self, src):
+		try:
+			self.__pipe_impl.execute(self._executor_data.loadLibrary(src))
+		except Exception as ex:
+			self._pack_exception(ex)
+
 	def reduce(self, src):
 		try:
 			self.__reduce_impl.reduce(self._executor_data.loadLibrary(src))
@@ -80,6 +86,12 @@ class IGeneralActionModule(IModule, IGeneralActionModuleIface):
 	def foreachPartition(self, src):
 		try:
 			self.__pipe_impl.foreachPartition(self._executor_data.loadLibrary(src))
+		except Exception as ex:
+			self._pack_exception(ex)
+
+	def foreachExecutor(self, src):
+		try:
+			self.__pipe_impl.foreachExecutor(self._executor_data.loadLibrary(src))
 		except Exception as ex:
 			self._pack_exception(ex)
 

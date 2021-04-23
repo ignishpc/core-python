@@ -7,7 +7,7 @@ from thrift.server.TServer import TServer
 from thrift.transport.TSocket import TServerSocket
 
 from ignis.executor.core.modules.IModule import IModule
-from ignis.executor.core.transport.IZlibTransport import IZlibTransportFactory
+from ignis.executor.core.transport.IZlibTransport import TZlibTransportFactoryExt
 from ignis.rpc.executor.server.IExecutorServerModule import Iface as IExecutorServerModuleIface, \
 	Processor as IExecutorServerModuleProcessor
 
@@ -75,7 +75,7 @@ class IExecutorServerModule(IModule, IExecutorServerModuleIface):
 			self.__server = IThreadedServer(
 				self.__processor,
 				TServerSocket(host='127.0.0.1', port=port),
-				IZlibTransportFactory(compression),
+				TZlibTransportFactoryExt(compression),
 				TCompactProtocolFactory()
 			)
 

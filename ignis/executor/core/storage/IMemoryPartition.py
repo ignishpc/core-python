@@ -47,7 +47,7 @@ class IMemoryPartition(IPartition):
         zlib_trans.flush()
 
     def clone(self):
-        newPartition = IMemoryPartition(self.__native)
+        newPartition = IMemoryPartition(self.__native, self.__cls)
         self.copyTo(newPartition)
         return newPartition
 

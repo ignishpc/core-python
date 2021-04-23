@@ -20,7 +20,7 @@ class _IFunctionLambda:
 
 class ISource:
 
-	def __init__(self, src, native=False):
+	def __init__(self, src, native=False, **kwargs):
 		self.__native = native
 		self.__inner = ignis.rpc.source.ttypes.ISource()
 		obj = ignis.rpc.source.ttypes.IEncoded()
@@ -31,6 +31,8 @@ class ISource:
 		else:
 			obj.bytes = ILibraryLoader.pickle(src)
 		self.__inner.obj = obj
+		for name, var in kwargs.items():
+			self.addParam(name, var)
 
 	@classmethod
 	def wrap(cls, src):

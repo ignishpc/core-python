@@ -9,14 +9,15 @@ class IModuleTest:
 
     def __init__(self):
         self._executor_data = IExecutorData()
-        self._base_impl = IBaseImpl(self._executor_data)
         self._library = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                                      "TestFunctions.py")
         props = self._executor_data.getContext().props()
-        props["ignis.transport.compression"] = "6"
-        props["ignis.partition.compression"] = "6"
+        props["ignis.transport.compression"] = "0"
+        props["ignis.partition.compression"] = "0"
         props["ignis.partition.serialization"] = "native"
         props["ignis.executor.directory"] = "./"
+        props["ignis.executor.cores"] = "1"
+        props["ignis.transport.cores"] = "0"
 
     def newSource(self, name):
         return ISource(obj=IEncoded(name=self._library + ":" + name))

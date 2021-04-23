@@ -10,10 +10,10 @@ logger = logging.getLogger(__name__)
 class IMathImpl(IBaseImpl):
 
 	def __init__(self, executor_data):
-		IBaseImpl.__init__(self, executor_data)
+		IBaseImpl.__init__(self, executor_data, logger)
 
 	def sample(self, withReplacement, num, seed):
-		input = self._executor_data.getPartitions()
+		input = self._executor_data.getAndDeletePartitions()
 		output = self._executor_data.getPartitionTools().newPartitionGroup(1)
 
 		logger.info("Math: sample " + str(len(input)) + " partitions")
@@ -43,6 +43,7 @@ class IMathImpl(IBaseImpl):
 					if rand < prob:
 						writer.write(part[j])
 						picked += 1
+			del input[p]
 
 		self._executor_data.setPartitions(output)
 
@@ -56,7 +57,7 @@ class IMathImpl(IBaseImpl):
 		return n
 
 	def sampleByKey(self, withReplacement, fractions, seed):
-		raise NotImplementedError()
+		raise NotImplementedError()#TODO
 
 	def countByKey(self):
 		input = self._executor_data.getPartitions()

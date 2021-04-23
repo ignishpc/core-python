@@ -23,7 +23,7 @@ def cmp_to_key(cmp):
 class ISortImpl(IBaseImpl):
 
     def __init__(self, executor_data):
-        IBaseImpl.__init__(self, executor_data)
+        IBaseImpl.__init__(self, executor_data, logger)
 
     def sort(self, ascending, numPartitions=-1):
         self.__sortImpl(None, ascending, numPartitions)
@@ -125,13 +125,11 @@ class ISortImpl(IBaseImpl):
             tmp.add(pivots)
             self._executor_data.setPartitions(tmp)
             self.__sortImpl(cmp, ascending, partitions, False)
-            tmp = self._executor_data.getPartitions()
             logger.info("Sort: -- resampling pivots end --")
 
             samples = partitions - 1
             logger.info("Sort: selecting " + str(samples) + " partition pivots")
-            id = self._executor_data.getContext().executorId()
-            pivots = self.__selectPivots(tmp, int(samples / executors) + (1 if samples % executors < id else 0))
+            pivots = self.__parallelSelectPivots(samples)
 
             logger.info("Sort: collecting pivots")
             self._executor_data.mpi().gather(pivots, 0)
@@ -153,17 +151,8 @@ class ISortImpl(IBaseImpl):
 
         ranges = self.__generateRanges(input, pivots, cmp, ascending)
         output = self._executor_data.getPartitionTools().newPartitionGroup()
-        executor_ranges = math.ceil(len(ranges) / executors)
-        target = -1
         logger.info("Sort: exchanging ranges")
-        for p in range(len(ranges)):
-            if p % executor_ranges == 0:
-                target += 1
-            self._executor_data.mpi().gather(ranges[p], target)
-            if self._executor_data.mpi().isRoot(target):
-                output.add(ranges[p])
-            else:
-                ranges[p] = None
+        self.exchange(ranges, output)
 
         # Sort final partitions
         logger.info("Sort: sorting again " + str(len(output)) + " partitions locally")
@@ -218,19 +207,62 @@ class ISortImpl(IBaseImpl):
                 continue
 
             skip = int((len(part) - samples) / (samples + 1))
+            rem = (len(part) - samples) % (samples + 1)
             if inMemory:
-                pos = skip
+                pos = skip + (1 if rem > 0 else 0)
                 for n in range(0, samples):
                     writer.write(part[pos])
-                    pos += skip + 1
+                    if n < rem - 1:
+                        pos += skip + 2
+                    else:
+                        pos += skip + 1
             else:
                 reader = part.readIterator()
                 for n in range(0, samples):
                     for i in range(skip):
                         reader.next()
+                    if n < rem:
+                        reader.next()
                     writer.write(reader.next())
 
         return pivots
+
+    def __parallelSelectPivots(self, samples):
+        rank = self._executor_data.mpi().rank()
+        result = self._executor_data.getPartitionTools().newMemoryPartition(samples)
+        tmp = self._executor_data.getPartitions()
+        sz = sum(map(lambda p: len(p), tmp))
+
+        aux = self._executor_data.mpi().native().allgather(sz)
+
+        sz = sum(aux)
+        disp = sum([aux[i] for i in range(rank)])
+
+        skip = int((sz - samples) / (samples + 1))
+        rem = (sz - samples) % (samples + 1)
+
+        pos = skip + (1 if rem > 0 else 0)
+        for sample in range(0, samples):
+            if pos >= disp:
+                break
+            if sample < rem - 1:
+                pos += skip + 2
+            else:
+                pos += skip + 1
+        pos -= disp
+
+        writer = result.writeIterator()
+        for part in tmp:
+            while pos < len(part) and sample < samples:
+                writer.write(part[pos])
+                if sample < rem - 1:
+                    pos += skip + 2
+                else:
+                    pos += skip + 1
+                sample +=1
+            pos -= len(part)
+
+        return result
 
     def __generateRanges(self, input, pivots, cmp, ascending):
         if cmp is None:

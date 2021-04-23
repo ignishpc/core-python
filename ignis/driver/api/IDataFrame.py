@@ -287,6 +287,13 @@ class IDataFrame:
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
 			raise IDriverException(ex.message, ex._cause)
 
+	def foreachExecutor(self, src):
+		try:
+			with Ignis._pool.getClient() as client:
+				client.getDataFrameService().foreachExecutor(self._id, ISource.wrap(src).rpc())
+		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+			raise IDriverException(ex.message, ex._cause)
+
 	def top(self, num, cmp=None):
 		try:
 			with Ignis._pool.getClient() as client:

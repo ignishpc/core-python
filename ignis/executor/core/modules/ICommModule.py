@@ -13,33 +13,39 @@ class ICommModule(IModule, ICommModuleIface):
 		IModule.__init__(self, executor_data, logger)
 		self.__impl = ICommImpl(executor_data)
 
-	def createGroup(self):
+	def openGroup(self):
 		try:
-			return self.__impl.createGroup()
+			return self.__impl.openGroup()
 		except Exception as ex:
 			self._pack_exception(ex)
 
-	def joinGroupMembers(self, group, id, size):
+	def closeGroup(self):
 		try:
-			self.__impl.joinGroupMembers(group, id, size)
+			self.__impl.closeGroup()
 		except Exception as ex:
 			self._pack_exception(ex)
 
-	def joinToGroup(self, group, id):
+	def joinToGroup(self, id, leader):
 		try:
-			self.__impl.joinToGroup(group, id)
+			self.__impl.joinToGroup(id, leader)
 		except Exception as ex:
 			self._pack_exception(ex)
 
-	def hasGroup(self, id):
+	def joinToGroupName(self, id, leader, name):
 		try:
-			return self.__impl.hasGroup(id)
+			self.__impl.joinToGroupName(id, leader, name)
 		except Exception as ex:
 			self._pack_exception(ex)
 
-	def destroyGroup(self, id):
+	def hasGroup(self, name):
 		try:
-			self.__impl.destroyGroup(id)
+			return self.__impl.hasGroup(name)
+		except Exception as ex:
+			self._pack_exception(ex)
+
+	def destroyGroup(self, name):
+		try:
+			self.__impl.destroyGroup(name)
 		except Exception as ex:
 			self._pack_exception(ex)
 
@@ -80,48 +86,63 @@ class ICommModule(IModule, ICommModuleIface):
 		except Exception as ex:
 			self._pack_exception(ex)
 
-	def driverGather(self, id, tp):
+	def newEmptyPartitions(self, n):
 		try:
-			# tp is generated in driver for static type languages
-			self.__impl.driverGather(id)
+			self.__impl.newEmptyPartitions(n)
 		except Exception as ex:
 			self._pack_exception(ex)
 
-	def driverGather0(self, id, tp):
-		try:
-			# tp is generated in driver for static type languages
-			self.__impl.driverGather0(id)
-		except Exception as ex:
-			self._pack_exception(ex)
-
-	def driverScatter(self, id, partitions):
-		try:
-			self.__impl.driverScatter(id, partitions)
-		except Exception as ex:
-			self._pack_exception(ex)
-
-	def driverScatter3(self, id, partitions, src):
+	def newEmptyPartitions2(self, n, src):
 		try:
 			self._use_source(src)
-			self.__impl.driverScatter(id, partitions)
+			self.__impl.newEmptyPartitions(n)
 		except Exception as ex:
 			self._pack_exception(ex)
 
-	def send(self, id, partition, dest, tag):
+	def driverGather(self, group, src):
 		try:
-			self.__impl.send(id, partition, dest, tag)
+			if not self._executor_data.hasPartitions():
+				self._use_source(src)
+			self.__impl.driverGather(group)
 		except Exception as ex:
 			self._pack_exception(ex)
 
-	def recv(self, id, partition, source, tag):
+	def driverGather0(self, group, src):
 		try:
-			self.__impl.recv(id, partition, source, tag)
+			if not self._executor_data.hasPartitions():
+				self._use_source(src)
+			self.__impl.driverGather0(group)
 		except Exception as ex:
 			self._pack_exception(ex)
 
-	def recv5(self, id, partition, source, tag, src):
+	def driverScatter(self, group, partitions):
 		try:
-			self._use_source(src)
-			self.__impl.recv(id, partition, source, tag)
+			self.__impl.driverScatter(group, partitions)
+		except Exception as ex:
+			self._pack_exception(ex)
+
+	def driverScatter3(self, group, partitions, src):
+		try:
+			if not self._executor_data.hasPartitions():
+				self._use_source(src)
+			self.__impl.driverScatter(group, partitions)
+		except Exception as ex:
+			self._pack_exception(ex)
+
+	def enableMultithreading(self, group):
+		try:
+			return self.__impl.enableMultithreading(group)
+		except Exception as ex:
+			self._pack_exception(ex)
+
+	def send(self, group, partition, dest, thread):
+		try:
+			self.__impl.send(group, partition, dest, thread)
+		except Exception as ex:
+			self._pack_exception(ex)
+
+	def recv(self, group, partition, source, thread):
+		try:
+			self.__impl.recv(group, partition, source, thread)
 		except Exception as ex:
 			self._pack_exception(ex)

@@ -16,6 +16,9 @@ class IGeneralModuleTest(IModuleTest, unittest.TestCase):
         props["ignis.modules.sort.samples"] = "0.1"
         props["ignis.modules.sort.resampling"] = "False"
 
+    def test_executeToInt(self):
+        self.__executeToTest("IntSequence", "Memory")
+
     def test_mapInt(self):
         self.__mapTest("MapInt", "Memory", IElementsInt)
 
@@ -90,6 +93,14 @@ class IGeneralModuleTest(IModuleTest, unittest.TestCase):
         self.__sortByKeyTest("Memory", (IElementsInt, IElementsStr))
 
     # -------------------------------------Impl-------------------------------------
+
+    def __executeToTest(self, name, partitionType):
+        self._executor_data.getContext().props()["ignis.partition.type"] = partitionType
+        self.__general.executeTo(self.newSource(name))
+        result = self.getFromPartitions()
+        elems = list(range(100))
+
+        self.assertEqual(elems, result)
 
     def __mapTest(self, name, partitionType, IElements):
         self._executor_data.getContext().props()["ignis.partition.type"] = partitionType
@@ -197,6 +208,9 @@ class IGeneralModuleTest(IModuleTest, unittest.TestCase):
                 self.assertEqual(counts[item[0]], len(item[1]))
 
     def __sortTest(self, name, partitionType, IElements, rs=False):
+        cores = str(self._executor_data.getContext().executors())
+        self._executor_data.getContext().props()["ignis.executor.cores"] = cores
+        self._executor_data.getContext().props()["ignis.transport.cores"] = cores
         self._executor_data.getContext().props()["ignis.partition.type"] = partitionType
         self._executor_data.getContext().props()["ignis.modules.sort.resampling"] = "True" if rs else "False"
         np = self._executor_data.getContext().executors()
