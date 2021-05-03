@@ -94,23 +94,21 @@ class ICommModule(IModule, ICommModuleIface):
 
 	def newEmptyPartitions2(self, n, src):
 		try:
-			self._use_source(src)
+			# src in python is empty
 			self.__impl.newEmptyPartitions(n)
 		except Exception as ex:
 			self._pack_exception(ex)
 
 	def driverGather(self, group, src):
 		try:
-			if not self._executor_data.hasPartitions():
-				self._use_source(src)
+			# src in python is empty
 			self.__impl.driverGather(group)
 		except Exception as ex:
 			self._pack_exception(ex)
 
 	def driverGather0(self, group, src):
 		try:
-			if not self._executor_data.hasPartitions():
-				self._use_source(src)
+			# src in python is empty
 			self.__impl.driverGather0(group)
 		except Exception as ex:
 			self._pack_exception(ex)

@@ -1,6 +1,7 @@
 import threading
 
 from ignis.driver.core.IDriverContext import IDriverContext
+from ignis.executor.core import ILog
 from ignis.executor.core.IExecutorData import IExecutorData
 from ignis.executor.core.modules.ICommModule import ICommModule
 from ignis.executor.core.modules.IExecutorServerModule import IExecutorServerModule
@@ -13,6 +14,7 @@ from ignis.rpc.executor.io.IIOModule import Processor as IIOModuleProcessor
 class ICallBack:
 
     def __init__(self, port, compression):
+        ILog.init()
         self.__port = port
         self.__compression = compression
 
@@ -37,8 +39,7 @@ class ICallBack:
                          daemon=True).start()
 
     def stop(self):
-        if self.__server:
-            self.__server.stop()
+        self.__server.stop()
 
     def driverContext(self):
         return self.__driverContext

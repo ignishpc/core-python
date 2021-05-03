@@ -83,7 +83,7 @@ class IExecutorServerModule(IModule, IExecutorServerModuleIface):
 			logger.info("ServerModule: python executor started")
 			self.__server.serve()
 			logger.info("ServerModule: python executor stopped")
-			self.__server.stop()
+			self.stop()
 
 	def start(self, properties):
 		try:
@@ -96,7 +96,9 @@ class IExecutorServerModule(IModule, IExecutorServerModuleIface):
 	def stop(self):
 		try:
 			if self.__server:
-				self.__server.stop()
+				aux = self.__server
+				self.__server = None
+				aux.stop()
 		except Exception as ex:
 			self._pack_exception(ex)
 

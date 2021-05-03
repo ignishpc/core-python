@@ -52,27 +52,27 @@ class IDriverContext(IModule, ICacheContextModuleIface):
     def loadCache(self, id):
         pass
 
-    def parallelize(self, data, collection, native):
+    def parallelize(self, data, native):
         try:
             group = self._executor_data.getPartitionTools().newPartitionGroup()
 
-            if isinstance(collection, bytes):
-                partition = IMemoryPartition(native, cls=bytearray, elements=bytearray(collection))
-            elif isinstance(collection, bytearray):
-                partition = IMemoryPartition(native, cls=bytearray, elements=collection)
-            elif isinstance(collection, list):
-                partition = IMemoryPartition(native, cls=list, elements=collection)
-            elif collection.__class__.__name__ == 'ndarray':
+            if isinstance(data, bytes):
+                partition = IMemoryPartition(native, cls=bytearray, elements=bytearray(data))
+            elif isinstance(data, bytearray):
+                partition = IMemoryPartition(native, cls=bytearray, elements=data)
+            elif isinstance(data, list):
+                partition = IMemoryPartition(native, cls=list, elements=data)
+            elif data.__class__.__name__ == 'ndarray':
                 from ignis.executor.core.io.INumpy import INumpyWrapper as Wrapper
                 class INumpyWrapper(Wrapper):
                     def __init__(self):
-                        Wrapper.__init__(self, len(collection), collection.dtype)
+                        Wrapper.__init__(self, len(data), data.dtype)
 
-                return IMemoryPartition(native=native, cls=INumpyWrapper, elements=Wrapper(array=collection))
+                return IMemoryPartition(native=native, cls=INumpyWrapper, elements=Wrapper(array=data))
             else:
                 partition = IMemoryPartition(native)
                 it = partition.writeIterator()
-                for item in collection:
+                for item in data:
                     it.write(item)
 
             group.add(partition)
