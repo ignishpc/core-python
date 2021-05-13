@@ -36,10 +36,10 @@ class ILibraryLoader:
         try:
             functions = getattr(module, '__ignis_library__')
         except TypeError as ex:
-            raise KeyError("'_ ignis library _' is required to register a python file as ignis library")
+            raise KeyError("'__ignis_library__' is required to register a python file as ignis library")
 
         if not isinstance(functions, list):
-            raise TypeError("'_ ignis library _' must be a list")
+            raise TypeError("'__ignis_library__' must be a list")
 
         for name in functions:
             try:
