@@ -25,7 +25,7 @@ class ISource:
 		self.__inner = ignis.rpc.source.ttypes.ISource()
 		obj = ignis.rpc.source.ttypes.IEncoded()
 		if isinstance(src, str):
-			obj.name = self.__src
+			obj.name = src
 		elif isinstance(src, FunctionType):
 			obj.bytes = ILibraryLoader.pickle(_IFunctionLambda(src))
 		else:
