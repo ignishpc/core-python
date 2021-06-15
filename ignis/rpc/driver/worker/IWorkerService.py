@@ -44,7 +44,7 @@ class Iface(object):
         """
         pass
 
-    def newInstance3a(self, id, name, type):
+    def newInstance3(self, id, name, type):
         """
         Parameters:
          - id
@@ -54,23 +54,25 @@ class Iface(object):
         """
         pass
 
-    def newInstance3b(self, id, type, cores):
+    def newInstance4(self, id, type, cores, instances):
         """
         Parameters:
          - id
          - type
          - cores
+         - instances
 
         """
         pass
 
-    def newInstance4(self, id, name, type, cores):
+    def newInstance5(self, id, name, type, cores, instances):
         """
         Parameters:
          - id
          - name
          - type
          - cores
+         - instances
 
         """
         pass
@@ -381,7 +383,7 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "newInstance failed: unknown result")
 
-    def newInstance3a(self, id, name, type):
+    def newInstance3(self, id, name, type):
         """
         Parameters:
          - id
@@ -389,12 +391,12 @@ class Client(Iface):
          - type
 
         """
-        self.send_newInstance3a(id, name, type)
-        return self.recv_newInstance3a()
+        self.send_newInstance3(id, name, type)
+        return self.recv_newInstance3()
 
-    def send_newInstance3a(self, id, name, type):
-        self._oprot.writeMessageBegin('newInstance3a', TMessageType.CALL, self._seqid)
-        args = newInstance3a_args()
+    def send_newInstance3(self, id, name, type):
+        self._oprot.writeMessageBegin('newInstance3', TMessageType.CALL, self._seqid)
+        args = newInstance3_args()
         args.id = id
         args.name = name
         args.type = type
@@ -402,7 +404,7 @@ class Client(Iface):
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_newInstance3a(self):
+    def recv_newInstance3(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -410,72 +412,34 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = newInstance3a_result()
+        result = newInstance3_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.success is not None:
             return result.success
         if result.ex is not None:
             raise result.ex
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "newInstance3a failed: unknown result")
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "newInstance3 failed: unknown result")
 
-    def newInstance3b(self, id, type, cores):
+    def newInstance4(self, id, type, cores, instances):
         """
         Parameters:
          - id
          - type
          - cores
+         - instances
 
         """
-        self.send_newInstance3b(id, type, cores)
-        return self.recv_newInstance3b()
-
-    def send_newInstance3b(self, id, type, cores):
-        self._oprot.writeMessageBegin('newInstance3b', TMessageType.CALL, self._seqid)
-        args = newInstance3b_args()
-        args.id = id
-        args.type = type
-        args.cores = cores
-        args.write(self._oprot)
-        self._oprot.writeMessageEnd()
-        self._oprot.trans.flush()
-
-    def recv_newInstance3b(self):
-        iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
-        if mtype == TMessageType.EXCEPTION:
-            x = TApplicationException()
-            x.read(iprot)
-            iprot.readMessageEnd()
-            raise x
-        result = newInstance3b_result()
-        result.read(iprot)
-        iprot.readMessageEnd()
-        if result.success is not None:
-            return result.success
-        if result.ex is not None:
-            raise result.ex
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "newInstance3b failed: unknown result")
-
-    def newInstance4(self, id, name, type, cores):
-        """
-        Parameters:
-         - id
-         - name
-         - type
-         - cores
-
-        """
-        self.send_newInstance4(id, name, type, cores)
+        self.send_newInstance4(id, type, cores, instances)
         return self.recv_newInstance4()
 
-    def send_newInstance4(self, id, name, type, cores):
+    def send_newInstance4(self, id, type, cores, instances):
         self._oprot.writeMessageBegin('newInstance4', TMessageType.CALL, self._seqid)
         args = newInstance4_args()
         args.id = id
-        args.name = name
         args.type = type
         args.cores = cores
+        args.instances = instances
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -496,6 +460,48 @@ class Client(Iface):
         if result.ex is not None:
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "newInstance4 failed: unknown result")
+
+    def newInstance5(self, id, name, type, cores, instances):
+        """
+        Parameters:
+         - id
+         - name
+         - type
+         - cores
+         - instances
+
+        """
+        self.send_newInstance5(id, name, type, cores, instances)
+        return self.recv_newInstance5()
+
+    def send_newInstance5(self, id, name, type, cores, instances):
+        self._oprot.writeMessageBegin('newInstance5', TMessageType.CALL, self._seqid)
+        args = newInstance5_args()
+        args.id = id
+        args.name = name
+        args.type = type
+        args.cores = cores
+        args.instances = instances
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_newInstance5(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = newInstance5_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.ex is not None:
+            raise result.ex
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "newInstance5 failed: unknown result")
 
     def setName(self, id, name):
         """
@@ -1277,9 +1283,9 @@ class Processor(Iface, TProcessor):
         self._processMap["start"] = Processor.process_start
         self._processMap["destroy"] = Processor.process_destroy
         self._processMap["newInstance"] = Processor.process_newInstance
-        self._processMap["newInstance3a"] = Processor.process_newInstance3a
-        self._processMap["newInstance3b"] = Processor.process_newInstance3b
+        self._processMap["newInstance3"] = Processor.process_newInstance3
         self._processMap["newInstance4"] = Processor.process_newInstance4
+        self._processMap["newInstance5"] = Processor.process_newInstance5
         self._processMap["setName"] = Processor.process_setName
         self._processMap["parallelize"] = Processor.process_parallelize
         self._processMap["parallelize4"] = Processor.process_parallelize4
@@ -1395,13 +1401,13 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_newInstance3a(self, seqid, iprot, oprot):
-        args = newInstance3a_args()
+    def process_newInstance3(self, seqid, iprot, oprot):
+        args = newInstance3_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = newInstance3a_result()
+        result = newInstance3_result()
         try:
-            result.success = self._handler.newInstance3a(args.id, args.name, args.type)
+            result.success = self._handler.newInstance3(args.id, args.name, args.type)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -1416,33 +1422,7 @@ class Processor(Iface, TProcessor):
             logging.exception('Unexpected exception in handler')
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("newInstance3a", msg_type, seqid)
-        result.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
-
-    def process_newInstance3b(self, seqid, iprot, oprot):
-        args = newInstance3b_args()
-        args.read(iprot)
-        iprot.readMessageEnd()
-        result = newInstance3b_result()
-        try:
-            result.success = self._handler.newInstance3b(args.id, args.type, args.cores)
-            msg_type = TMessageType.REPLY
-        except TTransport.TTransportException:
-            raise
-        except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            msg_type = TMessageType.REPLY
-            result.ex = ex
-        except TApplicationException as ex:
-            logging.exception('TApplication exception in handler')
-            msg_type = TMessageType.EXCEPTION
-            result = ex
-        except Exception:
-            logging.exception('Unexpected exception in handler')
-            msg_type = TMessageType.EXCEPTION
-            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("newInstance3b", msg_type, seqid)
+        oprot.writeMessageBegin("newInstance3", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -1453,7 +1433,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = newInstance4_result()
         try:
-            result.success = self._handler.newInstance4(args.id, args.name, args.type, args.cores)
+            result.success = self._handler.newInstance4(args.id, args.type, args.cores, args.instances)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -1469,6 +1449,32 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
         oprot.writeMessageBegin("newInstance4", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_newInstance5(self, seqid, iprot, oprot):
+        args = newInstance5_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = newInstance5_result()
+        try:
+            result.success = self._handler.newInstance5(args.id, args.name, args.type, args.cores, args.instances)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("newInstance5", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -2382,7 +2388,7 @@ newInstance_result.thrift_spec = (
 )
 
 
-class newInstance3a_args(object):
+class newInstance3_args(object):
     """
     Attributes:
      - id
@@ -2430,7 +2436,7 @@ class newInstance3a_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('newInstance3a_args')
+        oprot.writeStructBegin('newInstance3_args')
         if self.id is not None:
             oprot.writeFieldBegin('id', TType.I64, 1)
             oprot.writeI64(self.id)
@@ -2459,8 +2465,8 @@ class newInstance3a_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(newInstance3a_args)
-newInstance3a_args.thrift_spec = (
+all_structs.append(newInstance3_args)
+newInstance3_args.thrift_spec = (
     None,  # 0
     (1, TType.I64, 'id', None, None, ),  # 1
     (2, TType.STRING, 'name', 'UTF8', None, ),  # 2
@@ -2468,7 +2474,7 @@ newInstance3a_args.thrift_spec = (
 )
 
 
-class newInstance3a_result(object):
+class newInstance3_result(object):
     """
     Attributes:
      - success
@@ -2510,7 +2516,7 @@ class newInstance3a_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('newInstance3a_result')
+        oprot.writeStructBegin('newInstance3_result')
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.STRUCT, 0)
             self.success.write(oprot)
@@ -2535,168 +2541,8 @@ class newInstance3a_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(newInstance3a_result)
-newInstance3a_result.thrift_spec = (
-    (0, TType.STRUCT, 'success', [IWorkerId, None], None, ),  # 0
-    (1, TType.STRUCT, 'ex', [ignis.rpc.driver.exception.ttypes.IDriverException, None], None, ),  # 1
-)
-
-
-class newInstance3b_args(object):
-    """
-    Attributes:
-     - id
-     - type
-     - cores
-
-    """
-
-
-    def __init__(self, id=None, type=None, cores=None,):
-        self.id = id
-        self.type = type
-        self.cores = cores
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.I64:
-                    self.id = iprot.readI64()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 2:
-                if ftype == TType.STRING:
-                    self.type = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 3:
-                if ftype == TType.I32:
-                    self.cores = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('newInstance3b_args')
-        if self.id is not None:
-            oprot.writeFieldBegin('id', TType.I64, 1)
-            oprot.writeI64(self.id)
-            oprot.writeFieldEnd()
-        if self.type is not None:
-            oprot.writeFieldBegin('type', TType.STRING, 2)
-            oprot.writeString(self.type.encode('utf-8') if sys.version_info[0] == 2 else self.type)
-            oprot.writeFieldEnd()
-        if self.cores is not None:
-            oprot.writeFieldBegin('cores', TType.I32, 3)
-            oprot.writeI32(self.cores)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(newInstance3b_args)
-newInstance3b_args.thrift_spec = (
-    None,  # 0
-    (1, TType.I64, 'id', None, None, ),  # 1
-    (2, TType.STRING, 'type', 'UTF8', None, ),  # 2
-    (3, TType.I32, 'cores', None, None, ),  # 3
-)
-
-
-class newInstance3b_result(object):
-    """
-    Attributes:
-     - success
-     - ex
-
-    """
-
-
-    def __init__(self, success=None, ex=None,):
-        self.success = success
-        self.ex = ex
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 0:
-                if ftype == TType.STRUCT:
-                    self.success = IWorkerId()
-                    self.success.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            elif fid == 1:
-                if ftype == TType.STRUCT:
-                    self.ex = ignis.rpc.driver.exception.ttypes.IDriverException.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('newInstance3b_result')
-        if self.success is not None:
-            oprot.writeFieldBegin('success', TType.STRUCT, 0)
-            self.success.write(oprot)
-            oprot.writeFieldEnd()
-        if self.ex is not None:
-            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
-            self.ex.write(oprot)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(newInstance3b_result)
-newInstance3b_result.thrift_spec = (
+all_structs.append(newInstance3_result)
+newInstance3_result.thrift_spec = (
     (0, TType.STRUCT, 'success', [IWorkerId, None], None, ),  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.driver.exception.ttypes.IDriverException, None], None, ),  # 1
 )
@@ -2706,18 +2552,18 @@ class newInstance4_args(object):
     """
     Attributes:
      - id
-     - name
      - type
      - cores
+     - instances
 
     """
 
 
-    def __init__(self, id=None, name=None, type=None, cores=None,):
+    def __init__(self, id=None, type=None, cores=None, instances=None,):
         self.id = id
-        self.name = name
         self.type = type
         self.cores = cores
+        self.instances = instances
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -2735,17 +2581,17 @@ class newInstance4_args(object):
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.STRING:
-                    self.name = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
+                    self.type = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
-                if ftype == TType.STRING:
-                    self.type = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
+                if ftype == TType.I32:
+                    self.cores = iprot.readI32()
                 else:
                     iprot.skip(ftype)
             elif fid == 4:
                 if ftype == TType.I32:
-                    self.cores = iprot.readI32()
+                    self.instances = iprot.readI32()
                 else:
                     iprot.skip(ftype)
             else:
@@ -2762,17 +2608,17 @@ class newInstance4_args(object):
             oprot.writeFieldBegin('id', TType.I64, 1)
             oprot.writeI64(self.id)
             oprot.writeFieldEnd()
-        if self.name is not None:
-            oprot.writeFieldBegin('name', TType.STRING, 2)
-            oprot.writeString(self.name.encode('utf-8') if sys.version_info[0] == 2 else self.name)
-            oprot.writeFieldEnd()
         if self.type is not None:
-            oprot.writeFieldBegin('type', TType.STRING, 3)
+            oprot.writeFieldBegin('type', TType.STRING, 2)
             oprot.writeString(self.type.encode('utf-8') if sys.version_info[0] == 2 else self.type)
             oprot.writeFieldEnd()
         if self.cores is not None:
-            oprot.writeFieldBegin('cores', TType.I32, 4)
+            oprot.writeFieldBegin('cores', TType.I32, 3)
             oprot.writeI32(self.cores)
+            oprot.writeFieldEnd()
+        if self.instances is not None:
+            oprot.writeFieldBegin('instances', TType.I32, 4)
+            oprot.writeI32(self.instances)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -2794,9 +2640,9 @@ all_structs.append(newInstance4_args)
 newInstance4_args.thrift_spec = (
     None,  # 0
     (1, TType.I64, 'id', None, None, ),  # 1
-    (2, TType.STRING, 'name', 'UTF8', None, ),  # 2
-    (3, TType.STRING, 'type', 'UTF8', None, ),  # 3
-    (4, TType.I32, 'cores', None, None, ),  # 4
+    (2, TType.STRING, 'type', 'UTF8', None, ),  # 2
+    (3, TType.I32, 'cores', None, None, ),  # 3
+    (4, TType.I32, 'instances', None, None, ),  # 4
 )
 
 
@@ -2869,6 +2715,190 @@ class newInstance4_result(object):
         return not (self == other)
 all_structs.append(newInstance4_result)
 newInstance4_result.thrift_spec = (
+    (0, TType.STRUCT, 'success', [IWorkerId, None], None, ),  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.driver.exception.ttypes.IDriverException, None], None, ),  # 1
+)
+
+
+class newInstance5_args(object):
+    """
+    Attributes:
+     - id
+     - name
+     - type
+     - cores
+     - instances
+
+    """
+
+
+    def __init__(self, id=None, name=None, type=None, cores=None, instances=None,):
+        self.id = id
+        self.name = name
+        self.type = type
+        self.cores = cores
+        self.instances = instances
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I64:
+                    self.id = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRING:
+                    self.name = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRING:
+                    self.type = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.I32:
+                    self.cores = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 5:
+                if ftype == TType.I32:
+                    self.instances = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('newInstance5_args')
+        if self.id is not None:
+            oprot.writeFieldBegin('id', TType.I64, 1)
+            oprot.writeI64(self.id)
+            oprot.writeFieldEnd()
+        if self.name is not None:
+            oprot.writeFieldBegin('name', TType.STRING, 2)
+            oprot.writeString(self.name.encode('utf-8') if sys.version_info[0] == 2 else self.name)
+            oprot.writeFieldEnd()
+        if self.type is not None:
+            oprot.writeFieldBegin('type', TType.STRING, 3)
+            oprot.writeString(self.type.encode('utf-8') if sys.version_info[0] == 2 else self.type)
+            oprot.writeFieldEnd()
+        if self.cores is not None:
+            oprot.writeFieldBegin('cores', TType.I32, 4)
+            oprot.writeI32(self.cores)
+            oprot.writeFieldEnd()
+        if self.instances is not None:
+            oprot.writeFieldBegin('instances', TType.I32, 5)
+            oprot.writeI32(self.instances)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(newInstance5_args)
+newInstance5_args.thrift_spec = (
+    None,  # 0
+    (1, TType.I64, 'id', None, None, ),  # 1
+    (2, TType.STRING, 'name', 'UTF8', None, ),  # 2
+    (3, TType.STRING, 'type', 'UTF8', None, ),  # 3
+    (4, TType.I32, 'cores', None, None, ),  # 4
+    (5, TType.I32, 'instances', None, None, ),  # 5
+)
+
+
+class newInstance5_result(object):
+    """
+    Attributes:
+     - success
+     - ex
+
+    """
+
+
+    def __init__(self, success=None, ex=None,):
+        self.success = success
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = IWorkerId()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.driver.exception.ttypes.IDriverException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('newInstance5_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(newInstance5_result)
+newInstance5_result.thrift_spec = (
     (0, TType.STRUCT, 'success', [IWorkerId, None], None, ),  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.driver.exception.ttypes.IDriverException, None], None, ),  # 1
 )

@@ -27,9 +27,9 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  void start(IWorkerId id)')
     print('  void destroy(IWorkerId id)')
     print('  IWorkerId newInstance(i64 id, string type)')
-    print('  IWorkerId newInstance3a(i64 id, string name, string type)')
-    print('  IWorkerId newInstance3b(i64 id, string type, i32 cores)')
-    print('  IWorkerId newInstance4(i64 id, string name, string type, i32 cores)')
+    print('  IWorkerId newInstance3(i64 id, string name, string type)')
+    print('  IWorkerId newInstance4(i64 id, string type, i32 cores, i32 instances)')
+    print('  IWorkerId newInstance5(i64 id, string name, string type, i32 cores, i32 instances)')
     print('  void setName(IWorkerId id, string name)')
     print('  IDataFrameId parallelize(IWorkerId id, i64 dataId, i64 partitions)')
     print('  IDataFrameId parallelize4(IWorkerId id, i64 dataId, i64 partitions, ISource src)')
@@ -148,23 +148,23 @@ elif cmd == 'newInstance':
         sys.exit(1)
     pp.pprint(client.newInstance(eval(args[0]), args[1],))
 
-elif cmd == 'newInstance3a':
+elif cmd == 'newInstance3':
     if len(args) != 3:
-        print('newInstance3a requires 3 args')
+        print('newInstance3 requires 3 args')
         sys.exit(1)
-    pp.pprint(client.newInstance3a(eval(args[0]), args[1], args[2],))
-
-elif cmd == 'newInstance3b':
-    if len(args) != 3:
-        print('newInstance3b requires 3 args')
-        sys.exit(1)
-    pp.pprint(client.newInstance3b(eval(args[0]), args[1], eval(args[2]),))
+    pp.pprint(client.newInstance3(eval(args[0]), args[1], args[2],))
 
 elif cmd == 'newInstance4':
     if len(args) != 4:
         print('newInstance4 requires 4 args')
         sys.exit(1)
-    pp.pprint(client.newInstance4(eval(args[0]), args[1], args[2], eval(args[3]),))
+    pp.pprint(client.newInstance4(eval(args[0]), args[1], eval(args[2]), eval(args[3]),))
+
+elif cmd == 'newInstance5':
+    if len(args) != 5:
+        print('newInstance5 requires 5 args')
+        sys.exit(1)
+    pp.pprint(client.newInstance5(eval(args[0]), args[1], args[2], eval(args[3]), eval(args[4]),))
 
 elif cmd == 'setName':
     if len(args) != 2:
