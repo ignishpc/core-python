@@ -158,7 +158,7 @@ class ICommImpl(IBaseImpl):
 		self._executor_data.mpi().driverGather0(comm, self._executor_data.getPartitions())
 
 	def driverScatter(self, group, partitions):
-		comm = self.__getGroup(id)
+		comm = self.__getGroup(group)
 		if comm.Get_rank() != 0:
 			self._executor_data.setPartitions(self._executor_data.getPartitionTools().newPartitionGroup())
 		self._executor_data.mpi().driverScatter(comm, self._executor_data.getPartitions(), partitions)
@@ -168,12 +168,12 @@ class ICommImpl(IBaseImpl):
 
 	def send(self, group, partition, dest, thread):
 		part_group = self._executor_data.getPartitions()
-		comm = self.__getGroup(id)
+		comm = self.__getGroup(group)
 		self._executor_data.mpi().send(comm, part_group[partition], dest)
 
 	def recv(self, group, partition, source, thread):
 		part_group = self._executor_data.getPartitions()
-		comm = self.__getGroup(id)
+		comm = self.__getGroup(group)
 		tag = comm.Get_rank()
 		self._executor_data.mpi().recv(comm, part_group[partition], source, tag)
 
