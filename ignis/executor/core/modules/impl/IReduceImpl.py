@@ -106,21 +106,12 @@ class IReduceImpl(IBaseImpl):
         self.__finalTreeReduce(f, partial_reduce)
 
     def union(self, other):
-        input1 = self._executor_data.getAndDeletePartitions()
+        input1 = self._executor_data.getPartitions()
         input2 = self._executor_data.getVariable(other)
         self._executor_data.removeVariable(other)
 
-        output = self._executor_data.getPartitionTools().newPartitionGroup(len(input1))
-        #backend makes all partitions are the same size
-        for p in range(len(input1)):
-            writer = output[p].writeIterator()
-            p1 = input1[p]
-            p2 = input2[p]
-
-            for i in range(min(len(p1), len(p2))):
-                writer.write((p1[i], p2[i]))
-
-        self._executor_data.setPartitions(output)
+        for part in input2:
+            input1.add(part)
 
     def join(self, other, numPartitions):
         logger.info("Reduce: preparing first partitions")

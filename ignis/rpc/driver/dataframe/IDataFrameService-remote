@@ -49,10 +49,10 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  IDataFrameId sort2(IDataFrameId id, bool ascending, i64 numPartitions)')
     print('  IDataFrameId sortBy(IDataFrameId id, ISource src, bool ascending)')
     print('  IDataFrameId sortBy3(IDataFrameId id, ISource src, bool ascending, i64 numPartitions)')
-    print('  IDataFrameId union_(IDataFrameId id, IDataFrameId other)')
-    print('  IDataFrameId union3a(IDataFrameId id, IDataFrameId other, i64 numPartitions)')
-    print('  IDataFrameId union3b(IDataFrameId id, IDataFrameId other, ISource src)')
-    print('  IDataFrameId union4(IDataFrameId id, IDataFrameId other, i64 numPartitions, ISource src)')
+    print('  IDataFrameId union_(IDataFrameId id, IDataFrameId other, bool preserveOrder)')
+    print('  IDataFrameId union4a(IDataFrameId id, IDataFrameId other, bool preserveOrder, i64 numPartitions)')
+    print('  IDataFrameId union4b(IDataFrameId id, IDataFrameId other, bool preserveOrder, ISource src)')
+    print('  IDataFrameId union5(IDataFrameId id, IDataFrameId other, bool preserveOrder, i64 numPartitions, ISource src)')
     print('  IDataFrameId join(IDataFrameId id, IDataFrameId other)')
     print('  IDataFrameId join3a(IDataFrameId id, IDataFrameId other, i64 numPartitions)')
     print('  IDataFrameId join3b(IDataFrameId id, IDataFrameId other, ISource src)')
@@ -336,28 +336,28 @@ elif cmd == 'sortBy3':
     pp.pprint(client.sortBy3(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
 
 elif cmd == 'union_':
-    if len(args) != 2:
-        print('union_ requires 2 args')
-        sys.exit(1)
-    pp.pprint(client.union_(eval(args[0]), eval(args[1]),))
-
-elif cmd == 'union3a':
     if len(args) != 3:
-        print('union3a requires 3 args')
+        print('union_ requires 3 args')
         sys.exit(1)
-    pp.pprint(client.union3a(eval(args[0]), eval(args[1]), eval(args[2]),))
+    pp.pprint(client.union_(eval(args[0]), eval(args[1]), eval(args[2]),))
 
-elif cmd == 'union3b':
-    if len(args) != 3:
-        print('union3b requires 3 args')
-        sys.exit(1)
-    pp.pprint(client.union3b(eval(args[0]), eval(args[1]), eval(args[2]),))
-
-elif cmd == 'union4':
+elif cmd == 'union4a':
     if len(args) != 4:
-        print('union4 requires 4 args')
+        print('union4a requires 4 args')
         sys.exit(1)
-    pp.pprint(client.union4(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
+    pp.pprint(client.union4a(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
+
+elif cmd == 'union4b':
+    if len(args) != 4:
+        print('union4b requires 4 args')
+        sys.exit(1)
+    pp.pprint(client.union4b(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
+
+elif cmd == 'union5':
+    if len(args) != 5:
+        print('union5 requires 5 args')
+        sys.exit(1)
+    pp.pprint(client.union5(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]), eval(args[4]),))
 
 elif cmd == 'join':
     if len(args) != 2:
