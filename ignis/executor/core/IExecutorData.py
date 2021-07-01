@@ -51,6 +51,9 @@ class IExecutorData:
     def getVariable(self, key):
         return self.__variables[key]
 
+    def hasVariable(self, key):
+        return key in self.__variables
+
     def removeVariable(self, key):
         del self.__variables[key]
 

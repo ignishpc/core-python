@@ -38,6 +38,12 @@ class ICacheContextModule(IModule, ICacheContextModuleIface):
 		except Exception as ex:
 			self._pack_exception(ex)
 
+	def loadContextAsVariable(self, id, name):
+		try:
+			self.__impl.loadContextAsVariable(id, name)
+		except Exception as ex:
+			self._pack_exception(ex)
+
 	def cache(self, id, level):
 		try:
 			self.__impl.cache(id, level)

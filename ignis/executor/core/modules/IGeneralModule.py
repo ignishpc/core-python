@@ -102,6 +102,45 @@ class IGeneralModule(IModule, IGeneralModuleIface):
         except Exception as ex:
             self._pack_exception(ex)
 
+    def union_(self, other):
+        try:
+            self.__reduce_impl.union(other)
+        except Exception as ex:
+            self._pack_exception(ex)
+
+    def union2(self, other, src):
+        try:
+            self._use_source(src)
+            self.__reduce_impl.union(other)
+        except Exception as ex:
+            self._pack_exception(ex)
+
+    def join(self, other, numPartitions):
+        try:
+            self.__reduce_impl.join(other, numPartitions)
+        except Exception as ex:
+            self._pack_exception(ex)
+
+    def join3(self, other, numPartitions, src):
+        try:
+            self._use_source(src)
+            self.__reduce_impl.join(other, numPartitions)
+        except Exception as ex:
+            self._pack_exception(ex)
+
+    def distinct(self, numPartitions):
+        try:
+            self.__reduce_impl.distinct(numPartitions)
+        except Exception as ex:
+            self._pack_exception(ex)
+
+    def distinct2(self, numPartitions, src):
+        try:
+            self._use_source(src)
+            self.__reduce_impl.distinct(numPartitions)
+        except Exception as ex:
+            self._pack_exception(ex)
+
     def flatMapValues(self, src):
         try:
             self.__pipe_impl.flatMapValues(self._executor_data.loadLibrary(src))

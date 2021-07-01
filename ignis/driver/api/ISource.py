@@ -6,13 +6,28 @@ from ignis.executor.core.protocol.IObjectProtocol import IObjectProtocol
 from ignis.executor.core.transport.IMemoryBuffer import IMemoryBuffer
 
 
-class _IFunctionLambda:
+class _IFunctionDef:
 
 	def __init__(self, f):
 		self.call = f
 
 	def before(self, context):
 		pass
+
+	def after(self, context):
+		pass
+
+
+class _IFunctionLambda:
+
+	def __init__(self, f):
+		self.f = f
+
+	def before(self, context):
+		pass
+
+	def call(self, *args):
+		self.f(*args[:-1])
 
 	def after(self, context):
 		pass
@@ -27,7 +42,10 @@ class ISource:
 		if isinstance(src, str):
 			obj.name = src
 		elif isinstance(src, FunctionType):
-			obj.bytes = ILibraryLoader.pickle(_IFunctionLambda(src))
+			if src.__name__ == '<lambda>':
+				obj.bytes = ILibraryLoader.pickle(_IFunctionLambda(src))
+			else:
+				obj.bytes = ILibraryLoader.pickle(_IFunctionDef(src))
 		else:
 			obj.bytes = ILibraryLoader.pickle(src)
 		self.__inner.obj = obj

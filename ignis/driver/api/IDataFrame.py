@@ -186,6 +186,81 @@ class IDataFrame:
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
             raise IDriverException(ex.message, ex._cause)
 
+
+    def union(self, other, numPartitions=None, src=None):
+        try:
+            with Ignis._pool.getClient() as client:
+                if src is None:
+                    if numPartitions is None:
+                        return Ignis._driverContext().collect(
+                            client.getDataFrameService().union_(self._id, other._id)
+                        )
+                    else:
+                        return Ignis._driverContext().collect(
+                            client.getDataFrameService().union3a(self._id, other._id, numPartitions)
+                        )
+                else:
+                    if numPartitions is None:
+                        return Ignis._driverContext().collect(
+                            client.getDataFrameService().union3b(self._id, other._id, ISource.wrap(src).rpc())
+                        )
+                    else:
+                        return Ignis._driverContext().collect(
+                            client.getDataFrameService().union4(self._id, other._id, numPartitions,
+                                                                ISource.wrap(src).rpc())
+                        )
+        except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+            raise IDriverException(ex.message, ex._cause)
+
+    def join(self, other, numPartitions=None, src=None):
+        try:
+            with Ignis._pool.getClient() as client:
+                if src is None:
+                    if numPartitions is None:
+                        return IDataFrame(
+                            client.getDataFrameService().join(self._id, other._id)
+                        )
+                    else:
+                        return IDataFrame(
+                            client.getDataFrameService().join3a(self._id, other._id, numPartitions)
+                        )
+                else:
+                    if numPartitions is None:
+                        return IDataFrame(
+                            client.getDataFrameService().join3b(self._id, other._id, ISource.wrap(src).rpc())
+                        )
+                    else:
+                        return IDataFrame(
+                            client.getDataFrameService().join4(self._id, other._id, numPartitions,
+                                                                ISource.wrap(src).rpc())
+                        )
+        except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+            raise IDriverException(ex.message, ex._cause)
+
+    def distinct(self, numPartitions=None, src=None):
+        try:
+            with Ignis._pool.getClient() as client:
+                if src is None:
+                    if numPartitions is None:
+                        return IDataFrame(
+                            client.getDataFrameService().join(self._id)
+                        )
+                    else:
+                        return IDataFrame(
+                            client.getDataFrameService().join2a(self._id, numPartitions)
+                        )
+                else:
+                    if numPartitions is None:
+                        return IDataFrame(
+                            client.getDataFrameService().join2b(self._id, ISource.wrap(src).rpc())
+                        )
+                    else:
+                        return IDataFrame(
+                            client.getDataFrameService().join3(self._id, numPartitions, ISource.wrap(src).rpc())
+                        )
+        except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+            raise IDriverException(ex.message, ex._cause)
+
     def reduce(self, src):
         try:
             with Ignis._pool.getClient() as client:

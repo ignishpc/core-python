@@ -137,6 +137,59 @@ class Iface(object):
         """
         pass
 
+    def union_(self, other):
+        """
+        Parameters:
+         - other
+
+        """
+        pass
+
+    def union2(self, other, src):
+        """
+        Parameters:
+         - other
+         - src
+
+        """
+        pass
+
+    def join(self, other, numPartitions):
+        """
+        Parameters:
+         - other
+         - numPartitions
+
+        """
+        pass
+
+    def join3(self, other, numPartitions, src):
+        """
+        Parameters:
+         - other
+         - numPartitions
+         - src
+
+        """
+        pass
+
+    def distinct(self, numPartitions):
+        """
+        Parameters:
+         - numPartitions
+
+        """
+        pass
+
+    def distinct2(self, numPartitions, src):
+        """
+        Parameters:
+         - numPartitions
+         - src
+
+        """
+        pass
+
     def flatMapValues(self, src):
         """
         Parameters:
@@ -716,6 +769,208 @@ class Client(Iface):
             raise result.ex
         return
 
+    def union_(self, other):
+        """
+        Parameters:
+         - other
+
+        """
+        self.send_union_(other)
+        self.recv_union_()
+
+    def send_union_(self, other):
+        self._oprot.writeMessageBegin('union_', TMessageType.CALL, self._seqid)
+        args = union__args()
+        args.other = other
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_union_(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = union__result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def union2(self, other, src):
+        """
+        Parameters:
+         - other
+         - src
+
+        """
+        self.send_union2(other, src)
+        self.recv_union2()
+
+    def send_union2(self, other, src):
+        self._oprot.writeMessageBegin('union2', TMessageType.CALL, self._seqid)
+        args = union2_args()
+        args.other = other
+        args.src = src
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_union2(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = union2_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def join(self, other, numPartitions):
+        """
+        Parameters:
+         - other
+         - numPartitions
+
+        """
+        self.send_join(other, numPartitions)
+        self.recv_join()
+
+    def send_join(self, other, numPartitions):
+        self._oprot.writeMessageBegin('join', TMessageType.CALL, self._seqid)
+        args = join_args()
+        args.other = other
+        args.numPartitions = numPartitions
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_join(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = join_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def join3(self, other, numPartitions, src):
+        """
+        Parameters:
+         - other
+         - numPartitions
+         - src
+
+        """
+        self.send_join3(other, numPartitions, src)
+        self.recv_join3()
+
+    def send_join3(self, other, numPartitions, src):
+        self._oprot.writeMessageBegin('join3', TMessageType.CALL, self._seqid)
+        args = join3_args()
+        args.other = other
+        args.numPartitions = numPartitions
+        args.src = src
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_join3(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = join3_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def distinct(self, numPartitions):
+        """
+        Parameters:
+         - numPartitions
+
+        """
+        self.send_distinct(numPartitions)
+        self.recv_distinct()
+
+    def send_distinct(self, numPartitions):
+        self._oprot.writeMessageBegin('distinct', TMessageType.CALL, self._seqid)
+        args = distinct_args()
+        args.numPartitions = numPartitions
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_distinct(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = distinct_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def distinct2(self, numPartitions, src):
+        """
+        Parameters:
+         - numPartitions
+         - src
+
+        """
+        self.send_distinct2(numPartitions, src)
+        self.recv_distinct2()
+
+    def send_distinct2(self, numPartitions, src):
+        self._oprot.writeMessageBegin('distinct2', TMessageType.CALL, self._seqid)
+        args = distinct2_args()
+        args.numPartitions = numPartitions
+        args.src = src
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_distinct2(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = distinct2_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
     def flatMapValues(self, src):
         """
         Parameters:
@@ -1149,6 +1404,12 @@ class Processor(Iface, TProcessor):
         self._processMap["sort2"] = Processor.process_sort2
         self._processMap["sortBy"] = Processor.process_sortBy
         self._processMap["sortBy3"] = Processor.process_sortBy3
+        self._processMap["union_"] = Processor.process_union_
+        self._processMap["union2"] = Processor.process_union2
+        self._processMap["join"] = Processor.process_join
+        self._processMap["join3"] = Processor.process_join3
+        self._processMap["distinct"] = Processor.process_distinct
+        self._processMap["distinct2"] = Processor.process_distinct2
         self._processMap["flatMapValues"] = Processor.process_flatMapValues
         self._processMap["mapValues"] = Processor.process_mapValues
         self._processMap["groupByKey"] = Processor.process_groupByKey
@@ -1543,6 +1804,162 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
         oprot.writeMessageBegin("sortBy3", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_union_(self, seqid, iprot, oprot):
+        args = union__args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = union__result()
+        try:
+            self._handler.union_(args.other)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("union_", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_union2(self, seqid, iprot, oprot):
+        args = union2_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = union2_result()
+        try:
+            self._handler.union2(args.other, args.src)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("union2", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_join(self, seqid, iprot, oprot):
+        args = join_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = join_result()
+        try:
+            self._handler.join(args.other, args.numPartitions)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("join", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_join3(self, seqid, iprot, oprot):
+        args = join3_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = join3_result()
+        try:
+            self._handler.join3(args.other, args.numPartitions, args.src)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("join3", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_distinct(self, seqid, iprot, oprot):
+        args = distinct_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = distinct_result()
+        try:
+            self._handler.distinct(args.numPartitions)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("distinct", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_distinct2(self, seqid, iprot, oprot):
+        args = distinct2_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = distinct2_result()
+        try:
+            self._handler.distinct2(args.numPartitions, args.src)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("distinct2", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -3677,6 +4094,813 @@ class sortBy3_result(object):
         return not (self == other)
 all_structs.append(sortBy3_result)
 sortBy3_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class union__args(object):
+    """
+    Attributes:
+     - other
+
+    """
+
+
+    def __init__(self, other=None,):
+        self.other = other
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.other = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('union__args')
+        if self.other is not None:
+            oprot.writeFieldBegin('other', TType.STRING, 1)
+            oprot.writeString(self.other.encode('utf-8') if sys.version_info[0] == 2 else self.other)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(union__args)
+union__args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRING, 'other', 'UTF8', None, ),  # 1
+)
+
+
+class union__result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('union__result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(union__result)
+union__result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class union2_args(object):
+    """
+    Attributes:
+     - other
+     - src
+
+    """
+
+
+    def __init__(self, other=None, src=None,):
+        self.other = other
+        self.src = src
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.other = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self.src = ignis.rpc.source.ttypes.ISource()
+                    self.src.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('union2_args')
+        if self.other is not None:
+            oprot.writeFieldBegin('other', TType.STRING, 1)
+            oprot.writeString(self.other.encode('utf-8') if sys.version_info[0] == 2 else self.other)
+            oprot.writeFieldEnd()
+        if self.src is not None:
+            oprot.writeFieldBegin('src', TType.STRUCT, 2)
+            self.src.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(union2_args)
+union2_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRING, 'other', 'UTF8', None, ),  # 1
+    (2, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 2
+)
+
+
+class union2_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('union2_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(union2_result)
+union2_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class join_args(object):
+    """
+    Attributes:
+     - other
+     - numPartitions
+
+    """
+
+
+    def __init__(self, other=None, numPartitions=None,):
+        self.other = other
+        self.numPartitions = numPartitions
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.other = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I64:
+                    self.numPartitions = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('join_args')
+        if self.other is not None:
+            oprot.writeFieldBegin('other', TType.STRING, 1)
+            oprot.writeString(self.other.encode('utf-8') if sys.version_info[0] == 2 else self.other)
+            oprot.writeFieldEnd()
+        if self.numPartitions is not None:
+            oprot.writeFieldBegin('numPartitions', TType.I64, 2)
+            oprot.writeI64(self.numPartitions)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(join_args)
+join_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRING, 'other', 'UTF8', None, ),  # 1
+    (2, TType.I64, 'numPartitions', None, None, ),  # 2
+)
+
+
+class join_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('join_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(join_result)
+join_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class join3_args(object):
+    """
+    Attributes:
+     - other
+     - numPartitions
+     - src
+
+    """
+
+
+    def __init__(self, other=None, numPartitions=None, src=None,):
+        self.other = other
+        self.numPartitions = numPartitions
+        self.src = src
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.other = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I64:
+                    self.numPartitions = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.STRUCT:
+                    self.src = ignis.rpc.source.ttypes.ISource()
+                    self.src.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('join3_args')
+        if self.other is not None:
+            oprot.writeFieldBegin('other', TType.STRING, 1)
+            oprot.writeString(self.other.encode('utf-8') if sys.version_info[0] == 2 else self.other)
+            oprot.writeFieldEnd()
+        if self.numPartitions is not None:
+            oprot.writeFieldBegin('numPartitions', TType.I64, 2)
+            oprot.writeI64(self.numPartitions)
+            oprot.writeFieldEnd()
+        if self.src is not None:
+            oprot.writeFieldBegin('src', TType.STRUCT, 3)
+            self.src.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(join3_args)
+join3_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRING, 'other', 'UTF8', None, ),  # 1
+    (2, TType.I64, 'numPartitions', None, None, ),  # 2
+    (3, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 3
+)
+
+
+class join3_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('join3_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(join3_result)
+join3_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class distinct_args(object):
+    """
+    Attributes:
+     - numPartitions
+
+    """
+
+
+    def __init__(self, numPartitions=None,):
+        self.numPartitions = numPartitions
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I64:
+                    self.numPartitions = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('distinct_args')
+        if self.numPartitions is not None:
+            oprot.writeFieldBegin('numPartitions', TType.I64, 1)
+            oprot.writeI64(self.numPartitions)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(distinct_args)
+distinct_args.thrift_spec = (
+    None,  # 0
+    (1, TType.I64, 'numPartitions', None, None, ),  # 1
+)
+
+
+class distinct_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('distinct_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(distinct_result)
+distinct_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class distinct2_args(object):
+    """
+    Attributes:
+     - numPartitions
+     - src
+
+    """
+
+
+    def __init__(self, numPartitions=None, src=None,):
+        self.numPartitions = numPartitions
+        self.src = src
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I64:
+                    self.numPartitions = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self.src = ignis.rpc.source.ttypes.ISource()
+                    self.src.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('distinct2_args')
+        if self.numPartitions is not None:
+            oprot.writeFieldBegin('numPartitions', TType.I64, 1)
+            oprot.writeI64(self.numPartitions)
+            oprot.writeFieldEnd()
+        if self.src is not None:
+            oprot.writeFieldBegin('src', TType.STRUCT, 2)
+            self.src.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(distinct2_args)
+distinct2_args.thrift_spec = (
+    None,  # 0
+    (1, TType.I64, 'numPartitions', None, None, ),  # 1
+    (2, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 2
+)
+
+
+class distinct2_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('distinct2_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(distinct2_result)
+distinct2_result.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
 )

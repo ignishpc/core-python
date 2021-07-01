@@ -27,6 +27,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  i64 saveContext()')
     print('  void clearContext()')
     print('  void loadContext(i64 id)')
+    print('  void loadContextAsVariable(i64 id, string name)')
     print('  void cache(i64 id, i8 level)')
     print('  void loadCache(i64 id)')
     print('')
@@ -125,6 +126,12 @@ elif cmd == 'loadContext':
         print('loadContext requires 1 args')
         sys.exit(1)
     pp.pprint(client.loadContext(eval(args[0]),))
+
+elif cmd == 'loadContextAsVariable':
+    if len(args) != 2:
+        print('loadContextAsVariable requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.loadContextAsVariable(eval(args[0]), args[1],))
 
 elif cmd == 'cache':
     if len(args) != 2:

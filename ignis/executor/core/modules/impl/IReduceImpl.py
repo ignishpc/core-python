@@ -105,12 +105,84 @@ class IReduceImpl(IBaseImpl):
         partial_reduce.writeIterator().write(acum)
         self.__finalTreeReduce(f, partial_reduce)
 
-    def groupByKey(self, numPartitions):
+    def union(self, other):
+        input1 = self._executor_data.getAndDeletePartitions()
+        input2 = self._executor_data.getVariable(other)
+        self._executor_data.removeVariable(other)
+
+        output = self._executor_data.getPartitionTools().newPartitionGroup(len(input1))
+        #backend makes all partitions are the same size
+        for p in range(len(input1)):
+            writer = output[p].writeIterator()
+            p1 = input1[p]
+            p2 = input2[p]
+
+            for i in range(min(len(p1), len(p2))):
+                writer.write((p1[i], p2[i]))
+
+        self._executor_data.setPartitions(output)
+
+    def join(self, other, numPartitions):
+        logger.info("Reduce: preparing first partitions")
         self.__keyHashing(numPartitions)
-        self.__keyExchanging()
+        self.__exchanging()
+        input1 = self._executor_data.getAndDeletePartitions()
+
+        logger.info("Reduce: preparing second partitions")
+        self._executor_data.setPartitions(self._executor_data.getVariable(other))
+        self._executor_data.removeVariable(other)
+        self.__keyHashing(numPartitions)
+        self.__exchanging()
+        input2 = self._executor_data.getAndDeletePartitions()
+
+        output = self._executor_data.getPartitionTools().newPartitionGroup(numPartitions)
+        logger.info("Reduce: joining key elements")
+
+        acum = dict()
+        for p in range(len(input1)):
+            for key, value in input1[p]:
+                if key in acum:
+                    acum[key].append(value)
+                else:
+                    acum[key] = [value]
+            input1[p] = None
+            writer = output[p].writeIterator()
+
+            for key, value2 in input2[p]:
+                if key in acum:
+                    for _, value1 in acum[key]:
+                        writer.write((key, (value1, value2)))
+            input2[p] = None
+            acum.clear()
+
+        self._executor_data.setPartitions(output)
+
+    def distinct(self, numPartitions):
+        self.hashing(numPartitions)
+        self.__exchanging()
 
         input = self._executor_data.getAndDeletePartitions()
-        output = self._executor_data.getPartitionTools().newPartitionGroup(1)
+        output = self._executor_data.getPartitionTools().newPartitionGroup(numPartitions)
+        logger.info("Reduce: removing duplicate elements")
+
+        single = set()
+        for p in range(len(input)):
+            for item in input[p]:
+                single.add(item)
+            input[p] = None
+            writer = output[p].writeIterator()
+            for item in single:
+                writer.write(item)
+            single.clear()
+
+        self._executor_data.setPartitions(output)
+
+    def groupByKey(self, numPartitions):
+        self.__keyHashing(numPartitions)
+        self.__exchanging()
+
+        input = self._executor_data.getAndDeletePartitions()
+        output = self._executor_data.getPartitionTools().newPartitionGroup(numPartitions)
         logger.info("Reduce: reducing key elements")
 
         acum = dict()
@@ -121,10 +193,11 @@ class IReduceImpl(IBaseImpl):
                 else:
                     acum[key] = [value]
             input[p] = None
+            writer = output[p].writeIterator()
+            for item in acum.items():
+                writer.write(item)
+            acum.clear()
 
-        writer = output[0].writeIterator()
-        for item in acum.items():
-            writer.write(item)
         self._executor_data.setPartitions(output)
 
     def reduceByKey(self, f, numPartitions, localReduce):
@@ -134,7 +207,7 @@ class IReduceImpl(IBaseImpl):
             logger.info("Reduce: local reducing key elements")
             self.__localReduceByKey(f)
         self.__keyHashing(numPartitions)
-        self.__keyExchanging()
+        self.__exchanging()
         logger.info("Reduce: reducing key elements")
 
         self.__localReduceByKey(f)
@@ -145,7 +218,7 @@ class IReduceImpl(IBaseImpl):
         f.before(context)
         if hashing:
             self.__keyHashing(numPartitions)
-            self.__keyExchanging()
+            self.__exchanging()
         logger.info("Reduce: aggregating key elements")
 
         self.__localAggregateByKey(f)
@@ -159,12 +232,12 @@ class IReduceImpl(IBaseImpl):
             logger.info("Reduce: local folding key elements")
             self.__localAggregateByKey(f)
             self.__keyHashing(numPartitions)
-            self.__keyExchanging()
+            self.__exchanging()
             logger.info("Reduce: folding key elements")
             self.__localReduceByKey(f)
         else:
             self.__keyHashing(numPartitions)
-            self.__keyExchanging()
+            self.__exchanging()
             logger.info("Reduce: folding key elements")
             self.__localAggregateByKey(f)
 
@@ -263,6 +336,24 @@ class IReduceImpl(IBaseImpl):
 
         self._executor_data.setPartitions(output)
 
+    def hashing(self, numPartitions):
+        input = self._executor_data.getAndDeletePartitions()
+        output = self._executor_data.getPartitionTools().newPartitionGroup(numPartitions)
+        cache = input.cache()
+        logger.info("Reduce: creating " + str(len(input)) + " new partitions with key hashing")
+
+        writers = [part.writeIterator() for part in output]
+        n = len(writers)
+        for i in range(len(input)):
+            part = input[i]
+            for elem in part:
+                writers[hash(elem) % n].write(elem)
+            if not cache:
+                part.clear()
+            input[i] = None
+
+        self._executor_data.setPartitions(output)
+
     def __keyHashing(self, numPartitions):
         input = self._executor_data.getAndDeletePartitions()
         output = self._executor_data.getPartitionTools().newPartitionGroup(numPartitions)
@@ -281,11 +372,11 @@ class IReduceImpl(IBaseImpl):
 
         self._executor_data.setPartitions(output)
 
-    def __keyExchanging(self):
+    def __exchanging(self):
         input = self._executor_data.getPartitions()
         output = self._executor_data.getPartitionTools().newPartitionGroup()
         numPartitions = len(input)
-        logger.info("Reduce: exchanging " + str(numPartitions) + " partitions keys")
+        logger.info("Reduce: exchanging " + str(numPartitions) + " partitions")
 
         self.exchange(input, output)
 

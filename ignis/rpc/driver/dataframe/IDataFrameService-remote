@@ -49,6 +49,18 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  IDataFrameId sort2(IDataFrameId id, bool ascending, i64 numPartitions)')
     print('  IDataFrameId sortBy(IDataFrameId id, ISource src, bool ascending)')
     print('  IDataFrameId sortBy3(IDataFrameId id, ISource src, bool ascending, i64 numPartitions)')
+    print('  IDataFrameId union_(IDataFrameId id, IDataFrameId other)')
+    print('  IDataFrameId union3a(IDataFrameId id, IDataFrameId other, i64 numPartitions)')
+    print('  IDataFrameId union3b(IDataFrameId id, IDataFrameId other, ISource src)')
+    print('  IDataFrameId union4(IDataFrameId id, IDataFrameId other, i64 numPartitions, ISource src)')
+    print('  IDataFrameId join(IDataFrameId id, IDataFrameId other)')
+    print('  IDataFrameId join3a(IDataFrameId id, IDataFrameId other, i64 numPartitions)')
+    print('  IDataFrameId join3b(IDataFrameId id, IDataFrameId other, ISource src)')
+    print('  IDataFrameId join4(IDataFrameId id, IDataFrameId other, i64 numPartitions, ISource src)')
+    print('  IDataFrameId distinct(IDataFrameId id)')
+    print('  IDataFrameId distinct2a(IDataFrameId id, i64 numPartitions)')
+    print('  IDataFrameId distinct2b(IDataFrameId id, ISource src)')
+    print('  IDataFrameId distinct3(IDataFrameId id, i64 numPartitions, ISource src)')
     print('  i64 reduce(IDataFrameId id, ISource src, ISource tp)')
     print('  i64 treeReduce(IDataFrameId id, ISource src, ISource tp)')
     print('  i64 collect(IDataFrameId id, ISource tp)')
@@ -322,6 +334,78 @@ elif cmd == 'sortBy3':
         print('sortBy3 requires 4 args')
         sys.exit(1)
     pp.pprint(client.sortBy3(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
+
+elif cmd == 'union_':
+    if len(args) != 2:
+        print('union_ requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.union_(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'union3a':
+    if len(args) != 3:
+        print('union3a requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.union3a(eval(args[0]), eval(args[1]), eval(args[2]),))
+
+elif cmd == 'union3b':
+    if len(args) != 3:
+        print('union3b requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.union3b(eval(args[0]), eval(args[1]), eval(args[2]),))
+
+elif cmd == 'union4':
+    if len(args) != 4:
+        print('union4 requires 4 args')
+        sys.exit(1)
+    pp.pprint(client.union4(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
+
+elif cmd == 'join':
+    if len(args) != 2:
+        print('join requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.join(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'join3a':
+    if len(args) != 3:
+        print('join3a requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.join3a(eval(args[0]), eval(args[1]), eval(args[2]),))
+
+elif cmd == 'join3b':
+    if len(args) != 3:
+        print('join3b requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.join3b(eval(args[0]), eval(args[1]), eval(args[2]),))
+
+elif cmd == 'join4':
+    if len(args) != 4:
+        print('join4 requires 4 args')
+        sys.exit(1)
+    pp.pprint(client.join4(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
+
+elif cmd == 'distinct':
+    if len(args) != 1:
+        print('distinct requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.distinct(eval(args[0]),))
+
+elif cmd == 'distinct2a':
+    if len(args) != 2:
+        print('distinct2a requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.distinct2a(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'distinct2b':
+    if len(args) != 2:
+        print('distinct2b requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.distinct2b(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'distinct3':
+    if len(args) != 3:
+        print('distinct3 requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.distinct3(eval(args[0]), eval(args[1]), eval(args[2]),))
 
 elif cmd == 'reduce':
     if len(args) != 3:
