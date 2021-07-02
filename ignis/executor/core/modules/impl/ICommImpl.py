@@ -181,7 +181,7 @@ class ICommImpl(IBaseImpl):
 		self._executor_data.mpi().recv(comm, part_group[partition], source, tag)
 
 	def __addComm(self, group, comm, leader, detroyGroup):
-		peer = MPI.COMM_NULL
+		peer = MPI.Intracomm()
 
 		if comm != MPI.COMM_NULL:
 			peer = comm.Merge(not leader)
