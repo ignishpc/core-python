@@ -36,6 +36,7 @@ class ICommImpl(IBaseImpl):
 	def joinToGroup(self, id, leader):
 		root = self._executor_data.hasVariable("server")
 		comm = self._executor_data.mpi().native()
+		peer = MPI.COMM_NULL
 		if root:
 			peer = MPI.COMM_SELF.Accept(id)
 		elif not leader:
@@ -46,6 +47,7 @@ class ICommImpl(IBaseImpl):
 	def joinToGroupName(self, id, leader, name):
 		root = self._executor_data.hasVariable("server")
 		comm = self._executor_data.mpi().native()
+		peer = MPI.COMM_NULL
 		if root:
 			peer = MPI.COMM_SELF.Accept(id)
 		elif not leader:
@@ -59,8 +61,9 @@ class ICommImpl(IBaseImpl):
 	def destroyGroup(self, name):
 		if len(name) == 0:
 			comm = self._executor_data.mpi().native()
-			comm.Free()
-			self._executor_data.setMpiGroup(MPI.COMM_WORLD)
+			if comm != MPI.COMM_WORLD:
+				comm.Free()
+				self._executor_data.setMpiGroup(MPI.COMM_WORLD)
 		elif name in self.__groups[name]:
 			comm = self.__groups[name]
 			comm.Free()
