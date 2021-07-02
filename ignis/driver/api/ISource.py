@@ -27,7 +27,7 @@ class _IFunctionLambda:
 		pass
 
 	def call(self, *args):
-		self.f(*args[:-1])
+		return self.f(*args[:-1])
 
 	def after(self, context):
 		pass
