@@ -38,7 +38,7 @@ class ICommImpl(IBaseImpl):
 		comm = self._executor_data.mpi().native()
 		if root:
 			peer = MPI.COMM_SELF.Accept(id)
-		else:
+		elif not leader:
 			peer = comm.Connect(id)
 		comm = self.__addComm(comm, peer, leader, comm != MPI.COMM_WORLD)
 		self._executor_data.setMpiGroup(comm)
@@ -48,7 +48,7 @@ class ICommImpl(IBaseImpl):
 		comm = self._executor_data.mpi().native()
 		if root:
 			peer = MPI.COMM_SELF.Accept(id)
-		else:
+		elif not leader:
 			peer = comm.Connect(id)
 		comm = self.__addComm(comm, peer, leader, comm != MPI.COMM_WORLD)
 		self.__groups[name] = comm
