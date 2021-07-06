@@ -13,7 +13,7 @@ class IDriverContext(IModule, ICacheContextModuleIface):
 
     def __init__(self, executor_data):
         IModule.__init__(self, executor_data, logger)
-        self.__lock = threading.Lock()
+        self.__lock = threading.RLock()
         self.__next_context_id = 0
         self.__context = dict()
 
