@@ -13,15 +13,23 @@ class IDriverContext(IModule, ICacheContextModuleIface):
 
     def __init__(self, executor_data):
         IModule.__init__(self, executor_data, logger)
-        self.__lock = threading.RLock()
-        self.__next_context_id = 0
+        self.__lock = threading.Lock()
+        self.__next_id = 0
         self.__context = dict()
+        self.__data = dict()
+
+    def __getContext(self, id):
+        value = self.__context.get(id, None)
+        if not value:
+            raise ValueError("context " + str(id) + " not found")
+        del self.__context.get[id]
+        return value()
 
     def saveContext(self):
         try:
             with self.__lock:
-                id = self.__next_context_id
-                self.__next_context_id += 1
+                id = self.__next_id
+                self.__next_id += 1
                 self.__context[id] = self._executor_data.getPartitions()
                 return id
         except Exception as ex:
@@ -38,57 +46,65 @@ class IDriverContext(IModule, ICacheContextModuleIface):
     def loadContext(self, id):
         try:
             with self.__lock:
-                value = self.__context.get(id, None)
-                if not value:
-                    raise ValueError("context " + str(id) + " not found")
-                self._executor_data.setPartitions(value)
-                del self.__context.get[id]
+                self._executor_data.setPartitions(self.__getContext(id))
         except Exception as ex:
             self._pack_exception(ex)
 
+    def loadContextAsVariable(self, id, name):
+        raise self._pack_exception(RuntimeError("Driver does not implement loadContextAsVariable"))
+
     def cache(self, id, level):
-        pass
+        raise self._pack_exception(RuntimeError("Driver does not implement cache"))
 
     def loadCache(self, id):
-        pass
+        try:
+            with self.__lock:
+                value = self.__data.get(id, None)
+                if not value:
+                    raise ValueError("data " + str(id) + " not found")
+                self._executor_data.setPartitions(value())
+        except Exception as ex:
+            self._pack_exception(ex)
 
     def parallelize(self, data, native):
         try:
-            group = self._executor_data.getPartitionTools().newPartitionGroup()
 
-            if isinstance(data, bytes):
-                partition = IMemoryPartition(native, cls=bytearray, elements=bytearray(data))
-            elif isinstance(data, bytearray):
-                partition = IMemoryPartition(native, cls=bytearray, elements=data)
-            elif isinstance(data, list):
-                partition = IMemoryPartition(native, cls=list, elements=data)
-            elif data.__class__.__name__ == 'ndarray':
-                from ignis.executor.core.io.INumpy import INumpyWrapper as Wrapper
-                class INumpyWrapper(Wrapper):
-                    def __init__(self):
-                        Wrapper.__init__(self, len(data), data.dtype)
+            def get():
+                group = self._executor_data.getPartitionTools().newPartitionGroup()
 
-                return IMemoryPartition(native=native, cls=INumpyWrapper, elements=Wrapper(array=data))
-            else:
-                partition = IMemoryPartition(native)
-                it = partition.writeIterator()
-                for item in data:
-                    it.write(item)
+                if isinstance(data, bytes):
+                    partition = IMemoryPartition(native, cls=bytearray, elements=bytearray(data))
+                elif isinstance(data, bytearray):
+                    partition = IMemoryPartition(native, cls=bytearray, elements=data)
+                elif isinstance(data, list):
+                    partition = IMemoryPartition(native, cls=list, elements=data)
+                elif data.__class__.__name__ == 'ndarray':
+                    from ignis.executor.core.io.INumpy import INumpyWrapper as Wrapper
+                    class INumpyWrapper(Wrapper):
+                        def __init__(self):
+                            Wrapper.__init__(self, len(data), data.dtype)
 
-            group.add(partition)
+                    return IMemoryPartition(native=native, cls=INumpyWrapper, elements=Wrapper(array=data))
+                else:
+                    partition = IMemoryPartition(native)
+                    it = partition.writeIterator()
+                    for item in data:
+                        it.write(item)
+
+                group.add(partition)
 
             with self.__lock:
-                self._executor_data.setPartitions(group)
-                return self.saveContext()
+                id = self.__next_id
+                self.__next_id += 1
+                self.__data[id] = get
+                return id
         except Exception as ex:
             raise IDriverException(str(ex)) from ex
 
     def collect(self, id):
         try:
             with self.__lock:
-                self.loadContext(id)
-                group = self._executor_data.getPartitions()
-                self._executor_data.deletePartitions()
+                group = self.__getContext(id)
 
             if self._executor_data.getPartitionTools().isMemory(group):
                 cls = group[0]._IMemoryPartition__cls
