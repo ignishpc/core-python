@@ -20,10 +20,10 @@ class IDriverContext(IModule, ICacheContextModuleIface):
 
     def __getContext(self, id):
         value = self.__context.get(id, None)
-        if not value:
+        if value is None:
             raise ValueError("context " + str(id) + " not found")
         del self.__context.get[id]
-        return value()
+        return value
 
     def saveContext(self):
         try:
@@ -60,7 +60,7 @@ class IDriverContext(IModule, ICacheContextModuleIface):
         try:
             with self.__lock:
                 value = self.__data.get(id, None)
-                if not value:
+                if value is None:
                     raise ValueError("data " + str(id) + " not found")
                 self._executor_data.setPartitions(value())
         except Exception as ex:
@@ -84,7 +84,7 @@ class IDriverContext(IModule, ICacheContextModuleIface):
                         def __init__(self):
                             Wrapper.__init__(self, len(data), data.dtype)
 
-                    return IMemoryPartition(native=native, cls=INumpyWrapper, elements=Wrapper(array=data))
+                    partition = IMemoryPartition(native=native, cls=INumpyWrapper, elements=Wrapper(array=data))
                 else:
                     partition = IMemoryPartition(native)
                     it = partition.writeIterator()
@@ -92,6 +92,7 @@ class IDriverContext(IModule, ICacheContextModuleIface):
                         it.write(item)
 
                 group.add(partition)
+                return group
 
             with self.__lock:
                 id = self.__next_id

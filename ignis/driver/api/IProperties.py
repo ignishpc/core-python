@@ -15,21 +15,21 @@ class IProperties:
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
 			raise IDriverException(ex.message, ex._cause)
 
-	def setProperty(self, key, value):
+	def set(self, key, value):
 		try:
 			with Ignis._pool.getClient() as client:
 				client.getPropertiesService().setProperty(self._id, key, value)
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
 			raise IDriverException(ex.message, ex._cause)
 
-	def getProperty(self, key):
+	def get(self, key):
 		try:
 			with Ignis._pool.getClient() as client:
 				return client.getPropertiesService().getProperty(self._id, key)
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
 			raise IDriverException(ex.message, ex._cause)
 
-	def rmProperty(self, key):
+	def rm(self, key):
 		try:
 			with Ignis._pool.getClient() as client:
 				return client.getPropertiesService().rmProperty(self._id, key)
