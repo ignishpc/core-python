@@ -18,6 +18,7 @@ class IIOImpl(IBaseImpl):
 		IBaseImpl.__init__(self, executor_data, logger)
 
 	def partitionApproxSize(self):
+		logger.info("IO: calculating partition size")
 		input = self._executor_data.getPartitions()
 		return sum(map(lambda p: p.bytes(), input))
 
