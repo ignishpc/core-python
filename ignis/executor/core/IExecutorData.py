@@ -91,10 +91,10 @@ class IExecutorData:
 
     def reloadLibraries(self):
         backup_path = self.infoDirectory() + "/sources" + str(self.__context.executorId()) + ".bak"
-        logger.info("Function backup found, loading")
         loaded = set()
         source = ISource(obj=IEncoded())
         if os.path.exists(backup_path):
+            logger.info("Function backup found, loading")
             with open(backup_path, "r") as file:
                 for line in file:
                     try:
