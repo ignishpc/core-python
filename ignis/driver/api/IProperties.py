@@ -44,13 +44,13 @@ class IProperties:
 			raise IDriverException(ex.message, ex._cause)
 
 	def __getitem__(self, key):
-		return self.getProperty(key)
+		return self.get(key)
 
 	def __setitem__(self, key, value):
-		self.setProperty(key, value)
+		self.set(key, value)
 
 	def __delitem__(self, key):
-		self.rmProperty(key)
+		self.rm(key)
 
 	def __contains__(self, key):
 		return self.contains(key)
