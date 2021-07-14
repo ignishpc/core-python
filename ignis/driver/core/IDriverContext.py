@@ -22,7 +22,7 @@ class IDriverContext(IModule, ICacheContextModuleIface):
         value = self.__context.get(id, None)
         if value is None:
             raise ValueError("context " + str(id) + " not found")
-        del self.__context.get[id]
+        del self.__context[id]
         return value
 
     def saveContext(self):
