@@ -56,7 +56,7 @@ class ICommImpl(IBaseImpl):
 		self.__groups[name] = comm
 
 	def hasGroup(self, name):
-		return name in self.__groups[name]
+		return name in self.__groups
 
 	def destroyGroup(self, name):
 		if len(name) == 0:
@@ -64,7 +64,7 @@ class ICommImpl(IBaseImpl):
 			if comm != MPI.COMM_WORLD:
 				comm.Free()
 				self._executor_data.setMpiGroup(MPI.COMM_WORLD)
-		elif name in self.__groups[name]:
+		elif name in self.__groups:
 			comm = self.__groups[name]
 			comm.Free()
 			del self.__groups[name]

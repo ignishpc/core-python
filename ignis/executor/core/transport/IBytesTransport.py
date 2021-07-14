@@ -11,7 +11,7 @@ class IBytesTransport(TTransportBase):
 		return True
 
 	def read(self, sz):
-		consumed = min(len(self.__header) - self.__pos, sz)
+		consumed = min(len(self.__bytes) - self.__pos, sz)
 		old_pos = self.__pos
 		self.__pos += consumed
-		return self.__header[old_pos:self.__pos]
+		return self.__bytes[old_pos:self.__pos]
