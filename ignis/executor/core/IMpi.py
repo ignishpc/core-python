@@ -115,7 +115,7 @@ class IMpi:
         storage_v = bytearray(storage_length * group.Get_size()) if driver else bytearray()
         with memoryview(storage) as c_storage:
             with memoryview(storage_v) as c_storage_v:
-                self.native().Gather((c_storage, storage_length, MPI.BYTE), (c_storage_v, storage_length, MPI.BYTE), 0)
+                group.Gather((c_storage, storage_length, MPI.BYTE), (c_storage_v, storage_length, MPI.BYTE), 0)
 
         for i in range(0, len(storage_v), storage_length):
             if storage_v[i] != 0:
