@@ -1,8 +1,12 @@
 import logging
 from ctypes import c_int, c_bool, c_byte, memmove
 
-import cloudpickle
+
+from mpi4py import rc
+rc.initialize = False
+rc.finalize = False
 from mpi4py import MPI
+import cloudpickle
 
 from ignis.executor.core.protocol.IObjectProtocol import IObjectProtocol
 from ignis.executor.core.storage import IMemoryPartition, IRawMemoryPartition, IDiskPartition

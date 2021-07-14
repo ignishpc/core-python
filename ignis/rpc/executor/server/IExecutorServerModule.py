@@ -19,10 +19,11 @@ all_structs = []
 
 
 class Iface(object):
-    def start(self, properties):
+    def start(self, properties, env):
         """
         Parameters:
          - properties
+         - env
 
         """
         pass
@@ -41,19 +42,21 @@ class Client(Iface):
             self._oprot = oprot
         self._seqid = 0
 
-    def start(self, properties):
+    def start(self, properties, env):
         """
         Parameters:
          - properties
+         - env
 
         """
-        self.send_start(properties)
+        self.send_start(properties, env)
         self.recv_start()
 
-    def send_start(self, properties):
+    def send_start(self, properties, env):
         self._oprot.writeMessageBegin('start', TMessageType.CALL, self._seqid)
         args = start_args()
         args.properties = properties
+        args.env = env
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -163,7 +166,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = start_result()
         try:
-            self._handler.start(args.properties)
+            self._handler.start(args.properties, args.env)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -242,12 +245,14 @@ class start_args(object):
     """
     Attributes:
      - properties
+     - env
 
     """
 
 
-    def __init__(self, properties=None,):
+    def __init__(self, properties=None, env=None,):
         self.properties = properties
+        self.env = env
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -269,6 +274,17 @@ class start_args(object):
                     iprot.readMapEnd()
                 else:
                     iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.MAP:
+                    self.env = {}
+                    (_ktype8, _vtype9, _size7) = iprot.readMapBegin()
+                    for _i11 in range(_size7):
+                        _key12 = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
+                        _val13 = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
+                        self.env[_key12] = _val13
+                    iprot.readMapEnd()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -282,9 +298,17 @@ class start_args(object):
         if self.properties is not None:
             oprot.writeFieldBegin('properties', TType.MAP, 1)
             oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.properties))
-            for kiter7, viter8 in self.properties.items():
-                oprot.writeString(kiter7.encode('utf-8') if sys.version_info[0] == 2 else kiter7)
-                oprot.writeString(viter8.encode('utf-8') if sys.version_info[0] == 2 else viter8)
+            for kiter14, viter15 in self.properties.items():
+                oprot.writeString(kiter14.encode('utf-8') if sys.version_info[0] == 2 else kiter14)
+                oprot.writeString(viter15.encode('utf-8') if sys.version_info[0] == 2 else viter15)
+            oprot.writeMapEnd()
+            oprot.writeFieldEnd()
+        if self.env is not None:
+            oprot.writeFieldBegin('env', TType.MAP, 2)
+            oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.env))
+            for kiter16, viter17 in self.env.items():
+                oprot.writeString(kiter16.encode('utf-8') if sys.version_info[0] == 2 else kiter16)
+                oprot.writeString(viter17.encode('utf-8') if sys.version_info[0] == 2 else viter17)
             oprot.writeMapEnd()
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -307,6 +331,7 @@ all_structs.append(start_args)
 start_args.thrift_spec = (
     None,  # 0
     (1, TType.MAP, 'properties', (TType.STRING, 'UTF8', TType.STRING, 'UTF8', False), None, ),  # 1
+    (2, TType.MAP, 'env', (TType.STRING, 'UTF8', TType.STRING, 'UTF8', False), None, ),  # 2
 )
 
 

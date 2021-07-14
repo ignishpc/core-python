@@ -1,4 +1,5 @@
 import logging
+import os
 import threading
 
 from thrift.TMultiplexedProcessor import TMultiplexedProcessor
@@ -7,6 +8,7 @@ from thrift.server.TServer import TServer
 from thrift.transport.TSocket import TServerSocket
 
 from ignis.executor.core.modules.IModule import IModule
+from ignis.executor.core.IMpi import MPI
 from ignis.executor.core.transport.IZlibTransport import TZlibTransportFactoryExt
 from ignis.rpc.executor.server.IExecutorServerModule import Iface as IExecutorServerModuleIface, \
 	Processor as IExecutorServerModuleProcessor
@@ -85,9 +87,16 @@ class IExecutorServerModule(IModule, IExecutorServerModuleIface):
 			logger.info("ServerModule: python executor stopped")
 			self.stop()
 
-	def start(self, properties):
+	def start(self, properties, env):
 		try:
 			self._executor_data.getContext().props().update(properties)
+
+			for key, value in env.items():
+				os.environ[key] = value
+
+			MPI.Init()
+			logger.info("ServerModule: Mpi started")
+
 			self._createServices(self.__processor)
 			logger.info("ServerModule: python executor ready")
 		except Exception as ex:
@@ -95,6 +104,7 @@ class IExecutorServerModule(IModule, IExecutorServerModuleIface):
 
 	def stop(self):
 		try:
+			MPI.Finalize()
 			if self.__server:
 				aux = self.__server
 				self.__server = None
