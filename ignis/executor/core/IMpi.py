@@ -179,7 +179,7 @@ class IMpi:
         if driver:
             src = part_group[0]
             sz = len(src)
-            group.Recv((same_protocol, 1, MPI.BYTE), 1, 0)
+            group.Recv((same_protocol, 1, MPI.BOOL), 1, 0)
         else:
             same_protocol = c_bool(protocol.value == IObjectProtocol.PYTHON_PROTOCOL)
             if exec0:
