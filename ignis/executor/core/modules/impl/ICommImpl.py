@@ -34,26 +34,10 @@ class ICommImpl(IBaseImpl):
 		self._executor_data.removeVariable("server")
 
 	def joinToGroup(self, id, leader):
-		root = self._executor_data.hasVariable("server")
-		comm = self._executor_data.mpi().native()
-		peer = MPI.COMM_NULL
-		if root:
-			peer = MPI.COMM_SELF.Accept(id)
-		elif not leader:
-			peer = comm.Connect(id)
-		comm = self.__addComm(comm, peer, leader, comm != MPI.COMM_WORLD)
-		self._executor_data.setMpiGroup(comm)
+		self._executor_data.setMpiGroup(self.__joinToGroupImpl(id, leader))
 
 	def joinToGroupName(self, id, leader, name):
-		root = self._executor_data.hasVariable("server")
-		comm = self._executor_data.mpi().native()
-		peer = MPI.COMM_NULL
-		if root:
-			peer = MPI.COMM_SELF.Accept(id)
-		elif not leader:
-			peer = comm.Connect(id)
-		comm = self.__addComm(comm, peer, leader, comm != MPI.COMM_WORLD)
-		self.__groups[name] = comm
+		self.__groups[name] = self.__joinToGroupImpl(id, leader)
 
 	def hasGroup(self, name):
 		return name in self.__groups
@@ -180,23 +164,20 @@ class ICommImpl(IBaseImpl):
 		tag = comm.Get_rank()
 		self._executor_data.mpi().recv(comm, part_group[partition], source, tag)
 
-	def __addComm(self, group, comm, leader, detroyGroup):
-		peer = MPI.Intracomm()
-
-		if comm != MPI.COMM_NULL:
-			peer = comm.Merge(not leader)
-
-		new_comm = group.Create_intercomm(0, peer, 1 if leader else 0, 1963)
-
-		new_group = new_comm.Merge(not leader)
-
-		if comm != MPI.COMM_NULL:
-			peer.Free()
-		new_comm.Free()
-
-		if detroyGroup:
-			group.Free()
-		return new_group
+	def __joinToGroupImpl(self, id, leader):
+		root = self._executor_data.hasVariable("server")
+		comm = self._executor_data.mpi().native()
+		if leader:
+			port = id if root else None
+			intercomm = comm.Accept(port)
+		else:
+			port = id if comm.Get_rank() == 0 else None
+			intercomm = comm.Connect(port)
+		comm1 = intercomm.Merge(not leader)
+		intercomm.Free()
+		if comm != MPI.COMM_WORLD:
+			comm.Free()
+		return comm1
 
 	def __getGroup(self, id):
 		if id not in self.__groups:
