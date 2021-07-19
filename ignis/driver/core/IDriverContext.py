@@ -127,4 +127,7 @@ class IDriverContext(IModule, ICacheContextModuleIface):
             raise IDriverException(str(ex)) from ex
 
     def collect1(self, id):
-        return self.collect(id)[0]
+        l = self.collect(id)[0]
+        if len(l) == 0:
+            raise IDriverException("Empty collection")
+        return l[0]
