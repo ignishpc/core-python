@@ -171,7 +171,7 @@ class ICommImpl(IBaseImpl):
 			port = id if root else None
 			intercomm = comm.Accept(port)
 		else:
-			port = id if comm.Get_rank() == 0 else None
+			port = id
 			intercomm = comm.Connect(port)
 		comm1 = intercomm.Merge(not leader)
 		intercomm.Free()
