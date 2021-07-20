@@ -109,9 +109,12 @@ class IDriverContext(IModule, ICacheContextModuleIface):
 
             if self._executor_data.getPartitionTools().isMemory(group):
                 cls = group[0]._IMemoryPartition__cls
-                result = IMemoryPartition(False, cls=cls)
-                for part in group:
-                    part.copyTo(result)
+                if len(group) > 1:
+                    result = IMemoryPartition(False, cls=cls)
+                    for part in group:
+                        part.copyTo(result)
+                else:
+                    result = group[0]
                 elems = result._IMemoryPartition__elements
                 if cls.__name__ == 'INumpyWrapper':
                     return elems.array

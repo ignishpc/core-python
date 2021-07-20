@@ -81,7 +81,9 @@ class ICommModule(IModule, ICommModuleIface):
 
 	def setPartitions2(self, partitions, src):
 		try:
-			self._use_source(src)
+			# src in python can be empty
+			if src.obj.name != "":
+				self._use_source(src)
 			self.__impl.setPartitions(partitions)
 		except Exception as ex:
 			self._pack_exception(ex)
