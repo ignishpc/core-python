@@ -142,7 +142,7 @@ class IMpi:
                 for p in part_group:
                     new_p = self.__partition_tools.newRawMemoryPartition(p.bytes())
                     p.copyTo(new_p)
-                part_group = new_part_group
+                part_group.__dict__ = new_part_group.__dict__
 
         part_sp = None
         for i in range(0, max_partition):

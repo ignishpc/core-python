@@ -436,7 +436,7 @@ class IDataFrame:
 class IPairDataFrame(IDataFrame):
 
     def __init__(self, _id):
-        IDataFrame.__init__(_id)
+        IDataFrame.__init__(self, _id)
 
     def toPair(self):
         return self
