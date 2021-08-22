@@ -38,12 +38,16 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  void sort2(bool ascending, i64 numPartitions)')
     print('  void sortBy(ISource src, bool ascending)')
     print('  void sortBy3(ISource src, bool ascending, i64 numPartitions)')
-    print('  void union_(string other)')
-    print('  void union2(string other, ISource src)')
+    print('  void union_(string other, bool preserveOrder)')
+    print('  void union2(string other, bool preserveOrder, ISource src)')
     print('  void join(string other, i64 numPartitions)')
     print('  void join3(string other, i64 numPartitions, ISource src)')
     print('  void distinct(i64 numPartitions)')
     print('  void distinct2(i64 numPartitions, ISource src)')
+    print('  void repartition(i64 numPartitions, bool preserveOrdering, bool global_)')
+    print('  void partitionByRandom(i64 numPartitions)')
+    print('  void partitionByHash(i64 numPartitions)')
+    print('  void partitionBy(ISource src, i64 numPartitions)')
     print('  void flatMapValues(ISource src)')
     print('  void mapValues(ISource src)')
     print('  void groupByKey(i64 numPartitions)')
@@ -220,16 +224,16 @@ elif cmd == 'sortBy3':
     pp.pprint(client.sortBy3(eval(args[0]), eval(args[1]), eval(args[2]),))
 
 elif cmd == 'union_':
-    if len(args) != 1:
-        print('union_ requires 1 args')
+    if len(args) != 2:
+        print('union_ requires 2 args')
         sys.exit(1)
-    pp.pprint(client.union_(args[0],))
+    pp.pprint(client.union_(args[0], eval(args[1]),))
 
 elif cmd == 'union2':
-    if len(args) != 2:
-        print('union2 requires 2 args')
+    if len(args) != 3:
+        print('union2 requires 3 args')
         sys.exit(1)
-    pp.pprint(client.union2(args[0], eval(args[1]),))
+    pp.pprint(client.union2(args[0], eval(args[1]), eval(args[2]),))
 
 elif cmd == 'join':
     if len(args) != 2:
@@ -254,6 +258,30 @@ elif cmd == 'distinct2':
         print('distinct2 requires 2 args')
         sys.exit(1)
     pp.pprint(client.distinct2(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'repartition':
+    if len(args) != 3:
+        print('repartition requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.repartition(eval(args[0]), eval(args[1]), eval(args[2]),))
+
+elif cmd == 'partitionByRandom':
+    if len(args) != 1:
+        print('partitionByRandom requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.partitionByRandom(eval(args[0]),))
+
+elif cmd == 'partitionByHash':
+    if len(args) != 1:
+        print('partitionByHash requires 1 args')
+        sys.exit(1)
+    pp.pprint(client.partitionByHash(eval(args[0]),))
+
+elif cmd == 'partitionBy':
+    if len(args) != 2:
+        print('partitionBy requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.partitionBy(eval(args[0]), eval(args[1]),))
 
 elif cmd == 'flatMapValues':
     if len(args) != 1:

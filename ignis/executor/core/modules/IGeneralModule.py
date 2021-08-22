@@ -3,6 +3,7 @@ import logging
 from ignis.executor.core.modules.IModule import IModule
 from ignis.executor.core.modules.impl.IPipeImpl import IPipeImpl
 from ignis.executor.core.modules.impl.IReduceImpl import IReduceImpl
+from ignis.executor.core.modules.impl.IRepartitionImpl import IRepartitionImpl
 from ignis.executor.core.modules.impl.ISortImpl import ISortImpl
 from ignis.rpc.executor.general.IGeneralModule import Iface as IGeneralModuleIface
 
@@ -16,6 +17,7 @@ class IGeneralModule(IModule, IGeneralModuleIface):
         self.__pipe_impl = IPipeImpl(executor_data)
         self.__sort_impl = ISortImpl(executor_data)
         self.__reduce_impl = IReduceImpl(executor_data)
+        self.__repartition_impl = IRepartitionImpl(executor_data)
 
     def executeTo(self, src):
         try:
@@ -102,16 +104,16 @@ class IGeneralModule(IModule, IGeneralModuleIface):
         except Exception as ex:
             self._pack_exception(ex)
 
-    def union_(self, other):
+    def union_(self, other, preserveOrder):
         try:
-            self.__reduce_impl.union(other)
+            self.__reduce_impl.union(other, preserveOrder)
         except Exception as ex:
             self._pack_exception(ex)
 
-    def union2(self, other, src):
+    def union2(self, other, preserveOrder, src):
         try:
             self._use_source(src)
-            self.__reduce_impl.union(other)
+            self.__reduce_impl.union(other, preserveOrder)
         except Exception as ex:
             self._pack_exception(ex)
 
@@ -138,6 +140,30 @@ class IGeneralModule(IModule, IGeneralModuleIface):
         try:
             self._use_source(src)
             self.__reduce_impl.distinct(numPartitions)
+        except Exception as ex:
+            self._pack_exception(ex)
+
+    def repartition(self, numPartitions, preserveOrdering, global_):
+        try:
+            self.__repartition_impl.repartition(numPartitions, preserveOrdering, global_)
+        except Exception as ex:
+            self._pack_exception(ex)
+
+    def partitionByRandom(self, numPartitions):
+        try:
+            self.__repartition_impl.partitionByRandom(numPartitions)
+        except Exception as ex:
+            self._pack_exception(ex)
+
+    def partitionByHash(self, numPartitions):
+        try:
+            self.__repartition_impl.partitionByHash(numPartitions)
+        except Exception as ex:
+            self._pack_exception(ex)
+
+    def partitionBy(self, src, numPartitions):
+        try:
+            self.__repartition_impl.partitionBy(self._executor_data.loadLibrary(src), numPartitions)
         except Exception as ex:
             self._pack_exception(ex)
 

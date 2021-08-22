@@ -1,36 +1,9 @@
 from types import FunctionType
 
 import ignis.rpc.source.ttypes
-from ignis.executor.core.ILibraryLoader import ILibraryLoader
+from ignis.executor.core.ILibraryLoader import ILibraryLoader, IFunctionDef, IFunctionLambda
 from ignis.executor.core.protocol.IObjectProtocol import IObjectProtocol
 from ignis.executor.core.transport.IMemoryBuffer import IMemoryBuffer
-
-
-class _IFunctionDef:
-
-	def __init__(self, f):
-		self.call = f
-
-	def before(self, context):
-		pass
-
-	def after(self, context):
-		pass
-
-
-class _IFunctionLambda:
-
-	def __init__(self, f):
-		self.f = f
-
-	def before(self, context):
-		pass
-
-	def call(self, *args):
-		return self.f(*args[:-1])
-
-	def after(self, context):
-		pass
 
 
 class ISource:
@@ -43,9 +16,9 @@ class ISource:
 			obj.name = src
 		elif isinstance(src, FunctionType):
 			if src.__name__ == '<lambda>':
-				obj.bytes = ILibraryLoader.pickle(_IFunctionLambda(src))
+				obj.bytes = ILibraryLoader.pickle(IFunctionLambda(src))
 			else:
-				obj.bytes = ILibraryLoader.pickle(_IFunctionDef(src))
+				obj.bytes = ILibraryLoader.pickle(IFunctionDef(src))
 		else:
 			obj.bytes = ILibraryLoader.pickle(src)
 		self.__inner.obj = obj

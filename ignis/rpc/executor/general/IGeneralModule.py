@@ -137,18 +137,20 @@ class Iface(object):
         """
         pass
 
-    def union_(self, other):
+    def union_(self, other, preserveOrder):
         """
         Parameters:
          - other
+         - preserveOrder
 
         """
         pass
 
-    def union2(self, other, src):
+    def union2(self, other, preserveOrder, src):
         """
         Parameters:
          - other
+         - preserveOrder
          - src
 
         """
@@ -186,6 +188,41 @@ class Iface(object):
         Parameters:
          - numPartitions
          - src
+
+        """
+        pass
+
+    def repartition(self, numPartitions, preserveOrdering, global_):
+        """
+        Parameters:
+         - numPartitions
+         - preserveOrdering
+         - global_
+
+        """
+        pass
+
+    def partitionByRandom(self, numPartitions):
+        """
+        Parameters:
+         - numPartitions
+
+        """
+        pass
+
+    def partitionByHash(self, numPartitions):
+        """
+        Parameters:
+         - numPartitions
+
+        """
+        pass
+
+    def partitionBy(self, src, numPartitions):
+        """
+        Parameters:
+         - src
+         - numPartitions
 
         """
         pass
@@ -769,19 +806,21 @@ class Client(Iface):
             raise result.ex
         return
 
-    def union_(self, other):
+    def union_(self, other, preserveOrder):
         """
         Parameters:
          - other
+         - preserveOrder
 
         """
-        self.send_union_(other)
+        self.send_union_(other, preserveOrder)
         self.recv_union_()
 
-    def send_union_(self, other):
+    def send_union_(self, other, preserveOrder):
         self._oprot.writeMessageBegin('union_', TMessageType.CALL, self._seqid)
         args = union__args()
         args.other = other
+        args.preserveOrder = preserveOrder
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -801,20 +840,22 @@ class Client(Iface):
             raise result.ex
         return
 
-    def union2(self, other, src):
+    def union2(self, other, preserveOrder, src):
         """
         Parameters:
          - other
+         - preserveOrder
          - src
 
         """
-        self.send_union2(other, src)
+        self.send_union2(other, preserveOrder, src)
         self.recv_union2()
 
-    def send_union2(self, other, src):
+    def send_union2(self, other, preserveOrder, src):
         self._oprot.writeMessageBegin('union2', TMessageType.CALL, self._seqid)
         args = union2_args()
         args.other = other
+        args.preserveOrder = preserveOrder
         args.src = src
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
@@ -965,6 +1006,140 @@ class Client(Iface):
             iprot.readMessageEnd()
             raise x
         result = distinct2_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def repartition(self, numPartitions, preserveOrdering, global_):
+        """
+        Parameters:
+         - numPartitions
+         - preserveOrdering
+         - global_
+
+        """
+        self.send_repartition(numPartitions, preserveOrdering, global_)
+        self.recv_repartition()
+
+    def send_repartition(self, numPartitions, preserveOrdering, global_):
+        self._oprot.writeMessageBegin('repartition', TMessageType.CALL, self._seqid)
+        args = repartition_args()
+        args.numPartitions = numPartitions
+        args.preserveOrdering = preserveOrdering
+        args.global_ = global_
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_repartition(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = repartition_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def partitionByRandom(self, numPartitions):
+        """
+        Parameters:
+         - numPartitions
+
+        """
+        self.send_partitionByRandom(numPartitions)
+        self.recv_partitionByRandom()
+
+    def send_partitionByRandom(self, numPartitions):
+        self._oprot.writeMessageBegin('partitionByRandom', TMessageType.CALL, self._seqid)
+        args = partitionByRandom_args()
+        args.numPartitions = numPartitions
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_partitionByRandom(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = partitionByRandom_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def partitionByHash(self, numPartitions):
+        """
+        Parameters:
+         - numPartitions
+
+        """
+        self.send_partitionByHash(numPartitions)
+        self.recv_partitionByHash()
+
+    def send_partitionByHash(self, numPartitions):
+        self._oprot.writeMessageBegin('partitionByHash', TMessageType.CALL, self._seqid)
+        args = partitionByHash_args()
+        args.numPartitions = numPartitions
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_partitionByHash(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = partitionByHash_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.ex is not None:
+            raise result.ex
+        return
+
+    def partitionBy(self, src, numPartitions):
+        """
+        Parameters:
+         - src
+         - numPartitions
+
+        """
+        self.send_partitionBy(src, numPartitions)
+        self.recv_partitionBy()
+
+    def send_partitionBy(self, src, numPartitions):
+        self._oprot.writeMessageBegin('partitionBy', TMessageType.CALL, self._seqid)
+        args = partitionBy_args()
+        args.src = src
+        args.numPartitions = numPartitions
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_partitionBy(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = partitionBy_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.ex is not None:
@@ -1410,6 +1585,10 @@ class Processor(Iface, TProcessor):
         self._processMap["join3"] = Processor.process_join3
         self._processMap["distinct"] = Processor.process_distinct
         self._processMap["distinct2"] = Processor.process_distinct2
+        self._processMap["repartition"] = Processor.process_repartition
+        self._processMap["partitionByRandom"] = Processor.process_partitionByRandom
+        self._processMap["partitionByHash"] = Processor.process_partitionByHash
+        self._processMap["partitionBy"] = Processor.process_partitionBy
         self._processMap["flatMapValues"] = Processor.process_flatMapValues
         self._processMap["mapValues"] = Processor.process_mapValues
         self._processMap["groupByKey"] = Processor.process_groupByKey
@@ -1814,7 +1993,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = union__result()
         try:
-            self._handler.union_(args.other)
+            self._handler.union_(args.other, args.preserveOrder)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -1840,7 +2019,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = union2_result()
         try:
-            self._handler.union2(args.other, args.src)
+            self._handler.union2(args.other, args.preserveOrder, args.src)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -1960,6 +2139,110 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
         oprot.writeMessageBegin("distinct2", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_repartition(self, seqid, iprot, oprot):
+        args = repartition_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = repartition_result()
+        try:
+            self._handler.repartition(args.numPartitions, args.preserveOrdering, args.global_)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("repartition", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_partitionByRandom(self, seqid, iprot, oprot):
+        args = partitionByRandom_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = partitionByRandom_result()
+        try:
+            self._handler.partitionByRandom(args.numPartitions)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("partitionByRandom", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_partitionByHash(self, seqid, iprot, oprot):
+        args = partitionByHash_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = partitionByHash_result()
+        try:
+            self._handler.partitionByHash(args.numPartitions)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("partitionByHash", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_partitionBy(self, seqid, iprot, oprot):
+        args = partitionBy_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = partitionBy_result()
+        try:
+            self._handler.partitionBy(args.src, args.numPartitions)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("partitionBy", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -4103,12 +4386,14 @@ class union__args(object):
     """
     Attributes:
      - other
+     - preserveOrder
 
     """
 
 
-    def __init__(self, other=None,):
+    def __init__(self, other=None, preserveOrder=None,):
         self.other = other
+        self.preserveOrder = preserveOrder
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -4124,6 +4409,11 @@ class union__args(object):
                     self.other = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.BOOL:
+                    self.preserveOrder = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -4137,6 +4427,10 @@ class union__args(object):
         if self.other is not None:
             oprot.writeFieldBegin('other', TType.STRING, 1)
             oprot.writeString(self.other.encode('utf-8') if sys.version_info[0] == 2 else self.other)
+            oprot.writeFieldEnd()
+        if self.preserveOrder is not None:
+            oprot.writeFieldBegin('preserveOrder', TType.BOOL, 2)
+            oprot.writeBool(self.preserveOrder)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -4158,6 +4452,7 @@ all_structs.append(union__args)
 union__args.thrift_spec = (
     None,  # 0
     (1, TType.STRING, 'other', 'UTF8', None, ),  # 1
+    (2, TType.BOOL, 'preserveOrder', None, None, ),  # 2
 )
 
 
@@ -4227,13 +4522,15 @@ class union2_args(object):
     """
     Attributes:
      - other
+     - preserveOrder
      - src
 
     """
 
 
-    def __init__(self, other=None, src=None,):
+    def __init__(self, other=None, preserveOrder=None, src=None,):
         self.other = other
+        self.preserveOrder = preserveOrder
         self.src = src
 
     def read(self, iprot):
@@ -4251,6 +4548,11 @@ class union2_args(object):
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
+                if ftype == TType.BOOL:
+                    self.preserveOrder = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
                 if ftype == TType.STRUCT:
                     self.src = ignis.rpc.source.ttypes.ISource()
                     self.src.read(iprot)
@@ -4270,8 +4572,12 @@ class union2_args(object):
             oprot.writeFieldBegin('other', TType.STRING, 1)
             oprot.writeString(self.other.encode('utf-8') if sys.version_info[0] == 2 else self.other)
             oprot.writeFieldEnd()
+        if self.preserveOrder is not None:
+            oprot.writeFieldBegin('preserveOrder', TType.BOOL, 2)
+            oprot.writeBool(self.preserveOrder)
+            oprot.writeFieldEnd()
         if self.src is not None:
-            oprot.writeFieldBegin('src', TType.STRUCT, 2)
+            oprot.writeFieldBegin('src', TType.STRUCT, 3)
             self.src.write(oprot)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
@@ -4294,7 +4600,8 @@ all_structs.append(union2_args)
 union2_args.thrift_spec = (
     None,  # 0
     (1, TType.STRING, 'other', 'UTF8', None, ),  # 1
-    (2, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 2
+    (2, TType.BOOL, 'preserveOrder', None, None, ),  # 2
+    (3, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 3
 )
 
 
@@ -4901,6 +5208,539 @@ class distinct2_result(object):
         return not (self == other)
 all_structs.append(distinct2_result)
 distinct2_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class repartition_args(object):
+    """
+    Attributes:
+     - numPartitions
+     - preserveOrdering
+     - global_
+
+    """
+
+
+    def __init__(self, numPartitions=None, preserveOrdering=None, global_=None,):
+        self.numPartitions = numPartitions
+        self.preserveOrdering = preserveOrdering
+        self.global_ = global_
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I64:
+                    self.numPartitions = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.BOOL:
+                    self.preserveOrdering = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.BOOL:
+                    self.global_ = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('repartition_args')
+        if self.numPartitions is not None:
+            oprot.writeFieldBegin('numPartitions', TType.I64, 1)
+            oprot.writeI64(self.numPartitions)
+            oprot.writeFieldEnd()
+        if self.preserveOrdering is not None:
+            oprot.writeFieldBegin('preserveOrdering', TType.BOOL, 2)
+            oprot.writeBool(self.preserveOrdering)
+            oprot.writeFieldEnd()
+        if self.global_ is not None:
+            oprot.writeFieldBegin('global_', TType.BOOL, 3)
+            oprot.writeBool(self.global_)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(repartition_args)
+repartition_args.thrift_spec = (
+    None,  # 0
+    (1, TType.I64, 'numPartitions', None, None, ),  # 1
+    (2, TType.BOOL, 'preserveOrdering', None, None, ),  # 2
+    (3, TType.BOOL, 'global_', None, None, ),  # 3
+)
+
+
+class repartition_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('repartition_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(repartition_result)
+repartition_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class partitionByRandom_args(object):
+    """
+    Attributes:
+     - numPartitions
+
+    """
+
+
+    def __init__(self, numPartitions=None,):
+        self.numPartitions = numPartitions
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I64:
+                    self.numPartitions = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('partitionByRandom_args')
+        if self.numPartitions is not None:
+            oprot.writeFieldBegin('numPartitions', TType.I64, 1)
+            oprot.writeI64(self.numPartitions)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(partitionByRandom_args)
+partitionByRandom_args.thrift_spec = (
+    None,  # 0
+    (1, TType.I64, 'numPartitions', None, None, ),  # 1
+)
+
+
+class partitionByRandom_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('partitionByRandom_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(partitionByRandom_result)
+partitionByRandom_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class partitionByHash_args(object):
+    """
+    Attributes:
+     - numPartitions
+
+    """
+
+
+    def __init__(self, numPartitions=None,):
+        self.numPartitions = numPartitions
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.I64:
+                    self.numPartitions = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('partitionByHash_args')
+        if self.numPartitions is not None:
+            oprot.writeFieldBegin('numPartitions', TType.I64, 1)
+            oprot.writeI64(self.numPartitions)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(partitionByHash_args)
+partitionByHash_args.thrift_spec = (
+    None,  # 0
+    (1, TType.I64, 'numPartitions', None, None, ),  # 1
+)
+
+
+class partitionByHash_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('partitionByHash_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(partitionByHash_result)
+partitionByHash_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class partitionBy_args(object):
+    """
+    Attributes:
+     - src
+     - numPartitions
+
+    """
+
+
+    def __init__(self, src=None, numPartitions=None,):
+        self.src = src
+        self.numPartitions = numPartitions
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.src = ignis.rpc.source.ttypes.ISource()
+                    self.src.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.I64:
+                    self.numPartitions = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('partitionBy_args')
+        if self.src is not None:
+            oprot.writeFieldBegin('src', TType.STRUCT, 1)
+            self.src.write(oprot)
+            oprot.writeFieldEnd()
+        if self.numPartitions is not None:
+            oprot.writeFieldBegin('numPartitions', TType.I64, 2)
+            oprot.writeI64(self.numPartitions)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(partitionBy_args)
+partitionBy_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 1
+    (2, TType.I64, 'numPartitions', None, None, ),  # 2
+)
+
+
+class partitionBy_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('partitionBy_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(partitionBy_result)
+partitionBy_result.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
 )

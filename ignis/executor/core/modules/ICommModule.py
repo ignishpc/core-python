@@ -88,19 +88,6 @@ class ICommModule(IModule, ICommModuleIface):
 		except Exception as ex:
 			self._pack_exception(ex)
 
-	def newEmptyPartitions(self, n):
-		try:
-			self.__impl.newEmptyPartitions(n)
-		except Exception as ex:
-			self._pack_exception(ex)
-
-	def newEmptyPartitions2(self, n, src):
-		try:
-			# src in python is empty
-			self.__impl.newEmptyPartitions(n)
-		except Exception as ex:
-			self._pack_exception(ex)
-
 	def driverGather(self, group, src):
 		try:
 			# src in python is empty
@@ -129,20 +116,15 @@ class ICommModule(IModule, ICommModuleIface):
 		except Exception as ex:
 			self._pack_exception(ex)
 
-	def enableMultithreading(self, group):
+	def importData(self, group, source, threads):
 		try:
-			return self.__impl.enableMultithreading(group)
+			self.__impl.importData(group, source, threads)
 		except Exception as ex:
 			self._pack_exception(ex)
 
-	def send(self, group, partition, dest, thread):
+	def importData4(self, group, source, threads, src):
 		try:
-			self.__impl.send(group, partition, dest, thread)
-		except Exception as ex:
-			self._pack_exception(ex)
-
-	def recv(self, group, partition, source, thread):
-		try:
-			self.__impl.recv(group, partition, source, thread)
+			self._use_source(src)
+			self.__impl.importData(group, source, threads)
 		except Exception as ex:
 			self._pack_exception(ex)

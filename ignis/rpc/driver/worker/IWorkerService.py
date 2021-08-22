@@ -116,32 +116,11 @@ class Iface(object):
         """
         pass
 
-    def importDataFrame3a(self, id, data, partitions):
+    def importDataFrame3(self, id, data, src):
         """
         Parameters:
          - id
          - data
-         - partitions
-
-        """
-        pass
-
-    def importDataFrame3b(self, id, data, src):
-        """
-        Parameters:
-         - id
-         - data
-         - src
-
-        """
-        pass
-
-    def importDataFrame4(self, id, data, partitions, src):
-        """
-        Parameters:
-         - id
-         - data
-         - partitions
          - src
 
         """
@@ -651,45 +630,7 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "importDataFrame failed: unknown result")
 
-    def importDataFrame3a(self, id, data, partitions):
-        """
-        Parameters:
-         - id
-         - data
-         - partitions
-
-        """
-        self.send_importDataFrame3a(id, data, partitions)
-        return self.recv_importDataFrame3a()
-
-    def send_importDataFrame3a(self, id, data, partitions):
-        self._oprot.writeMessageBegin('importDataFrame3a', TMessageType.CALL, self._seqid)
-        args = importDataFrame3a_args()
-        args.id = id
-        args.data = data
-        args.partitions = partitions
-        args.write(self._oprot)
-        self._oprot.writeMessageEnd()
-        self._oprot.trans.flush()
-
-    def recv_importDataFrame3a(self):
-        iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
-        if mtype == TMessageType.EXCEPTION:
-            x = TApplicationException()
-            x.read(iprot)
-            iprot.readMessageEnd()
-            raise x
-        result = importDataFrame3a_result()
-        result.read(iprot)
-        iprot.readMessageEnd()
-        if result.success is not None:
-            return result.success
-        if result.ex is not None:
-            raise result.ex
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "importDataFrame3a failed: unknown result")
-
-    def importDataFrame3b(self, id, data, src):
+    def importDataFrame3(self, id, data, src):
         """
         Parameters:
          - id
@@ -697,12 +638,12 @@ class Client(Iface):
          - src
 
         """
-        self.send_importDataFrame3b(id, data, src)
-        return self.recv_importDataFrame3b()
+        self.send_importDataFrame3(id, data, src)
+        return self.recv_importDataFrame3()
 
-    def send_importDataFrame3b(self, id, data, src):
-        self._oprot.writeMessageBegin('importDataFrame3b', TMessageType.CALL, self._seqid)
-        args = importDataFrame3b_args()
+    def send_importDataFrame3(self, id, data, src):
+        self._oprot.writeMessageBegin('importDataFrame3', TMessageType.CALL, self._seqid)
+        args = importDataFrame3_args()
         args.id = id
         args.data = data
         args.src = src
@@ -710,7 +651,7 @@ class Client(Iface):
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_importDataFrame3b(self):
+    def recv_importDataFrame3(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -718,54 +659,14 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = importDataFrame3b_result()
+        result = importDataFrame3_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.success is not None:
             return result.success
         if result.ex is not None:
             raise result.ex
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "importDataFrame3b failed: unknown result")
-
-    def importDataFrame4(self, id, data, partitions, src):
-        """
-        Parameters:
-         - id
-         - data
-         - partitions
-         - src
-
-        """
-        self.send_importDataFrame4(id, data, partitions, src)
-        return self.recv_importDataFrame4()
-
-    def send_importDataFrame4(self, id, data, partitions, src):
-        self._oprot.writeMessageBegin('importDataFrame4', TMessageType.CALL, self._seqid)
-        args = importDataFrame4_args()
-        args.id = id
-        args.data = data
-        args.partitions = partitions
-        args.src = src
-        args.write(self._oprot)
-        self._oprot.writeMessageEnd()
-        self._oprot.trans.flush()
-
-    def recv_importDataFrame4(self):
-        iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
-        if mtype == TMessageType.EXCEPTION:
-            x = TApplicationException()
-            x.read(iprot)
-            iprot.readMessageEnd()
-            raise x
-        result = importDataFrame4_result()
-        result.read(iprot)
-        iprot.readMessageEnd()
-        if result.success is not None:
-            return result.success
-        if result.ex is not None:
-            raise result.ex
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "importDataFrame4 failed: unknown result")
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "importDataFrame3 failed: unknown result")
 
     def textFile(self, id, path):
         """
@@ -1290,9 +1191,7 @@ class Processor(Iface, TProcessor):
         self._processMap["parallelize"] = Processor.process_parallelize
         self._processMap["parallelize4"] = Processor.process_parallelize4
         self._processMap["importDataFrame"] = Processor.process_importDataFrame
-        self._processMap["importDataFrame3a"] = Processor.process_importDataFrame3a
-        self._processMap["importDataFrame3b"] = Processor.process_importDataFrame3b
-        self._processMap["importDataFrame4"] = Processor.process_importDataFrame4
+        self._processMap["importDataFrame3"] = Processor.process_importDataFrame3
         self._processMap["textFile"] = Processor.process_textFile
         self._processMap["textFile3"] = Processor.process_textFile3
         self._processMap["partitionObjectFile"] = Processor.process_partitionObjectFile
@@ -1583,13 +1482,13 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_importDataFrame3a(self, seqid, iprot, oprot):
-        args = importDataFrame3a_args()
+    def process_importDataFrame3(self, seqid, iprot, oprot):
+        args = importDataFrame3_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = importDataFrame3a_result()
+        result = importDataFrame3_result()
         try:
-            result.success = self._handler.importDataFrame3a(args.id, args.data, args.partitions)
+            result.success = self._handler.importDataFrame3(args.id, args.data, args.src)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -1604,59 +1503,7 @@ class Processor(Iface, TProcessor):
             logging.exception('Unexpected exception in handler')
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("importDataFrame3a", msg_type, seqid)
-        result.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
-
-    def process_importDataFrame3b(self, seqid, iprot, oprot):
-        args = importDataFrame3b_args()
-        args.read(iprot)
-        iprot.readMessageEnd()
-        result = importDataFrame3b_result()
-        try:
-            result.success = self._handler.importDataFrame3b(args.id, args.data, args.src)
-            msg_type = TMessageType.REPLY
-        except TTransport.TTransportException:
-            raise
-        except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            msg_type = TMessageType.REPLY
-            result.ex = ex
-        except TApplicationException as ex:
-            logging.exception('TApplication exception in handler')
-            msg_type = TMessageType.EXCEPTION
-            result = ex
-        except Exception:
-            logging.exception('Unexpected exception in handler')
-            msg_type = TMessageType.EXCEPTION
-            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("importDataFrame3b", msg_type, seqid)
-        result.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
-
-    def process_importDataFrame4(self, seqid, iprot, oprot):
-        args = importDataFrame4_args()
-        args.read(iprot)
-        iprot.readMessageEnd()
-        result = importDataFrame4_result()
-        try:
-            result.success = self._handler.importDataFrame4(args.id, args.data, args.partitions, args.src)
-            msg_type = TMessageType.REPLY
-        except TTransport.TTransportException:
-            raise
-        except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            msg_type = TMessageType.REPLY
-            result.ex = ex
-        except TApplicationException as ex:
-            logging.exception('TApplication exception in handler')
-            msg_type = TMessageType.EXCEPTION
-            result = ex
-        except Exception:
-            logging.exception('Unexpected exception in handler')
-            msg_type = TMessageType.EXCEPTION
-            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("importDataFrame4", msg_type, seqid)
+        oprot.writeMessageBegin("importDataFrame3", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -3526,169 +3373,7 @@ importDataFrame_result.thrift_spec = (
 )
 
 
-class importDataFrame3a_args(object):
-    """
-    Attributes:
-     - id
-     - data
-     - partitions
-
-    """
-
-
-    def __init__(self, id=None, data=None, partitions=None,):
-        self.id = id
-        self.data = data
-        self.partitions = partitions
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.STRUCT:
-                    self.id = IWorkerId()
-                    self.id.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            elif fid == 2:
-                if ftype == TType.STRUCT:
-                    self.data = ignis.rpc.driver.dataframe.ttypes.IDataFrameId()
-                    self.data.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            elif fid == 3:
-                if ftype == TType.I64:
-                    self.partitions = iprot.readI64()
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('importDataFrame3a_args')
-        if self.id is not None:
-            oprot.writeFieldBegin('id', TType.STRUCT, 1)
-            self.id.write(oprot)
-            oprot.writeFieldEnd()
-        if self.data is not None:
-            oprot.writeFieldBegin('data', TType.STRUCT, 2)
-            self.data.write(oprot)
-            oprot.writeFieldEnd()
-        if self.partitions is not None:
-            oprot.writeFieldBegin('partitions', TType.I64, 3)
-            oprot.writeI64(self.partitions)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(importDataFrame3a_args)
-importDataFrame3a_args.thrift_spec = (
-    None,  # 0
-    (1, TType.STRUCT, 'id', [IWorkerId, None], None, ),  # 1
-    (2, TType.STRUCT, 'data', [ignis.rpc.driver.dataframe.ttypes.IDataFrameId, None], None, ),  # 2
-    (3, TType.I64, 'partitions', None, None, ),  # 3
-)
-
-
-class importDataFrame3a_result(object):
-    """
-    Attributes:
-     - success
-     - ex
-
-    """
-
-
-    def __init__(self, success=None, ex=None,):
-        self.success = success
-        self.ex = ex
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 0:
-                if ftype == TType.STRUCT:
-                    self.success = ignis.rpc.driver.dataframe.ttypes.IDataFrameId()
-                    self.success.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            elif fid == 1:
-                if ftype == TType.STRUCT:
-                    self.ex = ignis.rpc.driver.exception.ttypes.IDriverException.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('importDataFrame3a_result')
-        if self.success is not None:
-            oprot.writeFieldBegin('success', TType.STRUCT, 0)
-            self.success.write(oprot)
-            oprot.writeFieldEnd()
-        if self.ex is not None:
-            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
-            self.ex.write(oprot)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(importDataFrame3a_result)
-importDataFrame3a_result.thrift_spec = (
-    (0, TType.STRUCT, 'success', [ignis.rpc.driver.dataframe.ttypes.IDataFrameId, None], None, ),  # 0
-    (1, TType.STRUCT, 'ex', [ignis.rpc.driver.exception.ttypes.IDriverException, None], None, ),  # 1
-)
-
-
-class importDataFrame3b_args(object):
+class importDataFrame3_args(object):
     """
     Attributes:
      - id
@@ -3739,7 +3424,7 @@ class importDataFrame3b_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('importDataFrame3b_args')
+        oprot.writeStructBegin('importDataFrame3_args')
         if self.id is not None:
             oprot.writeFieldBegin('id', TType.STRUCT, 1)
             self.id.write(oprot)
@@ -3768,8 +3453,8 @@ class importDataFrame3b_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(importDataFrame3b_args)
-importDataFrame3b_args.thrift_spec = (
+all_structs.append(importDataFrame3_args)
+importDataFrame3_args.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'id', [IWorkerId, None], None, ),  # 1
     (2, TType.STRUCT, 'data', [ignis.rpc.driver.dataframe.ttypes.IDataFrameId, None], None, ),  # 2
@@ -3777,7 +3462,7 @@ importDataFrame3b_args.thrift_spec = (
 )
 
 
-class importDataFrame3b_result(object):
+class importDataFrame3_result(object):
     """
     Attributes:
      - success
@@ -3819,7 +3504,7 @@ class importDataFrame3b_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('importDataFrame3b_result')
+        oprot.writeStructBegin('importDataFrame3_result')
         if self.success is not None:
             oprot.writeFieldBegin('success', TType.STRUCT, 0)
             self.success.write(oprot)
@@ -3844,183 +3529,8 @@ class importDataFrame3b_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(importDataFrame3b_result)
-importDataFrame3b_result.thrift_spec = (
-    (0, TType.STRUCT, 'success', [ignis.rpc.driver.dataframe.ttypes.IDataFrameId, None], None, ),  # 0
-    (1, TType.STRUCT, 'ex', [ignis.rpc.driver.exception.ttypes.IDriverException, None], None, ),  # 1
-)
-
-
-class importDataFrame4_args(object):
-    """
-    Attributes:
-     - id
-     - data
-     - partitions
-     - src
-
-    """
-
-
-    def __init__(self, id=None, data=None, partitions=None, src=None,):
-        self.id = id
-        self.data = data
-        self.partitions = partitions
-        self.src = src
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.STRUCT:
-                    self.id = IWorkerId()
-                    self.id.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            elif fid == 2:
-                if ftype == TType.STRUCT:
-                    self.data = ignis.rpc.driver.dataframe.ttypes.IDataFrameId()
-                    self.data.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            elif fid == 3:
-                if ftype == TType.I64:
-                    self.partitions = iprot.readI64()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 4:
-                if ftype == TType.STRUCT:
-                    self.src = ignis.rpc.source.ttypes.ISource()
-                    self.src.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('importDataFrame4_args')
-        if self.id is not None:
-            oprot.writeFieldBegin('id', TType.STRUCT, 1)
-            self.id.write(oprot)
-            oprot.writeFieldEnd()
-        if self.data is not None:
-            oprot.writeFieldBegin('data', TType.STRUCT, 2)
-            self.data.write(oprot)
-            oprot.writeFieldEnd()
-        if self.partitions is not None:
-            oprot.writeFieldBegin('partitions', TType.I64, 3)
-            oprot.writeI64(self.partitions)
-            oprot.writeFieldEnd()
-        if self.src is not None:
-            oprot.writeFieldBegin('src', TType.STRUCT, 4)
-            self.src.write(oprot)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(importDataFrame4_args)
-importDataFrame4_args.thrift_spec = (
-    None,  # 0
-    (1, TType.STRUCT, 'id', [IWorkerId, None], None, ),  # 1
-    (2, TType.STRUCT, 'data', [ignis.rpc.driver.dataframe.ttypes.IDataFrameId, None], None, ),  # 2
-    (3, TType.I64, 'partitions', None, None, ),  # 3
-    (4, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 4
-)
-
-
-class importDataFrame4_result(object):
-    """
-    Attributes:
-     - success
-     - ex
-
-    """
-
-
-    def __init__(self, success=None, ex=None,):
-        self.success = success
-        self.ex = ex
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 0:
-                if ftype == TType.STRUCT:
-                    self.success = ignis.rpc.driver.dataframe.ttypes.IDataFrameId()
-                    self.success.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            elif fid == 1:
-                if ftype == TType.STRUCT:
-                    self.ex = ignis.rpc.driver.exception.ttypes.IDriverException.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('importDataFrame4_result')
-        if self.success is not None:
-            oprot.writeFieldBegin('success', TType.STRUCT, 0)
-            self.success.write(oprot)
-            oprot.writeFieldEnd()
-        if self.ex is not None:
-            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
-            self.ex.write(oprot)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(importDataFrame4_result)
-importDataFrame4_result.thrift_spec = (
+all_structs.append(importDataFrame3_result)
+importDataFrame3_result.thrift_spec = (
     (0, TType.STRUCT, 'success', [ignis.rpc.driver.dataframe.ttypes.IDataFrameId, None], None, ),  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.driver.exception.ttypes.IDriverException, None], None, ),  # 1
 )

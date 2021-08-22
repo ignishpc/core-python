@@ -18,17 +18,25 @@ class IExecutorData:
     def __init__(self):
         self.__context = IContext()
         self.__properties = IPropertyParser(self.__context.props())
-        self.__library_loader = ILibraryLoader()
+        self.__library_loader = ILibraryLoader(self.__properties)
         self.__partition_tools = IPartitionTools(self.__properties, self.__context)
         self.__mpi = IMpi(self.__properties, self.__partition_tools, self.__context)
         self.__partitions = None
         self.__variables = dict()
 
     def getPartitions(self):
-        return self.__partitions
+        group = self.__partitions
+        if len(group) > 0 and self.__properties.loadType():
+            part = group[0]
+            if self.__partition_tools.isMemory(part):
+                cls = part._IMemoryPartition__cls
+                self.__context.vars()["STORAGE_CLASS"] = cls
+                if cls.__name__ == "INumpyWrapper":
+                    self.__context.vars()["STORAGE_CLASS_DTYPE"] = part._IMemoryPartition__elements.array.dtype
+        return group
 
     def getAndDeletePartitions(self):
-        group = self.__partitions
+        group = self.getPartitions()
         self.deletePartitions()
         if group.cache():
             return group.shadowCopy(self)
@@ -77,10 +85,7 @@ class IExecutorData:
 
         if source.params:
             logger.info("Loading user variables")
-            for key, value in source.params.items():
-                buffer = IBytesTransport(value)
-                proto = IObjectProtocol(buffer)
-                self.__context.vars[key] = proto.readObject()
+            self.loadParameters(source)
 
         if source.obj.name and ":" in source.obj.name and withBackup:
             with open(self.infoDirectory() + "/sources" + str(self.__context.executorId()) + ".bak", "a+") as file:
@@ -88,6 +93,12 @@ class IExecutorData:
 
         logger.info("Function loaded")
         return lib
+
+    def loadParameters(self, source):
+        for key, value in source.params.items():
+            buffer = IBytesTransport(value)
+            proto = IObjectProtocol(buffer)
+            self.__context.vars[key] = proto.readObject()
 
     def reloadLibraries(self):
         backup_path = self.infoDirectory() + "/sources" + str(self.__context.executorId()) + ".bak"

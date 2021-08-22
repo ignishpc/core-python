@@ -2,6 +2,7 @@ import logging
 
 from ignis.executor.core.modules.IModule import IModule
 from ignis.executor.core.modules.impl.IMathImpl import IMathImpl
+from ignis.executor.core.modules.impl.IReduceImpl import IReduceImpl
 from ignis.executor.core.modules.impl.ISortImpl import ISortImpl
 from ignis.rpc.executor.math.IMathModule import Iface as IMathModuleIface
 
@@ -14,6 +15,7 @@ class IMathModule(IModule, IMathModuleIface):
         IModule.__init__(self, executor_data, logger)
         self.__math_impl = IMathImpl(executor_data)
         self.__sort_impl = ISortImpl(executor_data)
+        self.__reduce_impl = IReduceImpl(executor_data)
 
     def sample(self, withReplacement, num, seed):
         try:
@@ -53,7 +55,10 @@ class IMathModule(IModule, IMathModuleIface):
 
     def sampleByKey(self, withReplacement, fractions, seed):
         try:
-            self.__math_impl.sampleByKey(withReplacement,fractions, seed)
+            self._executor_data.loadParameters(fractions)
+            numPartitions = self.__math_impl.sampleByKeyFilter()
+            self.__reduce_impl.groupByKey(numPartitions)
+            self.__math_impl.sampleByKey(withReplacement, seed)
         except Exception as ex:
             self._pack_exception(ex)
 

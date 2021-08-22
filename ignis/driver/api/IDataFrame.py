@@ -54,20 +54,6 @@ class IDataFrame:
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
             raise IDriverException(ex.message, ex._cause)
 
-    def repartition(self, numPartitions):
-        try:
-            with Ignis._pool.getClient() as client:
-                self._id = client.getDataFrameService().repartition(self._id, numPartitions)
-        except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
-
-    def coalesce(self, numPartitions, shuffle):
-        try:
-            with Ignis._pool.getClient() as client:
-                return IDataFrame(client.getDataFrameService().coalesce(self._id, numPartitions, shuffle))
-        except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
-
     def partitions(self):
         try:
             with Ignis._pool.getClient() as client:
@@ -93,6 +79,34 @@ class IDataFrame:
         try:
             with Ignis._pool.getClient() as client:
                 client.getDataFrameService().saveAsJsonFile(self._id, path, pretty)
+        except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+            raise IDriverException(ex.message, ex._cause)
+
+    def repartition(self, numPartitions):
+        try:
+            with Ignis._pool.getClient() as client:
+                self._id = client.getDataFrameService().repartition(self._id, numPartitions)
+        except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+            raise IDriverException(ex.message, ex._cause)
+
+    def partitionByRandom(self, numPartitions):
+        try:
+            with Ignis._pool.getClient() as client:
+                self._id = client.getDataFrameService().partitionByRandom(self._id, numPartitions)
+        except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+            raise IDriverException(ex.message, ex._cause)
+
+    def partitionByHash(self, numPartitions):
+        try:
+            with Ignis._pool.getClient() as client:
+                self._id = client.getDataFrameService().partitionByHash(self._id, numPartitions)
+        except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+            raise IDriverException(ex.message, ex._cause)
+
+    def partitionBy(self, src, numPartitions):
+        try:
+            with Ignis._pool.getClient() as client:
+                self._id = client.getDataFrameService().partitionBy(self._id, ISource.wrap(src).rpc(),numPartitions)
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
             raise IDriverException(ex.message, ex._cause)
 
@@ -186,28 +200,18 @@ class IDataFrame:
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
             raise IDriverException(ex.message, ex._cause)
 
-    def union(self, other, numPartitions=None, src=None):
+    def union(self, other, preserveOrder=False, src=None):
         try:
             with Ignis._pool.getClient() as client:
                 if src is None:
-                    if numPartitions is None:
-                        return Ignis._driverContext().collect(
-                            client.getDataFrameService().union_(self._id, other._id)
-                        )
-                    else:
-                        return Ignis._driverContext().collect(
-                            client.getDataFrameService().union3a(self._id, other._id, numPartitions)
-                        )
+                    return Ignis._driverContext().collect(
+                        client.getDataFrameService().union_(self._id, other._id, preserveOrder)
+                    )
                 else:
-                    if numPartitions is None:
-                        return Ignis._driverContext().collect(
-                            client.getDataFrameService().union3b(self._id, other._id, ISource.wrap(src).rpc())
-                        )
-                    else:
-                        return Ignis._driverContext().collect(
-                            client.getDataFrameService().union4(self._id, other._id, numPartitions,
-                                                                ISource.wrap(src).rpc())
-                        )
+                    return Ignis._driverContext().collect(
+                        client.getDataFrameService().union4(self._id, other._id, preserveOrder, ISource.wrap(src).rpc())
+                    )
+
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
             raise IDriverException(ex.message, ex._cause)
 

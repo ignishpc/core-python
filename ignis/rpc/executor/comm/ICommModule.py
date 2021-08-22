@@ -100,23 +100,6 @@ class Iface(object):
         """
         pass
 
-    def newEmptyPartitions(self, n):
-        """
-        Parameters:
-         - n
-
-        """
-        pass
-
-    def newEmptyPartitions2(self, n, src):
-        """
-        Parameters:
-         - n
-         - src
-
-        """
-        pass
-
     def driverGather(self, group, src):
         """
         Parameters:
@@ -154,32 +137,23 @@ class Iface(object):
         """
         pass
 
-    def enableMultithreading(self, group):
+    def importData(self, group, source, threads):
         """
         Parameters:
          - group
-
-        """
-        pass
-
-    def send(self, group, partition, dest, thread):
-        """
-        Parameters:
-         - group
-         - partition
-         - dest
-         - thread
-
-        """
-        pass
-
-    def recv(self, group, partition, source, thread):
-        """
-        Parameters:
-         - group
-         - partition
          - source
-         - thread
+         - threads
+
+        """
+        pass
+
+    def importData4(self, group, source, threads, src):
+        """
+        Parameters:
+         - group
+         - source
+         - threads
+         - src
 
         """
         pass
@@ -572,72 +546,6 @@ class Client(Iface):
             raise result.ex
         return
 
-    def newEmptyPartitions(self, n):
-        """
-        Parameters:
-         - n
-
-        """
-        self.send_newEmptyPartitions(n)
-        self.recv_newEmptyPartitions()
-
-    def send_newEmptyPartitions(self, n):
-        self._oprot.writeMessageBegin('newEmptyPartitions', TMessageType.CALL, self._seqid)
-        args = newEmptyPartitions_args()
-        args.n = n
-        args.write(self._oprot)
-        self._oprot.writeMessageEnd()
-        self._oprot.trans.flush()
-
-    def recv_newEmptyPartitions(self):
-        iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
-        if mtype == TMessageType.EXCEPTION:
-            x = TApplicationException()
-            x.read(iprot)
-            iprot.readMessageEnd()
-            raise x
-        result = newEmptyPartitions_result()
-        result.read(iprot)
-        iprot.readMessageEnd()
-        if result.ex is not None:
-            raise result.ex
-        return
-
-    def newEmptyPartitions2(self, n, src):
-        """
-        Parameters:
-         - n
-         - src
-
-        """
-        self.send_newEmptyPartitions2(n, src)
-        self.recv_newEmptyPartitions2()
-
-    def send_newEmptyPartitions2(self, n, src):
-        self._oprot.writeMessageBegin('newEmptyPartitions2', TMessageType.CALL, self._seqid)
-        args = newEmptyPartitions2_args()
-        args.n = n
-        args.src = src
-        args.write(self._oprot)
-        self._oprot.writeMessageEnd()
-        self._oprot.trans.flush()
-
-    def recv_newEmptyPartitions2(self):
-        iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
-        if mtype == TMessageType.EXCEPTION:
-            x = TApplicationException()
-            x.read(iprot)
-            iprot.readMessageEnd()
-            raise x
-        result = newEmptyPartitions2_result()
-        result.read(iprot)
-        iprot.readMessageEnd()
-        if result.ex is not None:
-            raise result.ex
-        return
-
     def driverGather(self, group, src):
         """
         Parameters:
@@ -776,24 +684,28 @@ class Client(Iface):
             raise result.ex
         return
 
-    def enableMultithreading(self, group):
+    def importData(self, group, source, threads):
         """
         Parameters:
          - group
+         - source
+         - threads
 
         """
-        self.send_enableMultithreading(group)
-        return self.recv_enableMultithreading()
+        self.send_importData(group, source, threads)
+        self.recv_importData()
 
-    def send_enableMultithreading(self, group):
-        self._oprot.writeMessageBegin('enableMultithreading', TMessageType.CALL, self._seqid)
-        args = enableMultithreading_args()
+    def send_importData(self, group, source, threads):
+        self._oprot.writeMessageBegin('importData', TMessageType.CALL, self._seqid)
+        args = importData_args()
         args.group = group
+        args.source = source
+        args.threads = threads
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_enableMultithreading(self):
+    def recv_importData(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -801,77 +713,37 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = enableMultithreading_result()
-        result.read(iprot)
-        iprot.readMessageEnd()
-        if result.success is not None:
-            return result.success
-        if result.ex is not None:
-            raise result.ex
-        raise TApplicationException(TApplicationException.MISSING_RESULT, "enableMultithreading failed: unknown result")
-
-    def send(self, group, partition, dest, thread):
-        """
-        Parameters:
-         - group
-         - partition
-         - dest
-         - thread
-
-        """
-        self.send_send(group, partition, dest, thread)
-        self.recv_send()
-
-    def send_send(self, group, partition, dest, thread):
-        self._oprot.writeMessageBegin('send', TMessageType.CALL, self._seqid)
-        args = send_args()
-        args.group = group
-        args.partition = partition
-        args.dest = dest
-        args.thread = thread
-        args.write(self._oprot)
-        self._oprot.writeMessageEnd()
-        self._oprot.trans.flush()
-
-    def recv_send(self):
-        iprot = self._iprot
-        (fname, mtype, rseqid) = iprot.readMessageBegin()
-        if mtype == TMessageType.EXCEPTION:
-            x = TApplicationException()
-            x.read(iprot)
-            iprot.readMessageEnd()
-            raise x
-        result = send_result()
+        result = importData_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.ex is not None:
             raise result.ex
         return
 
-    def recv(self, group, partition, source, thread):
+    def importData4(self, group, source, threads, src):
         """
         Parameters:
          - group
-         - partition
          - source
-         - thread
+         - threads
+         - src
 
         """
-        self.send_recv(group, partition, source, thread)
-        self.recv_recv()
+        self.send_importData4(group, source, threads, src)
+        self.recv_importData4()
 
-    def send_recv(self, group, partition, source, thread):
-        self._oprot.writeMessageBegin('recv', TMessageType.CALL, self._seqid)
-        args = recv_args()
+    def send_importData4(self, group, source, threads, src):
+        self._oprot.writeMessageBegin('importData4', TMessageType.CALL, self._seqid)
+        args = importData4_args()
         args.group = group
-        args.partition = partition
         args.source = source
-        args.thread = thread
+        args.threads = threads
+        args.src = src
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
 
-    def recv_recv(self):
+    def recv_importData4(self):
         iprot = self._iprot
         (fname, mtype, rseqid) = iprot.readMessageBegin()
         if mtype == TMessageType.EXCEPTION:
@@ -879,7 +751,7 @@ class Client(Iface):
             x.read(iprot)
             iprot.readMessageEnd()
             raise x
-        result = recv_result()
+        result = importData4_result()
         result.read(iprot)
         iprot.readMessageEnd()
         if result.ex is not None:
@@ -903,15 +775,12 @@ class Processor(Iface, TProcessor):
         self._processMap["getPartitions2"] = Processor.process_getPartitions2
         self._processMap["setPartitions"] = Processor.process_setPartitions
         self._processMap["setPartitions2"] = Processor.process_setPartitions2
-        self._processMap["newEmptyPartitions"] = Processor.process_newEmptyPartitions
-        self._processMap["newEmptyPartitions2"] = Processor.process_newEmptyPartitions2
         self._processMap["driverGather"] = Processor.process_driverGather
         self._processMap["driverGather0"] = Processor.process_driverGather0
         self._processMap["driverScatter"] = Processor.process_driverScatter
         self._processMap["driverScatter3"] = Processor.process_driverScatter3
-        self._processMap["enableMultithreading"] = Processor.process_enableMultithreading
-        self._processMap["send"] = Processor.process_send
-        self._processMap["recv"] = Processor.process_recv
+        self._processMap["importData"] = Processor.process_importData
+        self._processMap["importData4"] = Processor.process_importData4
         self._on_message_begin = None
 
     def on_message_begin(self, func):
@@ -1246,58 +1115,6 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_newEmptyPartitions(self, seqid, iprot, oprot):
-        args = newEmptyPartitions_args()
-        args.read(iprot)
-        iprot.readMessageEnd()
-        result = newEmptyPartitions_result()
-        try:
-            self._handler.newEmptyPartitions(args.n)
-            msg_type = TMessageType.REPLY
-        except TTransport.TTransportException:
-            raise
-        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
-            msg_type = TMessageType.REPLY
-            result.ex = ex
-        except TApplicationException as ex:
-            logging.exception('TApplication exception in handler')
-            msg_type = TMessageType.EXCEPTION
-            result = ex
-        except Exception:
-            logging.exception('Unexpected exception in handler')
-            msg_type = TMessageType.EXCEPTION
-            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("newEmptyPartitions", msg_type, seqid)
-        result.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
-
-    def process_newEmptyPartitions2(self, seqid, iprot, oprot):
-        args = newEmptyPartitions2_args()
-        args.read(iprot)
-        iprot.readMessageEnd()
-        result = newEmptyPartitions2_result()
-        try:
-            self._handler.newEmptyPartitions2(args.n, args.src)
-            msg_type = TMessageType.REPLY
-        except TTransport.TTransportException:
-            raise
-        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
-            msg_type = TMessageType.REPLY
-            result.ex = ex
-        except TApplicationException as ex:
-            logging.exception('TApplication exception in handler')
-            msg_type = TMessageType.EXCEPTION
-            result = ex
-        except Exception:
-            logging.exception('Unexpected exception in handler')
-            msg_type = TMessageType.EXCEPTION
-            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("newEmptyPartitions2", msg_type, seqid)
-        result.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
-
     def process_driverGather(self, seqid, iprot, oprot):
         args = driverGather_args()
         args.read(iprot)
@@ -1402,13 +1219,13 @@ class Processor(Iface, TProcessor):
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_enableMultithreading(self, seqid, iprot, oprot):
-        args = enableMultithreading_args()
+    def process_importData(self, seqid, iprot, oprot):
+        args = importData_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = enableMultithreading_result()
+        result = importData_result()
         try:
-            result.success = self._handler.enableMultithreading(args.group)
+            self._handler.importData(args.group, args.source, args.threads)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -1423,18 +1240,18 @@ class Processor(Iface, TProcessor):
             logging.exception('Unexpected exception in handler')
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("enableMultithreading", msg_type, seqid)
+        oprot.writeMessageBegin("importData", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
 
-    def process_send(self, seqid, iprot, oprot):
-        args = send_args()
+    def process_importData4(self, seqid, iprot, oprot):
+        args = importData4_args()
         args.read(iprot)
         iprot.readMessageEnd()
-        result = send_result()
+        result = importData4_result()
         try:
-            self._handler.send(args.group, args.partition, args.dest, args.thread)
+            self._handler.importData4(args.group, args.source, args.threads, args.src)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -1449,33 +1266,7 @@ class Processor(Iface, TProcessor):
             logging.exception('Unexpected exception in handler')
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("send", msg_type, seqid)
-        result.write(oprot)
-        oprot.writeMessageEnd()
-        oprot.trans.flush()
-
-    def process_recv(self, seqid, iprot, oprot):
-        args = recv_args()
-        args.read(iprot)
-        iprot.readMessageEnd()
-        result = recv_result()
-        try:
-            self._handler.recv(args.group, args.partition, args.source, args.thread)
-            msg_type = TMessageType.REPLY
-        except TTransport.TTransportException:
-            raise
-        except ignis.rpc.executor.exception.ttypes.IExecutorException as ex:
-            msg_type = TMessageType.REPLY
-            result.ex = ex
-        except TApplicationException as ex:
-            logging.exception('TApplication exception in handler')
-            msg_type = TMessageType.EXCEPTION
-            result = ex
-        except Exception:
-            logging.exception('Unexpected exception in handler')
-            msg_type = TMessageType.EXCEPTION
-            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
-        oprot.writeMessageBegin("recv", msg_type, seqid)
+        oprot.writeMessageBegin("importData4", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -3043,270 +2834,6 @@ setPartitions2_result.thrift_spec = (
 )
 
 
-class newEmptyPartitions_args(object):
-    """
-    Attributes:
-     - n
-
-    """
-
-
-    def __init__(self, n=None,):
-        self.n = n
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.I64:
-                    self.n = iprot.readI64()
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('newEmptyPartitions_args')
-        if self.n is not None:
-            oprot.writeFieldBegin('n', TType.I64, 1)
-            oprot.writeI64(self.n)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(newEmptyPartitions_args)
-newEmptyPartitions_args.thrift_spec = (
-    None,  # 0
-    (1, TType.I64, 'n', None, None, ),  # 1
-)
-
-
-class newEmptyPartitions_result(object):
-    """
-    Attributes:
-     - ex
-
-    """
-
-
-    def __init__(self, ex=None,):
-        self.ex = ex
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.STRUCT:
-                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('newEmptyPartitions_result')
-        if self.ex is not None:
-            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
-            self.ex.write(oprot)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(newEmptyPartitions_result)
-newEmptyPartitions_result.thrift_spec = (
-    None,  # 0
-    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
-)
-
-
-class newEmptyPartitions2_args(object):
-    """
-    Attributes:
-     - n
-     - src
-
-    """
-
-
-    def __init__(self, n=None, src=None,):
-        self.n = n
-        self.src = src
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.I64:
-                    self.n = iprot.readI64()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 5:
-                if ftype == TType.STRUCT:
-                    self.src = ignis.rpc.source.ttypes.ISource()
-                    self.src.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('newEmptyPartitions2_args')
-        if self.n is not None:
-            oprot.writeFieldBegin('n', TType.I64, 1)
-            oprot.writeI64(self.n)
-            oprot.writeFieldEnd()
-        if self.src is not None:
-            oprot.writeFieldBegin('src', TType.STRUCT, 5)
-            self.src.write(oprot)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(newEmptyPartitions2_args)
-newEmptyPartitions2_args.thrift_spec = (
-    None,  # 0
-    (1, TType.I64, 'n', None, None, ),  # 1
-    None,  # 2
-    None,  # 3
-    None,  # 4
-    (5, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 5
-)
-
-
-class newEmptyPartitions2_result(object):
-    """
-    Attributes:
-     - ex
-
-    """
-
-
-    def __init__(self, ex=None,):
-        self.ex = ex
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.STRUCT:
-                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('newEmptyPartitions2_result')
-        if self.ex is not None:
-            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
-            self.ex.write(oprot)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(newEmptyPartitions2_result)
-newEmptyPartitions2_result.thrift_spec = (
-    None,  # 0
-    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
-)
-
-
 class driverGather_args(object):
     """
     Attributes:
@@ -3866,317 +3393,20 @@ driverScatter3_result.thrift_spec = (
 )
 
 
-class enableMultithreading_args(object):
+class importData_args(object):
     """
     Attributes:
      - group
-
-    """
-
-
-    def __init__(self, group=None,):
-        self.group = group
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.STRING:
-                    self.group = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('enableMultithreading_args')
-        if self.group is not None:
-            oprot.writeFieldBegin('group', TType.STRING, 1)
-            oprot.writeString(self.group.encode('utf-8') if sys.version_info[0] == 2 else self.group)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(enableMultithreading_args)
-enableMultithreading_args.thrift_spec = (
-    None,  # 0
-    (1, TType.STRING, 'group', 'UTF8', None, ),  # 1
-)
-
-
-class enableMultithreading_result(object):
-    """
-    Attributes:
-     - success
-     - ex
-
-    """
-
-
-    def __init__(self, success=None, ex=None,):
-        self.success = success
-        self.ex = ex
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 0:
-                if ftype == TType.I32:
-                    self.success = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 1:
-                if ftype == TType.STRUCT:
-                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('enableMultithreading_result')
-        if self.success is not None:
-            oprot.writeFieldBegin('success', TType.I32, 0)
-            oprot.writeI32(self.success)
-            oprot.writeFieldEnd()
-        if self.ex is not None:
-            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
-            self.ex.write(oprot)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(enableMultithreading_result)
-enableMultithreading_result.thrift_spec = (
-    (0, TType.I32, 'success', None, None, ),  # 0
-    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
-)
-
-
-class send_args(object):
-    """
-    Attributes:
-     - group
-     - partition
-     - dest
-     - thread
-
-    """
-
-
-    def __init__(self, group=None, partition=None, dest=None, thread=None,):
-        self.group = group
-        self.partition = partition
-        self.dest = dest
-        self.thread = thread
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.STRING:
-                    self.group = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 2:
-                if ftype == TType.I64:
-                    self.partition = iprot.readI64()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 3:
-                if ftype == TType.I64:
-                    self.dest = iprot.readI64()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 4:
-                if ftype == TType.I32:
-                    self.thread = iprot.readI32()
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('send_args')
-        if self.group is not None:
-            oprot.writeFieldBegin('group', TType.STRING, 1)
-            oprot.writeString(self.group.encode('utf-8') if sys.version_info[0] == 2 else self.group)
-            oprot.writeFieldEnd()
-        if self.partition is not None:
-            oprot.writeFieldBegin('partition', TType.I64, 2)
-            oprot.writeI64(self.partition)
-            oprot.writeFieldEnd()
-        if self.dest is not None:
-            oprot.writeFieldBegin('dest', TType.I64, 3)
-            oprot.writeI64(self.dest)
-            oprot.writeFieldEnd()
-        if self.thread is not None:
-            oprot.writeFieldBegin('thread', TType.I32, 4)
-            oprot.writeI32(self.thread)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(send_args)
-send_args.thrift_spec = (
-    None,  # 0
-    (1, TType.STRING, 'group', 'UTF8', None, ),  # 1
-    (2, TType.I64, 'partition', None, None, ),  # 2
-    (3, TType.I64, 'dest', None, None, ),  # 3
-    (4, TType.I32, 'thread', None, None, ),  # 4
-)
-
-
-class send_result(object):
-    """
-    Attributes:
-     - ex
-
-    """
-
-
-    def __init__(self, ex=None,):
-        self.ex = ex
-
-    def read(self, iprot):
-        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
-            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
-            return
-        iprot.readStructBegin()
-        while True:
-            (fname, ftype, fid) = iprot.readFieldBegin()
-            if ftype == TType.STOP:
-                break
-            if fid == 1:
-                if ftype == TType.STRUCT:
-                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException.read(iprot)
-                else:
-                    iprot.skip(ftype)
-            else:
-                iprot.skip(ftype)
-            iprot.readFieldEnd()
-        iprot.readStructEnd()
-
-    def write(self, oprot):
-        if oprot._fast_encode is not None and self.thrift_spec is not None:
-            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
-            return
-        oprot.writeStructBegin('send_result')
-        if self.ex is not None:
-            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
-            self.ex.write(oprot)
-            oprot.writeFieldEnd()
-        oprot.writeFieldStop()
-        oprot.writeStructEnd()
-
-    def validate(self):
-        return
-
-    def __repr__(self):
-        L = ['%s=%r' % (key, value)
-             for key, value in self.__dict__.items()]
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not (self == other)
-all_structs.append(send_result)
-send_result.thrift_spec = (
-    None,  # 0
-    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
-)
-
-
-class recv_args(object):
-    """
-    Attributes:
-     - group
-     - partition
      - source
-     - thread
+     - threads
 
     """
 
 
-    def __init__(self, group=None, partition=None, source=None, thread=None,):
+    def __init__(self, group=None, source=None, threads=None,):
         self.group = group
-        self.partition = partition
         self.source = source
-        self.thread = thread
+        self.threads = threads
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -4193,18 +3423,13 @@ class recv_args(object):
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
-                if ftype == TType.I64:
-                    self.partition = iprot.readI64()
+                if ftype == TType.BOOL:
+                    self.source = iprot.readBool()
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
                 if ftype == TType.I64:
-                    self.source = iprot.readI64()
-                else:
-                    iprot.skip(ftype)
-            elif fid == 4:
-                if ftype == TType.I32:
-                    self.thread = iprot.readI32()
+                    self.threads = iprot.readI64()
                 else:
                     iprot.skip(ftype)
             else:
@@ -4216,22 +3441,18 @@ class recv_args(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('recv_args')
+        oprot.writeStructBegin('importData_args')
         if self.group is not None:
             oprot.writeFieldBegin('group', TType.STRING, 1)
             oprot.writeString(self.group.encode('utf-8') if sys.version_info[0] == 2 else self.group)
-            oprot.writeFieldEnd()
-        if self.partition is not None:
-            oprot.writeFieldBegin('partition', TType.I64, 2)
-            oprot.writeI64(self.partition)
             oprot.writeFieldEnd()
         if self.source is not None:
-            oprot.writeFieldBegin('source', TType.I64, 3)
-            oprot.writeI64(self.source)
+            oprot.writeFieldBegin('source', TType.BOOL, 2)
+            oprot.writeBool(self.source)
             oprot.writeFieldEnd()
-        if self.thread is not None:
-            oprot.writeFieldBegin('thread', TType.I32, 4)
-            oprot.writeI32(self.thread)
+        if self.threads is not None:
+            oprot.writeFieldBegin('threads', TType.I64, 3)
+            oprot.writeI64(self.threads)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -4249,17 +3470,16 @@ class recv_args(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(recv_args)
-recv_args.thrift_spec = (
+all_structs.append(importData_args)
+importData_args.thrift_spec = (
     None,  # 0
     (1, TType.STRING, 'group', 'UTF8', None, ),  # 1
-    (2, TType.I64, 'partition', None, None, ),  # 2
-    (3, TType.I64, 'source', None, None, ),  # 3
-    (4, TType.I32, 'thread', None, None, ),  # 4
+    (2, TType.BOOL, 'source', None, None, ),  # 2
+    (3, TType.I64, 'threads', None, None, ),  # 3
 )
 
 
-class recv_result(object):
+class importData_result(object):
     """
     Attributes:
      - ex
@@ -4293,7 +3513,7 @@ class recv_result(object):
         if oprot._fast_encode is not None and self.thrift_spec is not None:
             oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
             return
-        oprot.writeStructBegin('recv_result')
+        oprot.writeStructBegin('importData_result')
         if self.ex is not None:
             oprot.writeFieldBegin('ex', TType.STRUCT, 1)
             self.ex.write(oprot)
@@ -4314,8 +3534,169 @@ class recv_result(object):
 
     def __ne__(self, other):
         return not (self == other)
-all_structs.append(recv_result)
-recv_result.thrift_spec = (
+all_structs.append(importData_result)
+importData_result.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
+)
+
+
+class importData4_args(object):
+    """
+    Attributes:
+     - group
+     - source
+     - threads
+     - src
+
+    """
+
+
+    def __init__(self, group=None, source=None, threads=None, src=None,):
+        self.group = group
+        self.source = source
+        self.threads = threads
+        self.src = src
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRING:
+                    self.group = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.BOOL:
+                    self.source = iprot.readBool()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I64:
+                    self.threads = iprot.readI64()
+                else:
+                    iprot.skip(ftype)
+            elif fid == 4:
+                if ftype == TType.STRUCT:
+                    self.src = ignis.rpc.source.ttypes.ISource()
+                    self.src.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('importData4_args')
+        if self.group is not None:
+            oprot.writeFieldBegin('group', TType.STRING, 1)
+            oprot.writeString(self.group.encode('utf-8') if sys.version_info[0] == 2 else self.group)
+            oprot.writeFieldEnd()
+        if self.source is not None:
+            oprot.writeFieldBegin('source', TType.BOOL, 2)
+            oprot.writeBool(self.source)
+            oprot.writeFieldEnd()
+        if self.threads is not None:
+            oprot.writeFieldBegin('threads', TType.I64, 3)
+            oprot.writeI64(self.threads)
+            oprot.writeFieldEnd()
+        if self.src is not None:
+            oprot.writeFieldBegin('src', TType.STRUCT, 4)
+            self.src.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(importData4_args)
+importData4_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRING, 'group', 'UTF8', None, ),  # 1
+    (2, TType.BOOL, 'source', None, None, ),  # 2
+    (3, TType.I64, 'threads', None, None, ),  # 3
+    (4, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 4
+)
+
+
+class importData4_result(object):
+    """
+    Attributes:
+     - ex
+
+    """
+
+
+    def __init__(self, ex=None,):
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.executor.exception.ttypes.IExecutorException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('importData4_result')
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(importData4_result)
+importData4_result.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.executor.exception.ttypes.IExecutorException, None], None, ),  # 1
 )

@@ -60,22 +60,14 @@ class IWorker:
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
             raise IDriverException(ex.message, ex._cause)
 
-    def importDataFrame(self, data, partitions=None, src=None):
+    def importDataFrame(self, data, src=None):
         try:
             with Ignis._pool.getClient() as client:
-                if partitions:
-                    if src is None:
-                        return IDataFrame(client.getWorkerService().importDataFrame3a(self._id, data, partitions))
-                    else:
-                        src = ISource.wrap(src)
-                        return IDataFrame(
-                            client.getWorkerService().importDataFrame4(self._id, data, partitions, src.rpc()))
+                if src is None:
+                    return IDataFrame(client.getWorkerService().importDataFrame(self._id, data))
                 else:
-                    if src is None:
-                        return IDataFrame(client.getWorkerService().importDataFrame(self._id, data))
-                    else:
-                        src = ISource.wrap(src)
-                        return IDataFrame(client.getWorkerService().importDataFrame3b(self._id, data, src.rpc()))
+                    src = ISource.wrap(src)
+                    return IDataFrame(client.getWorkerService().importDataFrame3(self._id, data, src.rpc()))
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
             raise IDriverException(ex.message, ex._cause)
 

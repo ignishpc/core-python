@@ -18,6 +18,8 @@ class IModuleTest:
         props["ignis.executor.directory"] = "./"
         props["ignis.executor.cores"] = "1"
         props["ignis.transport.cores"] = "0"
+        props["ignis.modules.load.type"] = "false"
+        props["ignis.modules.exchange.type"] = "sync"
 
     def newSource(self, name):
         return ISource(obj=IEncoded(name=self._library + ":" + name))

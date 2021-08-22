@@ -24,6 +24,9 @@ class IPropertyParser:
 	def sortResampling(self):
 		return self.getBoolean("ignis.modules.sort.resampling")
 
+	def loadType(self):
+		return self.getBoolean("ignis.modules.load.type")
+
 	def ioOverwrite(self):
 		return self.getBoolean("ignis.modules.io.overwrite")
 
@@ -41,6 +44,9 @@ class IPropertyParser:
 
 	def partitionType(self):
 		return self.getString("ignis.partition.type")
+
+	def exchangeType(self):
+		return self.getString("ignis.modules.exchange.type")
 
 	def jobName(self):
 		return self.getString("ignis.job.name")

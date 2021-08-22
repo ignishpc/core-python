@@ -2,7 +2,7 @@ import logging
 import math
 import random
 
-from ignis.executor.core.modules.impl.IBaseImpl import IBaseImpl
+from ignis.executor.core.modules.impl.IBaseImpl import IBaseImpl, MPI
 
 logger = logging.getLogger(__name__)
 
@@ -56,8 +56,51 @@ class IMathImpl(IBaseImpl):
 		self._executor_data.deletePartitions()
 		return n
 
-	def sampleByKey(self, withReplacement, fractions, seed):
-		raise NotImplementedError()#TODO
+	def sampleByKeyFilter(self):
+		input = self._executor_data.getAndDeletePartitions()
+		tmp = self._executor_data.getPartitionTools().newPartitionGroup(len(input))
+		fractions = self._executor_data.getContext().vars().get("fractions")
+
+		logger.info("Math: filtering key before sample " + str(len(input)) + " partitions")
+
+		for i in range(len(input)):
+			writer = tmp[i].writeIterator()
+			for key, value in input[i]:
+				if key in fractions:
+					writer.write((key,value))
+			input[i] = None
+
+		output = self._executor_data.getPartitionTools().newPartitionGroup()
+		for part in tmp:
+			if len(part) > 0:
+				output.add(part)
+
+		numPartitions = min(len(output), len(fractions))
+		numPartitions = self._executor_data.mpi().Allreduce(numPartitions, MPI.MAX)
+		self._executor_data.setPartitions(output)
+		return numPartitions
+
+	def sampleByKey(self, withReplacement, seed):
+		input = self._executor_data.getAndDeletePartitions()
+		output = self._executor_data.getPartitionTools().newPartitionGroup()
+		fractions = self._executor_data.getContext().vars().get("fractions")
+		num = [0 for _ in range(len(fractions))]
+		pmap = dict()
+		for key,_ in fractions:
+			pmap[key] = len(output)
+			output.add(self._executor_data.getPartitionTools().newPartition())
+		logger.info("Math: sampleByKey copying values to single partitions")
+
+		for part in input:
+			for key,values in part:
+				pos = pmap[key]
+				num[pos] = len(values)
+				writer = output[pos].writeIterator()
+				for value in values:
+					writer.write((key,value))
+
+		self._executor_data.setPartitions(output)
+		self.sample(withReplacement, num, seed)
 
 	def countByKey(self):
 		input = self._executor_data.getPartitions()

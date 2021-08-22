@@ -34,9 +34,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  IDataFrameId parallelize(IWorkerId id, i64 dataId, i64 partitions)')
     print('  IDataFrameId parallelize4(IWorkerId id, i64 dataId, i64 partitions, ISource src)')
     print('  IDataFrameId importDataFrame(IWorkerId id, IDataFrameId data)')
-    print('  IDataFrameId importDataFrame3a(IWorkerId id, IDataFrameId data, i64 partitions)')
-    print('  IDataFrameId importDataFrame3b(IWorkerId id, IDataFrameId data, ISource src)')
-    print('  IDataFrameId importDataFrame4(IWorkerId id, IDataFrameId data, i64 partitions, ISource src)')
+    print('  IDataFrameId importDataFrame3(IWorkerId id, IDataFrameId data, ISource src)')
     print('  IDataFrameId textFile(IWorkerId id, string path)')
     print('  IDataFrameId textFile3(IWorkerId id, string path, i64 minPartitions)')
     print('  IDataFrameId partitionObjectFile(IWorkerId id, string path)')
@@ -190,23 +188,11 @@ elif cmd == 'importDataFrame':
         sys.exit(1)
     pp.pprint(client.importDataFrame(eval(args[0]), eval(args[1]),))
 
-elif cmd == 'importDataFrame3a':
+elif cmd == 'importDataFrame3':
     if len(args) != 3:
-        print('importDataFrame3a requires 3 args')
+        print('importDataFrame3 requires 3 args')
         sys.exit(1)
-    pp.pprint(client.importDataFrame3a(eval(args[0]), eval(args[1]), eval(args[2]),))
-
-elif cmd == 'importDataFrame3b':
-    if len(args) != 3:
-        print('importDataFrame3b requires 3 args')
-        sys.exit(1)
-    pp.pprint(client.importDataFrame3b(eval(args[0]), eval(args[1]), eval(args[2]),))
-
-elif cmd == 'importDataFrame4':
-    if len(args) != 4:
-        print('importDataFrame4 requires 4 args')
-        sys.exit(1)
-    pp.pprint(client.importDataFrame4(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
+    pp.pprint(client.importDataFrame3(eval(args[0]), eval(args[1]), eval(args[2]),))
 
 elif cmd == 'textFile':
     if len(args) != 2:

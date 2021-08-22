@@ -12,14 +12,14 @@ logger = logging.getLogger(__name__)
 class Ignis:
     __lock = threading.Lock()
     __backend = None
-    _pool = None
+    __pool = None
     __callback = None
 
     @classmethod
     def start(cls):
         try:
             with cls.__lock:
-                if cls._pool:
+                if cls.__pool:
                     return
                 cls.__backend = subprocess.Popen(["ignis-backend"], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
 
@@ -29,7 +29,7 @@ class Ignis:
                 callback_compression = int(cls.__backend.stdout.readline())
 
                 cls.__callback = ICallBack(callback_port, callback_compression)
-                cls._pool = IClientPool(backend_port, backend_compression)
+                cls.__pool = IClientPool(backend_port, backend_compression)
         except Exception as ex:
             raise IDriverException(str(ex)) from ex
 
@@ -37,12 +37,12 @@ class Ignis:
     def stop(cls):
         try:
             with cls.__lock:
-                if not cls._pool:
+                if not cls.__pool:
                     return
-                with cls._pool.getClient() as client:
+                with cls.__pool.getClient() as client:
                     client.getBackendService().stop()
                 cls.__backend.wait()
-                cls._pool.destroy()
+                cls.__pool.destroy()
                 try:
                     cls.__callback.stop()
                 except Exception as ex:
@@ -55,5 +55,13 @@ class Ignis:
             raise IDriverException(ex) from ex
 
     @classmethod
+    def _clientPool(cls):
+        if not cls.__pool:
+            raise IDriverException("Ignis.start() must be invoked before the other routines")
+        return cls.__pool
+
+    @classmethod
     def _driverContext(cls):
+        if not cls.__callback:
+            raise IDriverException("Ignis.start() must be invoked before the other routines")
         return cls.__callback.driverContext()

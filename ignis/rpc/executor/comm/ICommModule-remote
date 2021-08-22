@@ -36,15 +36,12 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('   getPartitions2(i8 protocol, i64 minPartitions)')
     print('  void setPartitions( partitions)')
     print('  void setPartitions2( partitions, ISource src)')
-    print('  void newEmptyPartitions(i64 n)')
-    print('  void newEmptyPartitions2(i64 n, ISource src)')
     print('  void driverGather(string group, ISource src)')
     print('  void driverGather0(string group, ISource src)')
     print('  void driverScatter(string group, i64 partitions)')
     print('  void driverScatter3(string group, i64 partitions, ISource src)')
-    print('  i32 enableMultithreading(string group)')
-    print('  void send(string group, i64 partition, i64 dest, i32 thread)')
-    print('  void recv(string group, i64 partition, i64 source, i32 thread)')
+    print('  void importData(string group, bool source, i64 threads)')
+    print('  void importData4(string group, bool source, i64 threads, ISource src)')
     print('')
     sys.exit(0)
 
@@ -196,18 +193,6 @@ elif cmd == 'setPartitions2':
         sys.exit(1)
     pp.pprint(client.setPartitions2(eval(args[0]), eval(args[1]),))
 
-elif cmd == 'newEmptyPartitions':
-    if len(args) != 1:
-        print('newEmptyPartitions requires 1 args')
-        sys.exit(1)
-    pp.pprint(client.newEmptyPartitions(eval(args[0]),))
-
-elif cmd == 'newEmptyPartitions2':
-    if len(args) != 2:
-        print('newEmptyPartitions2 requires 2 args')
-        sys.exit(1)
-    pp.pprint(client.newEmptyPartitions2(eval(args[0]), eval(args[1]),))
-
 elif cmd == 'driverGather':
     if len(args) != 2:
         print('driverGather requires 2 args')
@@ -232,23 +217,17 @@ elif cmd == 'driverScatter3':
         sys.exit(1)
     pp.pprint(client.driverScatter3(args[0], eval(args[1]), eval(args[2]),))
 
-elif cmd == 'enableMultithreading':
-    if len(args) != 1:
-        print('enableMultithreading requires 1 args')
+elif cmd == 'importData':
+    if len(args) != 3:
+        print('importData requires 3 args')
         sys.exit(1)
-    pp.pprint(client.enableMultithreading(args[0],))
+    pp.pprint(client.importData(args[0], eval(args[1]), eval(args[2]),))
 
-elif cmd == 'send':
+elif cmd == 'importData4':
     if len(args) != 4:
-        print('send requires 4 args')
+        print('importData4 requires 4 args')
         sys.exit(1)
-    pp.pprint(client.send(args[0], eval(args[1]), eval(args[2]), eval(args[3]),))
-
-elif cmd == 'recv':
-    if len(args) != 4:
-        print('recv requires 4 args')
-        sys.exit(1)
-    pp.pprint(client.recv(args[0], eval(args[1]), eval(args[2]), eval(args[3]),))
+    pp.pprint(client.importData4(args[0], eval(args[1]), eval(args[2]), eval(args[3]),))
 
 else:
     print('Unrecognized method %s' % cmd)

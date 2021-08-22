@@ -29,12 +29,14 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  void cache(IDataFrameId id)')
     print('  void unpersist(IDataFrameId id)')
     print('  void uncache(IDataFrameId id)')
-    print('  IDataFrameId repartition(IDataFrameId id, i64 numPartitions)')
-    print('  IDataFrameId coalesce(IDataFrameId id, i64 numPartitions, bool shuffle)')
     print('  i64 partitions(IDataFrameId id)')
     print('  void saveAsObjectFile(IDataFrameId id, string path, i8 compression)')
     print('  void saveAsTextFile(IDataFrameId id, string path)')
     print('  void saveAsJsonFile(IDataFrameId id, string path, bool pretty)')
+    print('  IDataFrameId repartition(IDataFrameId id, i64 numPartitions, bool preserveOrdering, bool global_)')
+    print('  IDataFrameId partitionByRandom(IDataFrameId id, i64 numPartitions)')
+    print('  IDataFrameId partitionByHash(IDataFrameId id, i64 numPartitions)')
+    print('  IDataFrameId partitionBy(IDataFrameId id, ISource src, i64 numPartitions)')
     print('  IDataFrameId map_(IDataFrameId id, ISource src)')
     print('  IDataFrameId filter(IDataFrameId id, ISource src)')
     print('  IDataFrameId flatmap(IDataFrameId id, ISource src)')
@@ -50,9 +52,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  IDataFrameId sortBy(IDataFrameId id, ISource src, bool ascending)')
     print('  IDataFrameId sortBy3(IDataFrameId id, ISource src, bool ascending, i64 numPartitions)')
     print('  IDataFrameId union_(IDataFrameId id, IDataFrameId other, bool preserveOrder)')
-    print('  IDataFrameId union4a(IDataFrameId id, IDataFrameId other, bool preserveOrder, i64 numPartitions)')
-    print('  IDataFrameId union4b(IDataFrameId id, IDataFrameId other, bool preserveOrder, ISource src)')
-    print('  IDataFrameId union5(IDataFrameId id, IDataFrameId other, bool preserveOrder, i64 numPartitions, ISource src)')
+    print('  IDataFrameId union4(IDataFrameId id, IDataFrameId other, bool preserveOrder, ISource src)')
     print('  IDataFrameId join(IDataFrameId id, IDataFrameId other)')
     print('  IDataFrameId join3a(IDataFrameId id, IDataFrameId other, i64 numPartitions)')
     print('  IDataFrameId join3b(IDataFrameId id, IDataFrameId other, ISource src)')
@@ -215,18 +215,6 @@ elif cmd == 'uncache':
         sys.exit(1)
     pp.pprint(client.uncache(eval(args[0]),))
 
-elif cmd == 'repartition':
-    if len(args) != 2:
-        print('repartition requires 2 args')
-        sys.exit(1)
-    pp.pprint(client.repartition(eval(args[0]), eval(args[1]),))
-
-elif cmd == 'coalesce':
-    if len(args) != 3:
-        print('coalesce requires 3 args')
-        sys.exit(1)
-    pp.pprint(client.coalesce(eval(args[0]), eval(args[1]), eval(args[2]),))
-
 elif cmd == 'partitions':
     if len(args) != 1:
         print('partitions requires 1 args')
@@ -250,6 +238,30 @@ elif cmd == 'saveAsJsonFile':
         print('saveAsJsonFile requires 3 args')
         sys.exit(1)
     pp.pprint(client.saveAsJsonFile(eval(args[0]), args[1], eval(args[2]),))
+
+elif cmd == 'repartition':
+    if len(args) != 4:
+        print('repartition requires 4 args')
+        sys.exit(1)
+    pp.pprint(client.repartition(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
+
+elif cmd == 'partitionByRandom':
+    if len(args) != 2:
+        print('partitionByRandom requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.partitionByRandom(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'partitionByHash':
+    if len(args) != 2:
+        print('partitionByHash requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.partitionByHash(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'partitionBy':
+    if len(args) != 3:
+        print('partitionBy requires 3 args')
+        sys.exit(1)
+    pp.pprint(client.partitionBy(eval(args[0]), eval(args[1]), eval(args[2]),))
 
 elif cmd == 'map_':
     if len(args) != 2:
@@ -341,23 +353,11 @@ elif cmd == 'union_':
         sys.exit(1)
     pp.pprint(client.union_(eval(args[0]), eval(args[1]), eval(args[2]),))
 
-elif cmd == 'union4a':
+elif cmd == 'union4':
     if len(args) != 4:
-        print('union4a requires 4 args')
+        print('union4 requires 4 args')
         sys.exit(1)
-    pp.pprint(client.union4a(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
-
-elif cmd == 'union4b':
-    if len(args) != 4:
-        print('union4b requires 4 args')
-        sys.exit(1)
-    pp.pprint(client.union4b(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
-
-elif cmd == 'union5':
-    if len(args) != 5:
-        print('union5 requires 5 args')
-        sys.exit(1)
-    pp.pprint(client.union5(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]), eval(args[4]),))
+    pp.pprint(client.union4(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
 
 elif cmd == 'join':
     if len(args) != 2:
