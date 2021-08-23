@@ -1,6 +1,7 @@
 import logging
+import random
 
-from ignis.executor.core.modules.impl.IBaseImpl import IBaseImpl
+from ignis.executor.core.modules.impl.IBaseImpl import IBaseImpl, MPI
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +23,6 @@ class IRepartitionImpl(IBaseImpl):
 		input = self._executor_data.getAndDeletePartitions()
 		executors = self._executor_data.getContext().executors()
 		rank = self._executor_data.mpi().rank()
-		executors_count = list()
 		local_offset = list()
 		local_count = 0
 		global_count = 0
@@ -99,16 +99,157 @@ class IRepartitionImpl(IBaseImpl):
 		self._executor_data.setPartitions(output)
 
 	def __unordered_repartition(self, numPartitions):
-		raise NotImplemented()  # TODO
+		input = self._executor_data.getAndDeletePartitions()
+		executors = self._executor_data.getContext().executors()
+		rank = self._executor_data.mpi().rank()
+		local_count = 0
+		global_count = 0
+		msg_max = 0
+		msg_num = 0
+		for part in input:
+			local_count += len(part)
+			if len(part) > msg_max:
+				msg_max = len(part)
+		logger.info("Repartition: unordered repartition from " + str(len(input)) + " partitions")
+		executor_count = self._executor_data.native().allgather(local_count)
+		msg_max = self._executor_data.native().allreduce(msg_max, MPI.MAX)
+
+		average = int(global_count / executors)
+		executors_overhead = list()
+		for i in range(executors):
+			executors_overhead.append(average - executor_count[i])
+		src_target_size = list()
+		msg_count = [0 for _ in range(executors)]
+		other = 0
+		for i in range(executors):
+			while executors_overhead[i] >= 0 and other < executors:
+				if executors_overhead[other] <= 0:
+					other += 1
+					continue
+				if executors_overhead[other] + executors_overhead[i] > 0:
+					elems = -executors_overhead[i]
+					executors_overhead[other] -= elems
+					executors_overhead[i] = 0
+				else:
+					elems = executors_overhead[other]
+					executors_overhead[other] = 0
+					executors_overhead[i] += elems
+					other += 1
+
+				while elems > 0:
+					total = min(elems, msg_max)
+					src_target_size.append((other, i, total))
+					elems -= total
+					msg_count[i] += 1
+					if msg_count[i] > msg_num:
+						msg_num = msg_count[i]
+
+		shared = self._executor_data.getPartitionTools().newPartitionGroup(msg_num * executors)
+		src_part = input[-1]
+		reader = src_part.readIterator()
+		used = False
+		for entry in src_target_size:
+			if entry[0] == rank:
+				elems = entry[2]
+				target = msg_num * entry[1]
+				while not shared[target].empty():
+					target += 1
+				writer = shared[target].writeIterator()
+
+				while elems > 0:
+					used = True
+					while reader.hasNext() and elems > 0:
+						writer.write(reader.next())
+					if elems > 0:
+						input.remove(-1)
+						src_part = input[-1]
+						reader = src_part.readIterator()
+
+		if used and reader.hasNext():
+			new_part = self._executor_data.getPartitionTools().newPartition(src_part.type())
+			writer = new_part.writeIterator()
+			while reader.hasNext():
+				writer.write(reader.next())
+			input[-1] = new_part
+		logger.info("Repartition: exchanging new partitions")
+
+		tmp = self._executor_data.getPartitionTools().newPartitionGroup()
+		output = self._executor_data.getPartitionTools().newPartitionGroup()
+		self.exchange(shared, tmp)
+		for part in input:
+			output.add(part)
+		for part in tmp:
+			if part.empty():
+				output.add(part)
+		self._executor_data.setPartitions(output)
+		self.__local_repartition(numPartitions)
 
 	def __local_repartition(self, numPartitions):
-		raise NotImplemented()  # TODO
+		input = self._executor_data.getAndDeletePartitions()
+		output = self._executor_data.getPartitionTools().newPartitionGroup()
+		executors = self._executor_data.getContext().executors()
+		elements = 0
+		for part in input:
+			elements += len(part)
+		localPartitions = int(numPartitions / executors)
+		if numPartitions % executors > self._executor_data.getContext().executorId():
+			localPartitions += 1
+		logger.info(
+			"Repartition: local repartition from " + str(len(input)) + " to " + str(localPartitions) + " partitions")
+		partition_elems = int(elements / localPartitions)
+		remainder = elements % localPartitions
+		i = 1
+		er = len(input[0])
+		it = input[0].readIterator()
+		for p in range(localPartitions):
+			part = self._executor_data.getPartitionTools().newPartition()
+			writer = part.writeIterator()
+			ew = partition_elems
+			if p < remainder:
+				ew += 1
+
+			while ew > 0 and (i < len(input) or er > 0):
+				if er == 0:
+					input[i - 1] = None
+					er = len(input[i])
+					it = input[0].readIterator()
+					i += 1
+				while ew > 0 and er > 0:
+					writer.write(it.next())
+					ew -= 1
+					er -= 1
+			part.fit()
+			output.add(part)
+
+		self._executor_data.setPartitions(output)
 
 	def partitionByRandom(self, numPartitions):
-		raise NotImplemented()  # TODO
+		self.__partitionBy_impl(lambda elem, ctx: random.randint(0, numPartitions), numPartitions)
 
 	def partitionByHash(self, numPartitions):
-		raise NotImplemented()  # TODO
+		self.__partitionBy_impl(lambda elem, ctx: hash(elem), numPartitions)
 
 	def partitionBy(self, f, numPartitions):
-		raise NotImplemented()  # TODO
+		context = self._executor_data.getContext()
+		f.before(context)
+		self.__partitionBy_impl(f, numPartitions)
+		f.after(context)
+
+	def __partitionBy_impl(self, f, numPartitions):
+		input = self._executor_data.getAndDeletePartitions()
+		output = self._executor_data.getPartitionTools().newPartitionGroup()
+		context = self._executor_data.getContext()
+
+		logger.info("Repartition: partitionBy in " + str(len(input)) + " partitions")
+		global_group = self._executor_data.getPartitionTools().newPartitionGroup(numPartitions)
+		writers = [part.writeIterator() for part in global_group]
+		for p in range(len(input)):
+			reader = input[p].readIterator()
+			for i in range(len(input[p])):
+				elem = reader.next()
+				writers[f(elem, context) % numPartitions].write(elem)
+				input[p] = None
+
+		logger.info("Repartition: exchanging new partitions")
+		self.exchange(global_group, output)
+		self._executor_data.setPartitions(output)

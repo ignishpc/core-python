@@ -50,4 +50,4 @@ class IBaseImpl:
             self._executor_data.mpi().exchange_sync(input, output)
         else:
             self.__logger.info("Base: using asynchronous exchange")
-            self._executor_data.mpi().exchange_async( input, output)
+            self._executor_data.mpi().exchange_async(input, output)

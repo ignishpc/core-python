@@ -107,10 +107,7 @@ class ISortImpl(IBaseImpl):
         if sr > 1:
             samples = int(sr)
         else:
-            send = [0, 0]
-            send[0] = len(input)
-            for part in input:
-                send[1] += len(part)
+            send = [len(input), sum(map(len, input))]
             rcv = self._executor_data.mpi().native().allreduce(send, MPI.SUM)
             samples = math.ceil(rcv[1] / rcv[0] * sr)
 
@@ -272,10 +269,10 @@ class ISortImpl(IBaseImpl):
         ranges = self._executor_data.getPartitionTools().newPartitionGroup(len(pivots) + 1)
         writers = [p.writeIterator() for p in ranges]
 
-        for part in input:
-            for elem in part:
+        for p in range(len(input)):
+            for elem in input[p]:
                 writers[self.__searchRange(elem, pivots, cmp, ascending)].write(elem)
-            part.clear()
+            input[p] = None
 
         input.clear()
         return ranges
@@ -284,7 +281,8 @@ class ISortImpl(IBaseImpl):
         ranges = self._executor_data.getPartitionTools().newPartitionGroup(len(pivots) + 1)
         writers = [p.writeIterator() for p in ranges]
 
-        for part in input:
+        for p in range(len(input)):
+            part = input[p]
             elems_stack = list()
             ranges_stack = list()
 
@@ -314,7 +312,7 @@ class ISortImpl(IBaseImpl):
                     elems_stack.append((mid + 1, end))
                     ranges_stack.append((r, last))
 
-            part.clear()
+            input[p] = None
         return ranges
 
     def __searchRange(self, elem, pivots, cmp, ascending):

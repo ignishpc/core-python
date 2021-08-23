@@ -233,7 +233,7 @@ class IGeneralModuleTest(IModuleTest, unittest.TestCase):
 
         if self._executor_data.mpi().isRoot(0):
             elems.sort()
-            for i in range(1, len(result)):
+            for i in range(0, len(result)):
                 self.assertEqual(result[i], elems[i])
 
     def __flatMapValuesTest(self, name, partitionType, IElements):

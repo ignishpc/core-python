@@ -718,7 +718,7 @@ class IMpi:
 		cls = None
 		comm = self.native()
 		wins = list()
-		onlyShared = cores == self.executors()
+		onlyShared = False
 		if self.__propertyParser.transportCores() > 0 and cores > 1 and p_type != IDiskPartition.TYPE:
 			logger.info("Local exchange init")
 
@@ -809,6 +809,7 @@ class IMpi:
 
 			comm = self.native()
 			shared_comm = comm.Split_type(MPI.COMM_TYPE_SHARED)
+			onlyShared = shared_comm.Get_size() == self.executors()
 			rank = shared_comm.Get_rank()
 			if shared_comm.Get_size() == 1:
 				logger.info("Local exchange aborting, no shared memory enabled")
@@ -817,6 +818,10 @@ class IMpi:
 					p = parts_targets[i][0]
 					target = parts_targets[i][1] % cores
 					input[p] = send(input[p], target)
+					if parts_targets[i][1] == rank:
+						aux = self.__partition_tools.newMemoryPartition(len(input[p]), cls)
+						input[p].moveTo(aux)
+						input[p] = aux
 
 			if not onlyShared:
 				logger.info("Global exchange init")

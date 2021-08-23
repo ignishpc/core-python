@@ -38,7 +38,7 @@ class INumpyWrapper:
 		self.array[key] = value
 
 	def __iter__(self):
-		return self.array.__iter__()
+		return self.array[0:self.__next].__iter__()
 
 	def __repr__(self):
 		return str(self.array)
