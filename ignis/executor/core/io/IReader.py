@@ -97,7 +97,8 @@ def __readMap(protocol):
 	keyReader = IReader._getReaderType(IReader._readTypeAux(protocol))
 	valueReader = IReader._getReaderType(IReader._readTypeAux(protocol))
 	for i in range(0, size):
-		obj[keyReader.read(protocol)] = valueReader.read(protocol)
+		key = keyReader.read(protocol)
+		obj[key] = valueReader.read(protocol)
 	return obj
 
 

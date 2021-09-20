@@ -10,10 +10,8 @@ logger = logging.getLogger(__name__)
 
 def _newNumpyMemoryPartition(sz, native, dtype):
     from ignis.executor.core.io.INumpy import INumpyWrapper as Wrapper
-    class INumpyWrapper(Wrapper):
-        def __init__(self, array=None):
-            Wrapper.__init__(self, sz, dtype, array)
-
+    def INumpyWrapper(array=None):
+        return Wrapper(sz, dtype, array)
     return IMemoryPartition(native=native, cls=INumpyWrapper)
 
 
@@ -133,17 +131,17 @@ class IPartitionTools:
     def isMemory(self, part):
         if isinstance(part, IPartitionGroup):
             return len(part) > 0 and part[0].type() == IMemoryPartition.TYPE
-        return IMemoryPartition.TYPE == part.getType()
+        return IMemoryPartition.TYPE == part.type()
 
     def isRawMemory(self, part):
         if isinstance(part, IPartitionGroup):
             return len(part) > 0 and part[0] == IRawMemoryPartition.TYPE
-        return IRawMemoryPartition.TYPE == part.getType()
+        return IRawMemoryPartition.TYPE == part.type()
 
     def isDisk(self, part):
         if isinstance(part, IPartitionGroup):
             return len(part) > 0 and part[0] == IDiskPartition.TYPE
-        return IDiskPartition.TYPE == part.getType()
+        return IDiskPartition.TYPE == part.type()
 
     def createDirectoryIfNotExists(self, path):
         Path(path).mkdir(parents=True, exist_ok=True)

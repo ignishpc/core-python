@@ -1,5 +1,6 @@
 import unittest
 
+from ignis.driver.api.ISource import ISource
 from ignis.executor.core.modules.IMathModule import IMathModule
 from ignis_test.executor.core.IElements import IElementsInt, IElementsPair
 from ignis_test.executor.core.modules.IModuleTest import IModuleTest
@@ -14,6 +15,62 @@ class IMathModuleTest(IModuleTest, unittest.TestCase):
         props = self._executor_data.getContext().props()
         props["ignis.modules.sort.samples"] = "2"
 
+    def test_sampleWithReplacement(self):
+        self._executor_data.getContext().props()["ignis.partition.type"] = "RawMemory"
+        np = self._executor_data.getContext().executors()
+        num = [20 * np, 20 * np]
+        elems = IElementsInt().create(100 * 2 * np, 0)
+        local_elems = self.rankVector(elems)
+        self.loadToPartitions(local_elems, 2)
+
+        self.__math.sample(True, num, 0)
+
+        result = self.getFromPartitions()
+        self.assertEqual(len(result), sum(num))
+
+    def test_sampleWithoutReplacement(self):
+        self._executor_data.getContext().props()["ignis.partition.type"] = "Memory"
+        np = self._executor_data.getContext().executors()
+        num = [20 * np, 20 * np]
+        elems = list(range(sum(num)*2))
+        local_elems = self.rankVector(elems)
+        self.loadToPartitions(local_elems, 2)
+
+        self.__math.sample(False, num, 0)
+
+        result = self.getFromPartitions()
+        self.assertEqual(len(set(result)), len(result))
+
+    def test_sampleByKey(self):
+        self._executor_data.getContext().props()["ignis.partition.type"] = "Memory"
+        np = self._executor_data.getContext().executors()
+        values = IElementsInt().create(100 * 2 * np, 0)
+        elems = list()
+        for key in ["a", "b"]:
+            for v in values:
+                elems.append((key, v))
+
+        local_elems = self.rankVector(elems)
+        self.loadToPartitions(local_elems, 2)
+
+        fractions = ISource("").addParam("fractions", {"a": 0.5}).rpc()
+
+        self.__math.sampleByKey(True, fractions, 0)
+
+        result = self.getFromPartitions()
+        self.loadToPartitions(result, 1)
+        self._executor_data.mpi().gather(self._executor_data.getPartitions()[0], 0)
+        result = self.getFromPartitions()
+
+        if self._executor_data.mpi().isRoot(0):
+            count = dict()
+            for key, value in result:
+                count[key] = count.get(key, 0) + 1
+
+            self.assert_("a" in count)
+            self.assert_("b" not in count)
+            self.assertEqual(count["a"], int(len(values) / 2))
+
     def test_count(self):
         self._executor_data.getContext().props()["ignis.partition.type"] = "Memory"
         elems = IElementsInt().create(100 * 2, 0)
@@ -23,7 +80,8 @@ class IMathModuleTest(IModuleTest, unittest.TestCase):
 
     def test_max(self):
         self._executor_data.getContext().props()["ignis.partition.type"] = "Memory"
-        elems = IElementsInt().create(100 * 2, 0)
+        np = self._executor_data.getContext().executors()
+        elems = IElementsInt().create(100 * 2 * np, 0)
         local_elems = self.rankVector(elems)
         self.loadToPartitions(local_elems, 2)
         self.__math.max()
@@ -36,7 +94,8 @@ class IMathModuleTest(IModuleTest, unittest.TestCase):
 
     def test_min(self):
         self._executor_data.getContext().props()["ignis.partition.type"] = "Memory"
-        elems = IElementsInt().create(100 * 2, 0)
+        np = self._executor_data.getContext().executors()
+        elems = IElementsInt().create(100 * 2 * np, 0)
         local_elems = self.rankVector(elems)
         self.loadToPartitions(local_elems, 2)
         self.__math.min()

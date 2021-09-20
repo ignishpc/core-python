@@ -98,7 +98,7 @@ class IExecutorData:
         for key, value in source.params.items():
             buffer = IBytesTransport(value)
             proto = IObjectProtocol(buffer)
-            self.__context.vars[key] = proto.readObject()
+            self.__context.vars()[key] = proto.readObject()
 
     def reloadLibraries(self):
         backup_path = self.infoDirectory() + "/sources" + str(self.__context.executorId()) + ".bak"

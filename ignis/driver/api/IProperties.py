@@ -13,35 +13,35 @@ class IProperties:
 				else:
 					self._id = client.getPropertiesService().newInstance()
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-			raise IDriverException(ex.message, ex._cause)
+			raise IDriverException(ex.message, ex.cause_)
 
 	def set(self, key, value):
 		try:
 			with Ignis._pool.getClient() as client:
 				client.getPropertiesService().setProperty(self._id, key, value)
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-			raise IDriverException(ex.message, ex._cause)
+			raise IDriverException(ex.message, ex.cause_)
 
 	def get(self, key):
 		try:
 			with Ignis._pool.getClient() as client:
 				return client.getPropertiesService().getProperty(self._id, key)
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-			raise IDriverException(ex.message, ex._cause)
+			raise IDriverException(ex.message, ex.cause_)
 
 	def rm(self, key):
 		try:
 			with Ignis._pool.getClient() as client:
 				return client.getPropertiesService().rmProperty(self._id, key)
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-			raise IDriverException(ex.message, ex._cause)
+			raise IDriverException(ex.message, ex.cause_)
 
 	def contains(self, key):
 		try:
 			with Ignis._pool.getClient() as client:
 				return client.getPropertiesService().contains(self._id, key)
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-			raise IDriverException(ex.message, ex._cause)
+			raise IDriverException(ex.message, ex.cause_)
 
 	def __getitem__(self, key):
 		return self.get(key)
@@ -60,32 +60,32 @@ class IProperties:
 			with Ignis._pool.getClient() as client:
 				return client.getPropertiesService().toMap(self._id, defaults)
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-			raise IDriverException(ex.message, ex._cause)
+			raise IDriverException(ex.message, ex.cause_)
 
 	def fromMap(self, _map):
 		try:
 			with Ignis._pool.getClient() as client:
 				return client.getPropertiesService().fromDict(self._id, _map)
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-			raise IDriverException(ex.message, ex._cause)
+			raise IDriverException(ex.message, ex.cause_)
 
 	def load(self, path):
 		try:
 			with Ignis._pool.getClient() as client:
 				client.getPropertiesService().load(self._id, path)
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-			raise IDriverException(ex.message, ex._cause)
+			raise IDriverException(ex.message, ex.cause_)
 
 	def store(self, path):
 		try:
 			with Ignis._pool.getClient() as client:
 				client.getPropertiesService().store(self._id, path)
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-			raise IDriverException(ex.message, ex._cause)
+			raise IDriverException(ex.message, ex.cause_)
 
 	def clear(self):
 		try:
 			with Ignis._pool.getClient() as client:
 				client.getPropertiesService().clear(self._id)
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-			raise IDriverException(ex.message, ex._cause)
+			raise IDriverException(ex.message, ex.cause_)

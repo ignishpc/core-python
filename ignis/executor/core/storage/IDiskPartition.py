@@ -33,13 +33,19 @@ class IDiskPartition(IRawPartition):
 			self.clear()
 
 	def clone(self):
-		newPartition = IDiskPartition(self.__path + '0', self._compression, self._native, cls=self._cls)
+		newPath = self.__path
+		i = 0
+		while os.path.exists(newPath + "." + str(i)):
+			i += 1
+		newPath += "." + str(i)
+		newPartition = IDiskPartition(newPath, self._compression, self._native, cls=self._cls)
 		self.copyTo(newPartition)
 		return newPartition
 
 	def clear(self):
 		IRawPartition.clear(self)
 		self._transport.fileobj.truncate(0)
+		self.sync()
 
 	def fit(self):
 		pass
@@ -90,7 +96,7 @@ class IDiskPartition(IRawPartition):
 
 	def _writeHeader(self):
 		buffer = IMemoryBuffer(IRawPartition._HEADER)
-		zlib_buffer = IZlibTransport(buffer)
+		zlib_buffer = IZlibTransport(buffer, self._compression)
 		proto = IObjectProtocol(zlib_buffer)
 		proto.writeSerialization(self._native)
 		self._header.write(proto, self._elements, self._type)

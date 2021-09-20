@@ -400,7 +400,7 @@ class IMpi:
 				cls_list = group.gather(cls, root)
 				if rank == root:
 					for cls in cls_list:
-						if cls != None:
+						if cls is not None:
 							break
 				cls = group.bcast(cls, root)
 
@@ -457,7 +457,6 @@ class IMpi:
 					sz = 0
 				szv = (c_int * executors)() if rank == root else None
 				group.Gather((c_int(sz), 1, MPI.INT), (szv, 1, MPI.INT), root)
-
 				if root == rank:
 					displs = self.__displs(szv)
 					buffer.setBufferSize(displs[-1])
@@ -478,7 +477,6 @@ class IMpi:
 			ELEMS = 0
 			BYTES = 1
 			part.sync()
-			part._writeHeader()
 			buffer = part._transport
 			tmp_buffer = IMemoryBuffer()
 			hsz = (c_int * executors)() if rank == root else None
@@ -540,6 +538,7 @@ class IMpi:
 					else:
 						part.moveTo(rcv)
 				self.__partition_tools.swap(part, rcv)
+			group.Barrier()
 
 	def __sendRecv(self, part, source, dest, tag):
 		self.__sendRecvImpl(self.native(), part, source, dest, tag, True)
@@ -600,7 +599,7 @@ class IMpi:
 					elems = part._IMemoryPartition__elements
 					group.Send((elems.array, sz, MPI.BYTE), dest, tag)
 				else:
-					init = len(elems.array)
+					init = len(elems)
 					sz, dtype = group.recv(None, source, tag)
 					if part.empty():
 						tmp = self.__partition_tools.newNumpyMemoryPartition(dtype, sz)
@@ -632,7 +631,6 @@ class IMpi:
 			ELEMS = 0
 			BYTES = 1
 			part.sync()
-			part._writeHeader()
 			if id == source:
 				hsz = c_int(part._header_size)
 				group.Send((hsz, 1, MPI.INT), dest, tag)
@@ -647,19 +645,17 @@ class IMpi:
 				group.Send((buffer.getBuffer().address(), sz[BYTES], MPI.BYTE), dest, tag)
 			else:
 				group.Recv((sz, 2, MPI.INT), source, tag)
-				if not part:
-					part._header_size = hsz.value
-					buffer.setBufferSize(sz[BYTES])
-					buffer.setWriteBuffer(buffer.getBufferSize())
-					group.Recv((buffer.getBuffer().address(), sz[BYTES], MPI.BYTE), source, tag)
-					part._readHeader(IZlibTransport(part._readTransport()))
+				if part:
+					tmp = self.__partition_tools.newRawMemoryPartition()
+					buffer = tmp._transport
 				else:
-					tmp = IRawMemoryPartition()
-					tmp._header_size = hsz.value
-					tmp._transport.setBufferSize(sz[BYTES])
-					buffer.setWriteBuffer(buffer.getBufferSize())
-					group.Recv((tmp._transport.getBuffer().address(), sz[BYTES], MPI.BYTE), source, tag)
-					tmp._readHeader(IZlibTransport(part._readTransport()))
+					tmp = part
+				tmp._header_size = hsz.value
+				buffer.setBufferSize(sz[BYTES])
+				buffer.setWriteBuffer(buffer.getBufferSize())
+				group.Recv((buffer.getBuffer().address(), sz[BYTES], MPI.BYTE), source, tag)
+				tmp._readHeader(IZlibTransport(tmp._readTransport()))
+				if part != tmp:
 					tmp.moveTo(part)
 		else:
 			part.sync()
@@ -696,21 +692,17 @@ class IMpi:
 		numPartitions = input.partitions()
 		block = int(numPartitions / executors)
 		remainder = numPartitions % executors
-		parts_targets = list()
+		parts_targets = [None] * (block + 1) * executors
 
-		for i in range(block):
-			for j in range(executors):
-				if j < remainder:
-					parts_targets.append((block * j + i + j, j))
-				else:
-					parts_targets.append((block * j + i + remainder, j))
-
-		if block > 0:
-			for j in range(remainder):
-				parts_targets.append((block * j + block, j))
-		else:
-			for j in range(remainder):
-				parts_targets.append((j, j))
+		p = 0
+		for i in range(executors):
+			for j in range(block):
+				parts_targets[j * executors + i] = (p + j, i)
+			p += block
+			if i < remainder:
+				parts_targets[block * executors + i] = (p, i)
+				p += 1
+		parts_targets = list(filter(None, parts_targets))
 
 		cores = self.__propertyParser.cores()
 		p_type = input[0].type()
@@ -738,7 +730,12 @@ class IMpi:
 			def send(part, target):
 				part.sync()
 				trans = part._transport
-				info = shared_comm.allgather((trans.writeEnd() - IRawMemoryPartition._HEADER, len(part)))
+				info = shared_comm.allgather((trans.writeEnd() - IRawMemoryPartition._HEADER, len(part),
+				                              (part._header, part._type) if len(part) > 0 else None))
+				if sum(map(lambda a: a[1], info)) == info[target][1]:
+					if rank == target:
+						return part
+					return None
 				lsz = info[rank][0]
 				sz = sum(map(lambda a: a[0], info)) + IRawMemoryPartition._HEADER
 				disp = sum(list(map(lambda a: a[0], info))[0:rank]) + IRawMemoryPartition._HEADER
@@ -750,11 +747,17 @@ class IMpi:
 
 				buffer[disp:disp + lsz] = trans.getBuffer()[
 				                          IRawMemoryPartition._HEADER: IRawMemoryPartition._HEADER + lsz]
+				if rank != target and len(part) == 0:
+					buffer[0:IRawMemoryPartition._HEADER] = trans.getBuffer()[0:IRawMemoryPartition._HEADER]
 				shared_comm.Barrier()
 				if rank == target:
 					part._transport = IMemoryBuffer(sz, buffer, IMemoryBuffer.MemoryPolicy.TAKE_OWNERSHIP)
 					part._zlib = IZlibTransport(part._transport, part._compression)
 					part._transport.setReadBuffer(0)
+					if len(part) == 0:
+						header_type = list(filter(None, map(lambda a: a[2], info)))[0]
+						part._header = header_type[0]
+						part._type = header_type[1]
 					part._elements = elems
 					part._writeHeader()
 					if onlyShared:  # call it if no Gather
@@ -776,6 +779,10 @@ class IMpi:
 						array = part._IMemoryPartition__elements
 						info = shared_comm.allgather(len(array))
 						total = sum(info)
+						if info[target] == total:
+							if rank == target:
+								return part
+							return None
 						disp = sum(info[0:rank])
 						win = MPI.Win.Allocate_shared(total * array.itemsize() if rank == target else 0, 1,
 						                              comm=shared_comm)
@@ -796,6 +803,7 @@ class IMpi:
 						wrap = numpy.ndarray(buffer=buf, dtype=array.array.dtype, shape=(total,))
 						wrap[disp:disp + info[rank]] = array.array[0:info[rank]]
 
+						shared_comm.Barrier()
 						if rank == target:
 							aux = INumpyWrapper(wrap)
 							part._IMemoryPartition__elements = aux
@@ -811,6 +819,7 @@ class IMpi:
 			shared_comm = comm.Split_type(MPI.COMM_TYPE_SHARED)
 			onlyShared = shared_comm.Get_size() == self.executors()
 			rank = shared_comm.Get_rank()
+			cores = shared_comm.Get_size()
 			if shared_comm.Get_size() == 1:
 				logger.info("Local exchange aborting, no shared memory enabled")
 			else:
@@ -818,7 +827,7 @@ class IMpi:
 					p = parts_targets[i][0]
 					target = parts_targets[i][1] % cores
 					input[p] = send(input[p], target)
-					if parts_targets[i][1] == rank:
+					if target == rank:
 						aux = self.__partition_tools.newMemoryPartition(len(input[p]), cls)
 						input[p].moveTo(aux)
 						input[p] = aux
@@ -848,7 +857,7 @@ class IMpi:
 			shared_comm.Free()
 
 		for i in range(numPartitions):
-			if input[i]:
+			if input[i] is not None:
 				if p_type == op_type:
 					output.add(input[i])
 				else:
@@ -868,14 +877,16 @@ class IMpi:
 		ranges = list()
 		queue = list()
 
-		last = 0
 		for i in range(executors):
-			end = last + block + 1
 			if i < remainder:
-				end += 1
-			ranges.append((last, end))
+				init = (block + 1) * i
+				end = init + block + 1
+			else:
+				init = (block + 1) * remainder + block * (i - remainder)
+				end = init + block
+			ranges.append((init, end))
 
-		m = executors if executors % 2 else executors + 1
+		m = executors if executors % 2 == 0 else executors + 1
 		id = 0
 		id2 = m * m - 2
 		for i in range(m - 1):
@@ -884,7 +895,7 @@ class IMpi:
 			if rank == m - 1:
 				queue.append(id % (m - 1))
 			id += 1
-			for j in range(int(m / 2)):
+			for j in range(1, int(m / 2)):
 				if rank == id % (m - 1):
 					queue.append(id2 % (m - 1))
 				if rank == id2 % (m - 1):
@@ -895,11 +906,11 @@ class IMpi:
 		for i in range(len(queue)):
 			other = queue[i]
 			ignore = True
-			if other == executors:
+			if other == executors or other == rank:
 				continue
 			for j in range(ranges[other][0], ranges[other][1]):
 				ignore = ignore and input[j].empty()
-			ignore_other = self.native().sendrecv(ignore, other)
+			ignore_other = self.native().sendrecv(ignore, source=other, dest=other)
 			if ignore and ignore_other:
 				continue
 			other_part = ranges[other][0]

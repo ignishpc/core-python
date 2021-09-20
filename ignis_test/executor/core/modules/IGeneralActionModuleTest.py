@@ -50,10 +50,10 @@ class IGeneralActionModuleTest(IModuleTest, unittest.TestCase):
         self.__foreachTest("ForeachInt", "Memory", IElementsInt)
 
     def test_foreachPartitionString(self):
-        self.__foreachPartitionTest("ForeachPartitionString", "RawMemory", IElementsStr)
+        self.__foreachPartitionTest("ForeachPartitionString", "Memory", IElementsStr)
 
     def test_foreachExecutorString(self):
-        self.__foreachPartitionTest("ForeachExecutorString", "Memory", IElementsStr)
+        self.__foreachExecutorTest("ForeachExecutorString", "RawMemory", IElementsStr)
 
     def test_topInt(self):
         self.__topTest("Memory", IElementsInt)
@@ -236,8 +236,9 @@ class IGeneralActionModuleTest(IModuleTest, unittest.TestCase):
 
     def __topTest(self, partitionType, IElements):
         self._executor_data.getContext().props()["ignis.partition.type"] = partitionType
+        np = self._executor_data.getContext().executors()
         n = 30
-        elems = IElements().create(100, 0)
+        elems = IElements().create(100 * 5 * np, 0)
         local_elems = self.rankVector(elems)
         self.loadToPartitions(local_elems, 5)
         self.__generalAction.top(n)
@@ -250,8 +251,9 @@ class IGeneralActionModuleTest(IModuleTest, unittest.TestCase):
 
     def __customTopTest(self, name, partitionType, IElements):
         self._executor_data.getContext().props()["ignis.partition.type"] = partitionType
+        np = self._executor_data.getContext().executors()
         n = 30
-        elems = IElements().create(100, 0)
+        elems = IElements().create(100 * 5 * np, 0)
         local_elems = self.rankVector(elems)
         self.loadToPartitions(local_elems, 5)
         self.__generalAction.top2(n, self.newSource(name))
@@ -264,8 +266,9 @@ class IGeneralActionModuleTest(IModuleTest, unittest.TestCase):
 
     def __takeOrderedTest(self, partitionType, IElements):
         self._executor_data.getContext().props()["ignis.partition.type"] = partitionType
+        np = self._executor_data.getContext().executors()
         n = 30
-        elems = IElements().create(100, 0)
+        elems = IElements().create(100 * 5 * np, 0)
         local_elems = self.rankVector(elems)
         self.loadToPartitions(local_elems, 5)
         self.__generalAction.takeOrdered(n)
@@ -278,8 +281,9 @@ class IGeneralActionModuleTest(IModuleTest, unittest.TestCase):
 
     def __customTakeOrderedTest(self, name, partitionType, IElements):
         self._executor_data.getContext().props()["ignis.partition.type"] = partitionType
+        np = self._executor_data.getContext().executors()
         n = 30
-        elems = IElements().create(100, 0)
+        elems = IElements().create(100 * 5 * np, 0)
         local_elems = self.rankVector(elems)
         self.loadToPartitions(local_elems, 5)
         self.__generalAction.takeOrdered2(n, self.newSource(name))

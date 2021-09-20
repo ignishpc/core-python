@@ -31,7 +31,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  string rmProperty(i64 id, string key)')
     print('  bool contains(i64 id, string key)')
     print('   toMap(i64 id, bool defaults)')
-    print('  void fromMap(i64 id,  _map)')
+    print('  void fromMap(i64 id,  map_)')
     print('  void load(i64 id, string path)')
     print('  void store(i64 id, string path)')
     print('  void clear(i64 id)')

@@ -12,7 +12,7 @@ class IRepartitionImpl(IBaseImpl):
 		IBaseImpl.__init__(self, executor_data, logger)
 
 	def repartition(self, numPartitions, preserveOrdering, global_):
-		if not global_:
+		if not global_ or self._executor_data.mpi().executors() == 1:
 			self.__local_repartition(numPartitions)
 		elif preserveOrdering:
 			self.__ordered_repartition(numPartitions)
@@ -43,33 +43,35 @@ class IRepartitionImpl(IBaseImpl):
 		block = int(global_count / numPartitions)
 		remainder = global_count % numPartitions
 		new_partitions_offset.append(0)
-		for i in range(len(input)):
-			new_partitions_count[i] = block
+		for i in range(numPartitions):
+			new_partitions_count.append(block)
 			if i < remainder:
 				new_partitions_count[i] += 1
 			new_partitions_offset.append(new_partitions_offset[-1] + new_partitions_count[i])
-			if global_offset > new_partitions_offset[i] and new_partitions_first == -1:
+			if global_offset <= new_partitions_offset[i + 1] and new_partitions_first == -1:
 				new_partitions_first = i
 
 		logger.info("Repartition: ordered repartition from " + str(len(input)) + " partitions")
 		global_group = self._executor_data.getPartitionTools().newPartitionGroup(numPartitions)
 
-		for p in range(len(input)):
-			reader = input[p].readIterator()
-			for i in range(new_partitions_first, len(input)):
-				if global_offset + local_offset[p] > new_partitions_offset[i]:
-					elems = new_partitions_count[i] - (global_offset + local_offset[p])
-					part_offset = i
-					writer = global_group[part_offset].writeIterator()
-			while reader.hasNext():
-				while reader.hasNext() and elems > 0:
-					elems -= 1
-					writer.write((rank, reader.next()))
-				if reader.hasNext():
-					part_offset += 1
-					elems = new_partitions_count[part_offset]
-					writer = global_group[part_offset].writeIterator()
-			input[p] = None
+		if len(input) > 0:
+			i = new_partitions_first
+			required = new_partitions_offset[i + 1] - global_offset
+			for p in range(len(input)):
+				reader = input[p].readIterator()
+				avail = len(input[p])
+				while avail > 0:
+					if required == 0:
+						i += 1
+						required = new_partitions_count[i]
+					writer = global_group[i].writeIterator()
+					its = min(avail, required)
+					for _ in range(its):
+						writer.write((rank, reader.next()))
+					avail -= its
+					required -= its
+				input[p] = None
+
 
 		logger.info("Repartition: exchanging new partitions")
 		tmp = self._executor_data.getPartitionTools().newPartitionGroup()
@@ -85,14 +87,13 @@ class IRepartitionImpl(IBaseImpl):
 			men_part = self._executor_data.getPartitionTools().newMemoryPartition()
 			part.moveTo(men_part)
 			first = [0] * executors
-			for i in range(len(men_part)):
+			count = [0] * executors
+			for i in reversed(range(len(men_part))):
 				first[men_part[i][0]] = i
-			for e in first:
-				for i in range(first[e], len(men_part)):
-					if men_part[i][0] == e:
-						writer.write(men_part[i][1])
-					else:
-						break
+				count[men_part[i][0]] += 1
+			for e in range(executors):
+				for i in range(first[e], first[e] + count[e]):
+					writer.write(men_part[i][1])
 			tmp[p] = None
 			output.add(new_part)
 
@@ -111,34 +112,35 @@ class IRepartitionImpl(IBaseImpl):
 			if len(part) > msg_max:
 				msg_max = len(part)
 		logger.info("Repartition: unordered repartition from " + str(len(input)) + " partitions")
-		executor_count = self._executor_data.native().allgather(local_count)
-		msg_max = self._executor_data.native().allreduce(msg_max, MPI.MAX)
+		executor_count = self._executor_data.mpi().native().allgather(local_count)
+		msg_max = self._executor_data.mpi().native().allreduce(msg_max, MPI.MAX)
 
+		global_count = sum(executor_count)
 		average = int(global_count / executors)
 		executors_overhead = list()
 		for i in range(executors):
-			executors_overhead.append(average - executor_count[i])
+			executors_overhead.append(executor_count[i] - average)
+
 		src_target_size = list()
 		msg_count = [0 for _ in range(executors)]
 		other = 0
 		for i in range(executors):
-			while executors_overhead[i] >= 0 and other < executors:
-				if executors_overhead[other] <= 0:
+			while executors_overhead[i] > 0 and other < executors:
+				if executors_overhead[other] >= 0:
 					other += 1
 					continue
 				if executors_overhead[other] + executors_overhead[i] > 0:
-					elems = -executors_overhead[i]
-					executors_overhead[other] -= elems
-					executors_overhead[i] = 0
-				else:
-					elems = executors_overhead[other]
+					elems = -executors_overhead[other]
 					executors_overhead[other] = 0
-					executors_overhead[i] += elems
-					other += 1
+					executors_overhead[i] -= elems
+				else:
+					elems = executors_overhead[i]
+					executors_overhead[i] = 0
+					executors_overhead[other] += elems
 
 				while elems > 0:
 					total = min(elems, msg_max)
-					src_target_size.append((other, i, total))
+					src_target_size.append((i, other, total))
 					elems -= total
 					msg_count[i] += 1
 					if msg_count[i] > msg_num:
@@ -160,6 +162,7 @@ class IRepartitionImpl(IBaseImpl):
 					used = True
 					while reader.hasNext() and elems > 0:
 						writer.write(reader.next())
+						elems -= 1
 					if elems > 0:
 						input.remove(-1)
 						src_part = input[-1]
@@ -179,7 +182,7 @@ class IRepartitionImpl(IBaseImpl):
 		for part in input:
 			output.add(part)
 		for part in tmp:
-			if part.empty():
+			if not part.empty():
 				output.add(part)
 		self._executor_data.setPartitions(output)
 		self.__local_repartition(numPartitions)
@@ -212,7 +215,7 @@ class IRepartitionImpl(IBaseImpl):
 				if er == 0:
 					input[i - 1] = None
 					er = len(input[i])
-					it = input[0].readIterator()
+					it = input[i].readIterator()
 					i += 1
 				while ew > 0 and er > 0:
 					writer.write(it.next())
@@ -232,7 +235,8 @@ class IRepartitionImpl(IBaseImpl):
 	def partitionBy(self, f, numPartitions):
 		context = self._executor_data.getContext()
 		f.before(context)
-		self.__partitionBy_impl(f, numPartitions)
+		call = f.call
+		self.__partitionBy_impl(call, numPartitions)
 		f.after(context)
 
 	def __partitionBy_impl(self, f, numPartitions):

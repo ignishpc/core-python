@@ -72,10 +72,9 @@ class ICommImpl(IBaseImpl):
 		if len(group) > minPartitions:
 			for part in group:
 				buffer.resetBuffer()
-				part.write(part, cmp, native)
+				part.write(buffer, cmp, native)
 				partitions.append(buffer.getBufferAsBytes())
-		elif len(group) == 1 and self._executor_data.getPartitionTools().isMemory(
-				group) and protocol == self.getProtocol():
+		elif len(group) == 1 and self._executor_data.getPartitionTools().isMemory(group):
 			men = group[0]
 			zlib = IZlibTransport(buffer, cmp)
 			proto = IObjectProtocol(zlib)
@@ -109,18 +108,24 @@ class ICommImpl(IBaseImpl):
 				if p < remainder:
 					ew += 1
 
-				while ew > 0 and i < len(group):
+				while ew > 0:
 					if er == 0:
 						er = len(group[i])
 						it = group[i].readIterator()
 						i += 1
-					while ew > 0 and er > 0:
+					n = min(ew, er)
+					for _ in range(n):
 						writer.write(it.next())
-						ew -= 1
-						er -= 1
-					part.write(buffer, cmp, native)
-					partitions.append(buffer.getBufferAsBytes())
-					buffer.resetBuffer()
+					ew -= n
+					er -= n
+				part.write(buffer, cmp, native)
+				partitions.append(buffer.getBufferAsBytes())
+				buffer.resetBuffer()
+		else:
+			part = IMemoryPartition(native=native)
+			part.write(buffer, cmp, native)
+			for _ in range(minPartitions):
+				partitions.append(buffer.getBufferAsBytes())
 
 		return partitions
 
@@ -151,10 +156,9 @@ class ICommImpl(IBaseImpl):
 	def importData(self, group, source, threads):
 		comm = self.__getGroup(group)
 		executors = comm.Get_size()
-		me = comm.Get_size()
-		ranges = list()
-		queue = list()
-		offset = self.__importDataAux(comm, source, ranges, queue)
+		me = comm.Get_rank()
+		queue,  ranges = self.__importDataAux(comm, source)
+		offset = ranges[me][0]
 		if source:
 			logger.info("General: importData sending partitions")
 		else:
@@ -165,67 +169,68 @@ class ICommImpl(IBaseImpl):
 
 		for i in range(len(queue)):
 			other = queue[i]
-			ignore = c_bool(True)
-			if other == executors:
+			if other == executors or other == me:
 				continue
-			if source:
-				for j in range(ranges[other][0], ranges[other][1]):
-					ignore.value = ignore.value and shared[j - offset].empty()
-				comm.Send(ignore, 1, MPI.BOOL, other, 0)
-			else:
-				comm.Recv(ignore, 1, MPI.BOOL, other, 0)
-			if ignore:
+			init = max(ranges[me][0], ranges[other][0])
+			end = min(ranges[me][1], ranges[other][1])
+			if end - init < 1:
 				continue
-			if source:
-				first = ranges[other][0]
-				its = ranges[other][1] - ranges[other][0]
-			else:
-				first = ranges[me][0]
-				its = ranges[me][1] - ranges[me][0]
-			opt = self._executor_data.mpi().getMsgOpt(comm, shared[first].type(), source, other, 0)
-			for j in range(its):
+
+			opt = self._executor_data.mpi().getMsgOpt(comm, shared[0].type(), source, other, 0)
+			for j in range(end - init):
 				if source:
-					self._executor_data.mpi().sendGroup(comm, shared[first - offset + j], other, 0, opt)
-					shared[first - offset + j] = None
+					self._executor_data.mpi().sendGroup(comm, shared[init - offset + j], other, 0, opt)
+					shared[init - offset + j] = None
 				else:
-					self._executor_data.mpi().recvGroup(comm, shared[first - offset + j], other, 0, opt)
+					self._executor_data.mpi().recvGroup(comm, shared[init - offset + j], other, 0, opt)
 
 		self._executor_data.setPartitions(shared)
 
-	def __importDataAux(self, group, source, ranges, queue):
+	def __importDataAux(self, group, source):
 		rank = group.Get_rank()
 		local_rank = self._executor_data.mpi().rank()
 		executors = group.Get_size()
 		local_executors = self._executor_data.getContext().executors()
 		remote_executors = executors - local_executors
-		local_root = rank == 0 if self._executor_data.mpi().rank() else remote_executors
-		remote_root = remote_executors if local_root == 0 else 0
+		local_root = rank - local_rank
+		remote_root = local_executors if local_root == 0 else 0
 		source_root = local_root if source else remote_root
-		target_executors = local_executors if source else remote_executors
-		count = c_longlong(0)
+		target_executors = remote_executors if source else local_executors
 		numPartitions = c_longlong(0)
 		if source:
 			input = self._executor_data.getPartitions()
-			count.value = sum(map(len, input))
 			numPartitions.value = len(input)
-		group.Allreduce(MPI.IN_PLACE, numPartitions, 1, MPI.LONG_LONG, MPI.SUM)
+
+		executors_count = (c_longlong * executors)()
+		group.Allgather((numPartitions, 1, MPI.LONG_LONG), (executors_count, 1, MPI.LONG_LONG))
+		numPartitions = sum(executors_count)
 		logger.info("General: importData " + str(numPartitions) + "partitions")
-		block = int(numPartitions.value / target_executors)
-		remainder = numPartitions.value % target_executors
-		last = 0
+		source_ranges = list()
+		offset = 0
+
+		for i in range(source_root, source_root + executors - target_executors):
+			source_ranges.append((offset, offset + executors_count[i]))
+			offset += executors_count[i]
+
+		block = int(numPartitions / target_executors)
+		remainder = numPartitions % target_executors
+		target_ranges = list()
 		for i in range(target_executors):
-			end = last + block + 1
 			if i < remainder:
-				end += 1
-			ranges.append((last, end))
+				init = (block + 1) * i
+				end = init + block + 1
+			else:
+				init = (block + 1) * remainder + block * (i - remainder)
+				end = init + block
+			target_ranges.append((init, end))
 
 		if source_root == 0:
-			ranges = [(0, 0) for _ in range(executors - target_executors)] + ranges
+			ranges = source_ranges + target_ranges
 		else:
-			ranges = [(ranges[-1][1], ranges[-1][1]) for _ in range(executors - target_executors)] + ranges
+			ranges = target_ranges + source_ranges
 
 		global_queue = list()
-		m = executors if executors % 2 else executors + 1
+		m = executors if executors % 2 == 0 else executors + 1
 		id = 0
 		id2 = m * m - 2
 		for i in range(m - 1):
@@ -234,13 +239,14 @@ class ICommImpl(IBaseImpl):
 			if rank == m - 1:
 				global_queue.append(id % (m - 1))
 			id += 1
-			for j in range(int(m / 2)):
+			for j in range(1, int(m / 2)):
 				if rank == id % (m - 1):
 					global_queue.append(id2 % (m - 1))
 				if rank == id2 % (m - 1):
 					global_queue.append(id % (m - 1))
 				id += 1
 				id2 -= 1
+		queue = list()
 		for other in global_queue:
 			if local_root > 0:
 				if other < local_root:
@@ -248,14 +254,7 @@ class ICommImpl(IBaseImpl):
 			else:
 				if other >= remote_root:
 					queue.append(other)
-		if source:
-			executors_count = (c_longlong * executors)()
-			offset = 0
-			self._executor_data.mpi().native().Allgather(count, 1, MPI.LONG_LONG, executors_count, 1, MPI.LONG_LONG)
-			for i in range(local_rank):
-				local_rank += executors_count[i].value
-			return offset
-		return ranges[rank][0]
+		return queue, ranges
 
 	def __joinToGroupImpl(self, id, leader):
 		root = self._executor_data.hasVariable("server")

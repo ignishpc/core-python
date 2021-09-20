@@ -1,8 +1,11 @@
+import glob
 import math
-import random
+import os
+import shutil
 import unittest
 
 from ignis.executor.core.modules.IIOModule import IIOModule
+from ignis_test.executor.core.IElements import IElementsStr
 from ignis_test.executor.core.modules.IModuleTest import IModuleTest
 
 
@@ -26,27 +29,31 @@ class IIOModuleTest(IModuleTest, unittest.TestCase):
 	def test_saveAsTextFile(self):
 		self.__saveAsTextFileTest(8)
 
+	def test_partitionTextFile(self):
+		self.__partitionTextFileTest()
+
+	def test_partitionJsonFile(self):
+		self.__partitionJsonFileTest()
+
+	def test_partitionObjectFile(self):
+		self.__partitionObjectFileTest()
+
 	# -------------------------------------Impl-------------------------------------
 
 	def __textFileTest(self, n):
-		random.seed(0)
-		alphanum = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-		path = "./tmpfile.txt"
-		executors = self._executor_data.getContext().executors()
+		path = "./testfile.txt"
+		np = self._executor_data.mpi().executors()
 		lines = list()
 		with open(path, "w") as file:
-			for l in range(10000):
-				lc = random.randint(0, 100)
-				line = ""
-				for l in range(lc):
-					line += alphanum[random.randint(0, len(alphanum) - 1)]
+			for i in range(100):
+				line = ''.join(IElementsStr().create(100, i))
 				file.write(line)
 				file.write('\n')
 				lines.append(line)
 
 		self.__io.textFile2(path, n)
 
-		self.assertGreaterEqual(math.ceil(n / executors), self.__io.partitionCount())
+		self.assertGreaterEqual(math.ceil(n / np), self.__io.partitionCount())
 
 		result = self.getFromPartitions()
 
@@ -58,17 +65,83 @@ class IIOModuleTest(IModuleTest, unittest.TestCase):
 			self.assertEqual(lines, result)
 
 	def __saveAsTextFileTest(self, n):
-		random.seed(0)
-		alphanum = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-		id = self._executor_data.getContext().executorId()
+		path = "./savetest.txt"
+		rank = self._executor_data.mpi().rank()
+		np = self._executor_data.mpi().executors()
+		if np > 0:
+			path = "." + path
 		lines = list()
+		for i in range(20 * n * np):
+			line = ''.join(IElementsStr().create(10, i))
+			lines.append(line)
 
-		for l in range(10000):
-			lc = random.randint(0, 100)
-			line = ""
-			for l in range(lc):
-				line += alphanum[random.randint(0, len(alphanum) - 1)]
+		local_lines = self.rankVector(lines)
+		self.loadToPartitions(local_lines, n)
+		if self._executor_data.mpi().isRoot(0) and os.path.exists(path):
+			shutil.rmtree(path)
+		self._executor_data.mpi().barrier()
+		self.__io.saveAsTextFile(path, rank * n)
+		self._executor_data.mpi().barrier()
+		if self._executor_data.mpi().isRoot(0):
+			parts = sorted(glob.glob(path + "/*"))
+			self.assertEqual(len(parts), n * np)
+			result = list()
+			for part in parts:
+				with open(part, "r") as file:
+					for line in file:
+						result.append(line.strip())
+			self.assertEqual(result, lines)
+
+	def __partitionTextFileTest(self):
+		path = "./savetest.txt"
+		n = 8
+		rank = self._executor_data.mpi().rank()
+		lines = list()
+		for i in range(100 * n):
+			line = ''.join(IElementsStr().create(10, i))
 			lines.append(line)
 
 		self.loadToPartitions(lines, n)
-		self.__io.saveAsTextFile("./tmpsave", id)
+		if os.path.exists(path):
+			shutil.rmtree(path)
+		self.__io.saveAsTextFile(path, rank * n)
+		self.__io.partitionTextFile(path, rank * n, n)
+
+		result = self.getFromPartitions()
+		self.assertEqual(result, lines)
+
+	def __partitionJsonFileTest(self):
+		path = "./savetestjson"
+		n = 8
+		rank = self._executor_data.mpi().rank()
+		lines = list()
+		for i in range(100 * n):
+			line = ''.join(IElementsStr().create(10, i))
+			lines.append(line)
+
+		self.loadToPartitions(lines, n)
+		if os.path.exists(path):
+			shutil.rmtree(path)
+		self.__io.saveAsJsonFile(path, rank * n, True)
+		self.__io.partitionJsonFile4a(path, rank * n, n, True)
+
+		result = self.getFromPartitions()
+		self.assertEqual(result, lines)
+
+	def __partitionObjectFileTest(self):
+		path = "./savetestbin"
+		n = 8
+		rank = self._executor_data.mpi().rank()
+		lines = list()
+		for i in range(100 * n):
+			line = ''.join(IElementsStr().create(10, i))
+			lines.append(line)
+
+		self.loadToPartitions(lines, n)
+		if os.path.exists(path):
+			shutil.rmtree(path)
+		self.__io.saveAsObjectFile(path, 0, rank * n)
+		self.__io.partitionObjectFile(path, rank * n, n)
+
+		result = self.getFromPartitions()
+		self.assertEqual(result, lines)

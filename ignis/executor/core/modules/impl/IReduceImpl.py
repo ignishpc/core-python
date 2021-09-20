@@ -112,9 +112,9 @@ class IReduceImpl(IBaseImpl):
 		logger.info("Reduce: union " + str(len(input)) + " and " + str(len(input2)) + " partitions")
 		if len(input) > 0:
 			storage = input[0].type()
-			if input.type() != input2.type():
+			if input[0].type() != input2[0].type():
 				for i in range(len(input2)):
-					new_part = self._executor_data.getPartitionTools().newPartition()
+					new_part = self._executor_data.getPartitionTools().newPartition(storage)
 					input2[i].copyTo(new_part)
 					input2[i] = new_part
 		else:
@@ -142,13 +142,14 @@ class IReduceImpl(IBaseImpl):
 			tmp = self._executor_data.getPartitionTools().newPartitionGroup()
 			def create(n):
 				for i in range(n):
-					tmp.add(self._executor_data.getPartitionTools.newPartition(storage))
+					tmp.add(self._executor_data.getPartitionTools().newPartition(storage))
 			def copy(parts):
 				for part in parts:
 					tmp.add(part)
 
 			create(offset)
 			copy(input)
+			create(global_count - len(tmp))
 			create(offset2)
 			copy(input2)
 			create(global_count + global_count2 - len(tmp))
@@ -190,7 +191,7 @@ class IReduceImpl(IBaseImpl):
 
 			for key, value2 in input2[p]:
 				if key in acum:
-					for _, value1 in acum[key]:
+					for value1 in acum[key]:
 						writer.write((key, (value1, value2)))
 			input2[p] = None
 			acum.clear()
@@ -306,22 +307,28 @@ class IReduceImpl(IBaseImpl):
 		executors = self._executor_data.mpi().executors()
 		rank = self._executor_data.mpi().rank()
 		context = self._executor_data.getContext()
-		pivotUp = executors
 		output = self._executor_data.getPartitionTools().newPartitionGroup()
 		# logger.info("Reduce: reducing all elements in the executor")
 		# Python is single core, len(partial) is always 1
 
 		logger.info("Reduce: performing a final tree reduce")
-		while pivotUp > 1:
-			pivotDown = math.floor(pivotUp / 2)
-			pivotUp = math.ceil(pivotUp / 2)
-			if rank < pivotDown:
-				self._executor_data.mpi().recv(partial, rank + pivotUp, 0)
+		distance = 0
+		order = 1
+		while distance < executors:
+			distance += 1
+			order *= 2
+			if rank % order == 0:
+				other = rank + distance
+				if other >= executors:
+					continue
+				self._executor_data.mpi().recv(partial, other, 0)
 				result = f.call(partial[0], partial[1], context)
 				partial.clear()
 				partial.writeIterator().write(result)
-			elif rank >= pivotUp:
-				self._executor_data.mpi().send(partial, rank - pivotUp, 0)
+			else:
+				other = rank - distance
+				self._executor_data.mpi().send(partial, other, 0)
+				break
 
 		if self._executor_data.mpi().isRoot(0) and len(partial) > 0:
 			result = self._executor_data.getPartitionTools().newMemoryPartition(1)
@@ -379,7 +386,7 @@ class IReduceImpl(IBaseImpl):
 	def __distinctFilter(self, parts):
 		distinct = set()
 		for i in range(len(parts)):
-			new_part = self._executor_data.getPartitionTools.newPartition()
+			new_part = self._executor_data.getPartitionTools().newPartition()
 			writer = new_part.writeIterator()
 			for elem in parts[i]:
 				if elem not in distinct:

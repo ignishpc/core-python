@@ -35,6 +35,7 @@ class ICacheImpl(IBaseImpl):
 	def clearContext(self):
 		self._executor_data.deletePartitions()
 		self._executor_data.clearVariables()
+		self._executor_data.getContext().vars().clear()
 
 	def loadContext(self, id):
 		value = self.__context.get(id, None)

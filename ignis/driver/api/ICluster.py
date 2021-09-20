@@ -19,53 +19,53 @@ class ICluster:
 					else:
 						self._id = client.getClusterService().newInstance2(name, properties._id)
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-			raise IDriverException(ex.message, ex._cause)
+			raise IDriverException(ex.message, ex.cause_)
 
 	def start(self):
 		try:
 			with Ignis._pool.getClient() as client:
 				client.getClusterService().start(self._id)
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-			raise IDriverException(ex.message, ex._cause)
+			raise IDriverException(ex.message, ex.cause_)
 
 	def destroy(self):
 		try:
 			with Ignis._pool.getClient() as client:
 				client.getClusterService().destroy(self._id)
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-			raise IDriverException(ex.message, ex._cause)
+			raise IDriverException(ex.message, ex.cause_)
 
 	def setName(self, name):
 		try:
 			with Ignis._pool.getClient() as client:
 				client.getClusterService().setName(self._id, name)
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-			raise IDriverException(ex.message, ex._cause)
+			raise IDriverException(ex.message, ex.cause_)
 
 	def execute(self, *args):
 		try:
 			with Ignis._pool.getClient() as client:
 				client.getClusterService().execute(self._id, args)
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-			raise IDriverException(ex.message, ex._cause)
+			raise IDriverException(ex.message, ex.cause_)
 
 	def executeScript(self, script):
 		try:
 			with Ignis._pool.getClient() as client:
 				client.getClusterService().executeScript(self._id, script)
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-			raise IDriverException(ex.message, ex._cause)
+			raise IDriverException(ex.message, ex.cause_)
 
 	def sendFile(self, source, target):
 		try:
 			with Ignis._pool.getClient() as client:
 				client.getClusterService().sendFile(self._id, source, target)
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-			raise IDriverException(ex.message, ex._cause)
+			raise IDriverException(ex.message, ex.cause_)
 
 	def sendCompressedFile(self, source, target):
 		try:
 			with Ignis._pool.getClient() as client:
 				client.getClusterService().sendCompressedFile(self._id, source, target)
 		except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-			raise IDriverException(ex.message, ex._cause)
+			raise IDriverException(ex.message, ex.cause_)

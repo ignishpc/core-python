@@ -1,6 +1,7 @@
 from ignis.executor.core.storage import IMemoryPartition
 from ignis.executor.core.IMpi import MPI
 
+
 class IBaseImpl:
     def __init__(self, executor_data, logger):
         self._executor_data = executor_data
@@ -38,12 +39,12 @@ class IBaseImpl:
         else:
             self.__logger.info("Base: detecting exchange type")
             data = [len(input), sum(1 for p in input if p.empty())]
-            data = self._executor_data.mpi().reduce(data, MPI.SUM)
+            data = self._executor_data.mpi().native().reduce(data, MPI.SUM)
             if self._executor_data.mpi().isRoot(0):
                 n = data[0]
                 n_zero = data[1]
                 sync = n_zero < int(n / executors)
-            sync = self._executor_data.mpi().bcast(sync)
+            sync = self._executor_data.mpi().native().bcast(sync, 0)
 
         if sync:
             self.__logger.info("Base: using synchronous exchange")

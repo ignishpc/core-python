@@ -76,11 +76,11 @@ class Iface(object):
         """
         pass
 
-    def fromMap(self, id, _map):
+    def fromMap(self, id, map_):
         """
         Parameters:
          - id
-         - _map
+         - map_
 
         """
         pass
@@ -363,21 +363,21 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "toMap failed: unknown result")
 
-    def fromMap(self, id, _map):
+    def fromMap(self, id, map_):
         """
         Parameters:
          - id
-         - _map
+         - map_
 
         """
-        self.send_fromMap(id, _map)
+        self.send_fromMap(id, map_)
         self.recv_fromMap()
 
-    def send_fromMap(self, id, _map):
+    def send_fromMap(self, id, map_):
         self._oprot.writeMessageBegin('fromMap', TMessageType.CALL, self._seqid)
         args = fromMap_args()
         args.id = id
-        args._map = _map
+        args.map_ = map_
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -723,7 +723,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = fromMap_result()
         try:
-            self._handler.fromMap(args.id, args._map)
+            self._handler.fromMap(args.id, args.map_)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -1836,14 +1836,14 @@ class fromMap_args(object):
     """
     Attributes:
      - id
-     - _map
+     - map_
 
     """
 
 
-    def __init__(self, id=None, _map=None,):
+    def __init__(self, id=None, map_=None,):
         self.id = id
-        self._map = _map
+        self.map_ = map_
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -1861,12 +1861,12 @@ class fromMap_args(object):
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.MAP:
-                    self._map = {}
+                    self.map_ = {}
                     (_ktype10, _vtype11, _size9) = iprot.readMapBegin()
                     for _i13 in range(_size9):
                         _key14 = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
                         _val15 = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
-                        self._map[_key14] = _val15
+                        self.map_[_key14] = _val15
                     iprot.readMapEnd()
                 else:
                     iprot.skip(ftype)
@@ -1884,10 +1884,10 @@ class fromMap_args(object):
             oprot.writeFieldBegin('id', TType.I64, 1)
             oprot.writeI64(self.id)
             oprot.writeFieldEnd()
-        if self._map is not None:
-            oprot.writeFieldBegin('_map', TType.MAP, 2)
-            oprot.writeMapBegin(TType.STRING, TType.STRING, len(self._map))
-            for kiter16, viter17 in self._map.items():
+        if self.map_ is not None:
+            oprot.writeFieldBegin('map_', TType.MAP, 2)
+            oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.map_))
+            for kiter16, viter17 in self.map_.items():
                 oprot.writeString(kiter16.encode('utf-8') if sys.version_info[0] == 2 else kiter16)
                 oprot.writeString(viter17.encode('utf-8') if sys.version_info[0] == 2 else viter17)
             oprot.writeMapEnd()
@@ -1912,7 +1912,7 @@ all_structs.append(fromMap_args)
 fromMap_args.thrift_spec = (
     None,  # 0
     (1, TType.I64, 'id', None, None, ),  # 1
-    (2, TType.MAP, '_map', (TType.STRING, 'UTF8', TType.STRING, 'UTF8', False), None, ),  # 2
+    (2, TType.MAP, 'map_', (TType.STRING, 'UTF8', TType.STRING, 'UTF8', False), None, ),  # 2
 )
 
 

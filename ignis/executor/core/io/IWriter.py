@@ -93,7 +93,7 @@ class IWriterTypeIt(IWriterType):
 		IWriterType.__init__(self, id, write)
 
 	def get(self, obj):
-		if obj:
+		if obj is not None and len(obj) > 0:
 			return self._getWriter(type(next(iter(obj))))
 		return self._getWriter(None)
 
@@ -136,7 +136,7 @@ def __writeMap(protocol, obj):
 		keyWriter = IWriter._getWriterType(None)
 		valueWriter = IWriter._getWriterType(None)
 	else:
-		entry = next(iter(obj))
+		entry = next(iter(obj.items()))
 		keyWriter = IWriter._getWriterType(entry[0])
 		valueWriter = IWriter._getWriterType(entry[1])
 	keyWriter.writeType(protocol)

@@ -136,3 +136,9 @@ class ForeachPartitionString(IVoidFunction):
 class ForeachExecutorString(IVoidFunction):
     def call(self, parts, context):
         context.vars()["test"] = True
+
+
+class PartitionByStr(IFunction):
+
+    def call(self, e, context):
+        return hash(e)

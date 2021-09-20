@@ -92,7 +92,7 @@ class IIOImpl(IBaseImpl):
 				partition = self._executor_data.getPartitionTools().newPartition()
 				write_iterator = partition.writeIterator()
 				for line in file:
-					write_iterator.write(line)
+					write_iterator.write(line.strip('\n'))
 				group.add(partition)
 
 	def partitionJsonFile(self, path, first, partitions, objectMapping):
@@ -101,7 +101,7 @@ class IIOImpl(IBaseImpl):
 		self._executor_data.setPartitions(group)
 
 		for i in range(partitions):
-			with self.__openFileRead(self.__partitionFileName(path, first + i)) as file:
+			with self.__openFileRead(self.__partitionFileName(path, first + i) + ".json") as file:
 				partition = self._executor_data.getPartitionTools().newPartition()
 				write_iterator = partition.writeIterator()
 				if objectMapping:

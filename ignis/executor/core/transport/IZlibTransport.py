@@ -33,7 +33,7 @@ class IZlibTransport(TZlibTransport):
         """
         if not self.__winit:
             self.write(bytes(0))
-        elif self.__in_compression == 0:
+        elif self.compresslevel == 0:
             self.__trans.flush()
             return
 

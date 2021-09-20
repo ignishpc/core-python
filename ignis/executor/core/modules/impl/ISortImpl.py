@@ -360,7 +360,7 @@ class ISortImpl(IBaseImpl):
             inner.append(elem)
             return
         if len(inner) == n:
-            if comparator(inner[-1], elem) == ascending:
+            if comparator(inner[-1], elem) == ascending or not (comparator(elem, inner[-1]) == ascending):
                 return
             i = self.__searchRange(elem, top, comparator, ascending)
         else:
@@ -399,10 +399,9 @@ class ISortImpl(IBaseImpl):
         result.writeIterator().write(elem)
         self._executor_data.mpi().gather(result, 0)
         if self._executor_data.mpi().isRoot(0):
-            for part in input:
-                for item in part:
-                    if comparator(item, elem) == ascending:
-                        elem = item
+            for item in result:
+                if comparator(item, elem) == ascending:
+                    elem = item
             result.clear()
             result.writeIterator().write(elem)
             output.add(result)

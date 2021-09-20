@@ -229,7 +229,7 @@ class IPipeImpl(IBaseImpl):
         context = self._executor_data.getContext()
         f.before(context)
         logger.info("General: foreachExecutor " + str(len(input)) + " partitions")
-        if not inMemory or input.cache():
+        if not inMemory:
             logger.info("General: loading partitions in memory")
             aux = self._executor_data.getPartitionTools().newPartitionGroup()
             for part in input:

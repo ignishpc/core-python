@@ -20,14 +20,14 @@ class IExecutorException(TException):
     """
     Attributes:
      - message
-     - _cause
+     - cause_
 
     """
 
 
-    def __init__(self, message=None, _cause=None,):
+    def __init__(self, message=None, cause_=None,):
         super(IExecutorException, self).__setattr__('message', message)
-        super(IExecutorException, self).__setattr__('_cause', _cause)
+        super(IExecutorException, self).__setattr__('cause_', cause_)
 
     def __setattr__(self, *args):
         raise TypeError("can't modify immutable instance")
@@ -36,7 +36,7 @@ class IExecutorException(TException):
         raise TypeError("can't modify immutable instance")
 
     def __hash__(self):
-        return hash(self.__class__) ^ hash((self.message, self._cause, ))
+        return hash(self.__class__) ^ hash((self.message, self.cause_, ))
 
     @classmethod
     def read(cls, iprot):
@@ -44,7 +44,7 @@ class IExecutorException(TException):
             return iprot._fast_decode(None, iprot, [cls, cls.thrift_spec])
         iprot.readStructBegin()
         message = None
-        _cause = None
+        cause_ = None
         while True:
             (fname, ftype, fid) = iprot.readFieldBegin()
             if ftype == TType.STOP:
@@ -56,7 +56,7 @@ class IExecutorException(TException):
                     iprot.skip(ftype)
             elif fid == 2:
                 if ftype == TType.STRING:
-                    _cause = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
+                    cause_ = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
             else:
@@ -65,7 +65,7 @@ class IExecutorException(TException):
         iprot.readStructEnd()
         return cls(
             message=message,
-            _cause=_cause,
+            cause_=cause_,
         )
 
     def write(self, oprot):
@@ -77,9 +77,9 @@ class IExecutorException(TException):
             oprot.writeFieldBegin('message', TType.STRING, 1)
             oprot.writeString(self.message.encode('utf-8') if sys.version_info[0] == 2 else self.message)
             oprot.writeFieldEnd()
-        if self._cause is not None:
-            oprot.writeFieldBegin('_cause', TType.STRING, 2)
-            oprot.writeString(self._cause.encode('utf-8') if sys.version_info[0] == 2 else self._cause)
+        if self.cause_ is not None:
+            oprot.writeFieldBegin('cause_', TType.STRING, 2)
+            oprot.writeString(self.cause_.encode('utf-8') if sys.version_info[0] == 2 else self.cause_)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -87,8 +87,8 @@ class IExecutorException(TException):
     def validate(self):
         if self.message is None:
             raise TProtocolException(message='Required field message is unset!')
-        if self._cause is None:
-            raise TProtocolException(message='Required field _cause is unset!')
+        if self.cause_ is None:
+            raise TProtocolException(message='Required field cause_ is unset!')
         return
 
     def __str__(self):
@@ -108,7 +108,7 @@ all_structs.append(IExecutorException)
 IExecutorException.thrift_spec = (
     None,  # 0
     (1, TType.STRING, 'message', 'UTF8', None, ),  # 1
-    (2, TType.STRING, '_cause', 'UTF8', None, ),  # 2
+    (2, TType.STRING, 'cause_', 'UTF8', None, ),  # 2
 )
 fix_spec(all_structs)
 del all_structs

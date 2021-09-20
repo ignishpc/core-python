@@ -9,6 +9,7 @@ class IRawMemoryPartition(IRawPartition):
 	def __init__(self, bytes, compression, native, cls=list):
 		buffer = IMemoryBuffer(bytes + IRawPartition._HEADER)
 		IRawPartition.__init__(self, buffer, compression, native, cls)
+		self.clear()
 
 	def clone(self):
 		newPartition = IRawMemoryPartition(self.bytes(), self._compression, self._native, self._cls)
@@ -22,6 +23,7 @@ class IRawMemoryPartition(IRawPartition):
 	def clear(self):
 		IRawPartition.clear(self)
 		self._transport.resetBuffer()
+		self.sync()
 
 	def fit(self):
 		self._transport.setBufferSize(self._transport.getBufferSize())
@@ -31,6 +33,10 @@ class IRawMemoryPartition(IRawPartition):
 
 	def _getBuffer(self):
 		return self._transport
+
+	def sync(self):
+		IRawPartition.sync(self)
+		self._writeHeader()
 
 	def _readTransport(self):
 		init = IRawPartition._HEADER - self._header_size

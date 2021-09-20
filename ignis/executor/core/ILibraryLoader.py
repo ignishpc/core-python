@@ -37,7 +37,11 @@ class ILibraryLoader:
 	def loadLibrary(self, path):
 		if "\n" in path:
 			path = self.__loadSource(path)
+		if not os.path.exists(path):
+			raise RuntimeError(path + " not found")
 		spec = importlib.util.spec_from_file_location(name="", location=path)
+		if spec is None:
+			raise RuntimeError(path + " is malformed")
 		module = importlib.util.module_from_spec(spec)
 		spec.loader.exec_module(module)
 		try:
@@ -62,18 +66,22 @@ class ILibraryLoader:
 		exec(src, None, result)
 		if len(result) > 1:
 			raise RuntimeError("Only one function can be defined inside lambda code, found: " + " ".join(result.keys()))
-		f = next(iter(result))
+		f = next(iter(result.values()))
 		return IFunctionDef(f)
 
 	def __loadSource(self, src):
 		folder = os.path.join(self.__properties.executorDirectory(), "pysrc")
 		os.makedirs(folder, exist_ok=True)
-		file = os.path.join(folder, hashlib.sha1(src).hexdigest())
+		file = os.path.join(folder, hashlib.sha1(src.encode()).hexdigest())
 		file2 = file
+		file += ".py"
 		i = 0
 		while os.path.exists(file):
+			with open(file, "r") as other:
+				if src == other.read():
+					break
 			i += 1
-			file = file2 + str(i)
+			file = file2 + str(i) + ".py"
 		with open(file, "w") as output:
 			output.write(src)
 		return file

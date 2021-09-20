@@ -24,119 +24,119 @@ class IDataFrame:
             with Ignis._pool.getClient() as client:
                 client.getDataFrameService().setName(self._id, name)
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def persist(self, cacheLevel):
         try:
             with Ignis._pool.getClient() as client:
                 client.getDataFrameService().persist(self._id, cacheLevel.value)
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def cache(self):
         try:
             with Ignis._pool.getClient() as client:
                 client.getDataFrameService().cache(self._id)
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def unpersist(self):
         try:
             with Ignis._pool.getClient() as client:
                 client.getDataFrameService().unpersist(self._id)
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def uncache(self):
         try:
             with Ignis._pool.getClient() as client:
                 client.getDataFrameService().uncache(self._id)
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def partitions(self):
         try:
             with Ignis._pool.getClient() as client:
                 return IDataFrame(client.getDataFrameService().partitions(self._id))
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def saveAsObjectFile(self, path, compression=6):
         try:
             with Ignis._pool.getClient() as client:
                 client.getDataFrameService().saveAsObjectFile(self._id, path, compression)
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def saveAsTextFile(self, path):
         try:
             with Ignis._pool.getClient() as client:
                 client.getDataFrameService().saveAsTextFile(self._id, path)
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def saveAsJsonFile(self, path, pretty=True):
         try:
             with Ignis._pool.getClient() as client:
                 client.getDataFrameService().saveAsJsonFile(self._id, path, pretty)
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def repartition(self, numPartitions):
         try:
             with Ignis._pool.getClient() as client:
                 self._id = client.getDataFrameService().repartition(self._id, numPartitions)
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def partitionByRandom(self, numPartitions):
         try:
             with Ignis._pool.getClient() as client:
                 self._id = client.getDataFrameService().partitionByRandom(self._id, numPartitions)
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def partitionByHash(self, numPartitions):
         try:
             with Ignis._pool.getClient() as client:
                 self._id = client.getDataFrameService().partitionByHash(self._id, numPartitions)
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def partitionBy(self, src, numPartitions):
         try:
             with Ignis._pool.getClient() as client:
                 self._id = client.getDataFrameService().partitionBy(self._id, ISource.wrap(src).rpc(),numPartitions)
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def map(self, src):
         try:
             with Ignis._pool.getClient() as client:
                 return IDataFrame(client.getDataFrameService().map_(self._id, ISource.wrap(src).rpc()))
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def filter(self, src):
         try:
             with Ignis._pool.getClient() as client:
                 return IDataFrame(client.getDataFrameService().filter(self._id, ISource.wrap(src).rpc()))
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def flatmap(self, src):
         try:
             with Ignis._pool.getClient() as client:
                 return IDataFrame(client.getDataFrameService().flatmap(self._id, ISource.wrap(src).rpc()))
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def keyBy(self, src):
         try:
             with Ignis._pool.getClient() as client:
                 return IPairDataFrame(client.getDataFrameService().keyBy(self._id, ISource.wrap(src).rpc()))
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def mapPartitions(self, src, preservesPartitioning=True):
         try:
@@ -144,7 +144,7 @@ class IDataFrame:
                 return IDataFrame(client.getDataFrameService().mapPartitions(self._id, ISource.wrap(src).rpc(),
                                                                              preservesPartitioning))
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def mapPartitionsWithIndex(self, src, preservesPartitioning=True):
         try:
@@ -152,21 +152,21 @@ class IDataFrame:
                 return IDataFrame(client.getDataFrameService().mapPartitionsWithIndex(self._id, ISource.wrap(src).rpc(),
                                                                                       preservesPartitioning))
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def mapExecutor(self, src):
         try:
             with Ignis._pool.getClient() as client:
                 return IDataFrame(client.getDataFrameService().mapExecutor(self._id, ISource.wrap(src).rpc()))
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def mapExecutorTo(self, src):
         try:
             with Ignis._pool.getClient() as client:
                 return IDataFrame(client.getDataFrameService().mapExecutorTo(self._id, ISource.wrap(src).rpc()))
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def groupBy(self, src, numPartitions=None):
         try:
@@ -177,7 +177,7 @@ class IDataFrame:
                     return IPairDataFrame(
                         client.getDataFrameService().groupBy2(self._id, ISource.wrap(src).rpc(), numPartitions))
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def sort(self, ascending=True, numPartitions=None):
         try:
@@ -187,7 +187,7 @@ class IDataFrame:
                 else:
                     return IDataFrame(client.getDataFrameService().sort2(self._id, ascending, numPartitions))
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def sortBy(self, src, ascending=True, numPartitions=None):
         try:
@@ -198,7 +198,7 @@ class IDataFrame:
                     return IDataFrame(client.getDataFrameService().sortBy3(self._id, ISource.wrap(src).rpc(), ascending,
                                                                            numPartitions))
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def union(self, other, preserveOrder=False, src=None):
         try:
@@ -213,7 +213,7 @@ class IDataFrame:
                     )
 
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def distinct(self, numPartitions=None, src=None):
         try:
@@ -237,7 +237,7 @@ class IDataFrame:
                             client.getDataFrameService().join3(self._id, numPartitions, ISource.wrap(src).rpc())
                         )
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def reduce(self, src):
         try:
@@ -246,7 +246,7 @@ class IDataFrame:
                     client.getDataFrameService().reduce(self._id, ISource.wrap(src).rpc(), ISource("").rpc())
                 )
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def treeReduce(self, src):
         try:
@@ -255,7 +255,7 @@ class IDataFrame:
                     client.getDataFrameService().treeReduce(self._id, ISource.wrap(src).rpc(), ISource("").rpc())
                 )
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def collect(self):
         try:
@@ -264,7 +264,7 @@ class IDataFrame:
                     client.getDataFrameService().collect(self._id, ISource("").rpc())
                 )
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def aggregate(self, zero, seqOp, combOp):
         try:
@@ -277,7 +277,7 @@ class IDataFrame:
                                                            ISource("").rpc())
                 )
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def treeAggregate(self, zero, seqOp, combOp):
         try:
@@ -291,7 +291,7 @@ class IDataFrame:
                 )
 
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def fold(self, zero, src):
         try:
@@ -303,7 +303,7 @@ class IDataFrame:
                                                       ISource("").rpc())
                 )
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def treeFold(self, zero, src):
         try:
@@ -315,7 +315,7 @@ class IDataFrame:
                                                           ISource("").rpc())
                 )
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def take(self, num):
         try:
@@ -324,28 +324,28 @@ class IDataFrame:
                     client.getDataFrameService().take(self._id, num, ISource("").rpc())
                 )
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def foreach(self, src):
         try:
             with Ignis._pool.getClient() as client:
                 client.getDataFrameService().foreach(self._id, ISource.wrap(src).rpc())
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def foreachPartition(self, src):
         try:
             with Ignis._pool.getClient() as client:
                 client.getDataFrameService().foreachPartition(self._id, ISource.wrap(src).rpc())
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def foreachExecutor(self, src):
         try:
             with Ignis._pool.getClient() as client:
                 client.getDataFrameService().foreachExecutor(self._id, ISource.wrap(src).rpc())
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def top(self, num, cmp=None):
         try:
@@ -359,7 +359,7 @@ class IDataFrame:
                         client.getDataFrameService().top4(self._id, num, ISource.wrap(cmp).rpc(), ISource("").rpc())
                     )
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def takeOrdered(self, num, cmp=None):
         try:
@@ -374,14 +374,14 @@ class IDataFrame:
                                                                   ISource("").rpc())
                     )
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def sample(self, withReplacement, fraction, seed):
         try:
             with Ignis._pool.getClient() as client:
                 return IDataFrame(client.getDataFrameService().sample(self._id, withReplacement, fraction, seed))
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def takeSample(self, withReplacement, num, seed):
         try:
@@ -390,14 +390,14 @@ class IDataFrame:
                     client.getDataFrameService().takeSample(self._id, withReplacement, num, seed, ISource("").rpc())
                 )
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def count(self):
         try:
             with Ignis._pool.getClient() as client:
                 return client.getDataFrameService().count(self._id)
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def max(self, cmp=None):
         try:
@@ -411,7 +411,7 @@ class IDataFrame:
                         client.getDataFrameService().max3(self._id, ISource.wrap(cmp).rpc(), ISource("").rpc())
                     )
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def min(self, cmp=None):
         try:
@@ -425,7 +425,7 @@ class IDataFrame:
                         client.getDataFrameService().min3(self._id, ISource.wrap(cmp).rpc(), ISource("").rpc())
                     )
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def toPair(self):
         return IPairDataFrame(self._id)
@@ -469,21 +469,21 @@ class IPairDataFrame(IDataFrame):
                                                                ISource.wrap(src).rpc())
                         )
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def flatMapValues(self, src):
         try:
             with Ignis._pool.getClient() as client:
                 return IPairDataFrame(client.getDataFrameService().flatMapValues(self._id, ISource.wrap(src).rpc()))
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def mapValues(self, src):
         try:
             with Ignis._pool.getClient() as client:
                 return IPairDataFrame(client.getDataFrameService().mapValues(self._id, ISource.wrap(src).rpc()))
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def groupByKey(self, numPartitions=None, src=None):
         try:
@@ -504,7 +504,7 @@ class IPairDataFrame(IDataFrame):
                         return IPairDataFrame(
                             client.getDataFrameService().groupByKey3(self._id, numPartitions, ISource.wrap(src).rpc()))
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def reduceByKey(self, src, numPartitions=None, localReduce=True):
         try:
@@ -517,7 +517,7 @@ class IPairDataFrame(IDataFrame):
                     return IPairDataFrame(client.getDataFrameService().reduceByKey4(self._id, ISource.wrap(src).rpc()),
                                           numPartitions, localReduce)
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def aggregateByKey(self, zero, seqOp, combOp=None, numPartitions=None):
         try:
@@ -552,7 +552,7 @@ class IPairDataFrame(IDataFrame):
                                                                          ISource.wrap(combOp).rpc(),
                                                                          numPartitions))
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def foldByKey(self, zero, src, numPartitions=None, localFold=True):
         try:
@@ -572,7 +572,7 @@ class IPairDataFrame(IDataFrame):
                                                                 numPartitions,
                                                                 localFold))
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def sortByKey(self, ascending=True, numPartitions=None, src=None):
         try:
@@ -604,7 +604,7 @@ class IPairDataFrame(IDataFrame):
                                                                     ISource.wrap(src).rpc()))
 
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def keys(self):
         try:
@@ -614,7 +614,7 @@ class IPairDataFrame(IDataFrame):
                                                       ISource("").rpc())
                 )
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def values(self):
         try:
@@ -624,7 +624,7 @@ class IPairDataFrame(IDataFrame):
                                                         ISource("").rpc())
                 )
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def sampleByKey(self, withReplacement, fractions, seed, native=False):
         try:
@@ -637,7 +637,7 @@ class IPairDataFrame(IDataFrame):
                                                              fractions_src.rpc(),
                                                              seed))
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def countByKey(self):
         try:
@@ -657,7 +657,7 @@ class IPairDataFrame(IDataFrame):
             return counts[0]
 
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)
 
     def countByValue(self):
         try:
@@ -677,4 +677,4 @@ class IPairDataFrame(IDataFrame):
             return counts[0]
 
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
-            raise IDriverException(ex.message, ex._cause)
+            raise IDriverException(ex.message, ex.cause_)

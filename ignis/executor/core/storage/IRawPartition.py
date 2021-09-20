@@ -23,7 +23,6 @@ class IRawPartition(IPartition):
 
 	def readIterator(self):
 		self.sync()
-		self._writeHeader()
 		zlib_it = IZlibTransport(self._readTransport())
 		proto = IObjectProtocol(zlib_it)
 		native = proto.readSerialization()
@@ -40,7 +39,6 @@ class IRawPartition(IPartition):
 		current_elems = self._elements
 		compatible, reader = self._readHeader(zlib_in)
 		self.sync()
-		self._writeHeader()
 
 		if compatible:
 			while True:
@@ -59,7 +57,6 @@ class IRawPartition(IPartition):
 		if native is None:
 			native = self._native
 		self.sync()
-		self._writeHeader()
 		source = self._readTransport()
 		if self._native == native:
 			if compression == self._compression:
@@ -114,7 +111,6 @@ class IRawPartition(IPartition):
 		if (source.type() == "Disk" or source.type() == "RawMemory") and source._native == self._native:
 			source.sync()
 			self.sync()
-			self._writeHeader()
 			if not self._elements:
 				self._type = source._type
 				self._header = source._header
@@ -162,7 +158,6 @@ class IRawPartition(IPartition):
 		self._elements = 0
 		self._type = IEnumTypes.I_VOID.value
 		self._header = IHeader._getHeaderTypeId(IWriter._getWriterTypeClass(self._cls).getId(), self._native)
-		self._header_size = 0
 
 	def fit(self):
 		pass
