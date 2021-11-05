@@ -903,15 +903,23 @@ class IMpi:
 				id += 1
 				id2 -= 1
 
+		ignores = [False] * len(queue)
 		for i in range(len(queue)):
 			other = queue[i]
 			ignore = True
-			if other == executors or other == rank:
+			if other == executors:
 				continue
 			for j in range(ranges[other][0], ranges[other][1]):
 				ignore = ignore and input[j].empty()
 			ignore_other = self.native().sendrecv(ignore, source=other, dest=other)
 			if ignore and ignore_other:
+				ignores[i] = True
+				for j in range(ranges[other][0], ranges[other][1]):
+					input[j] = None
+
+		for i in range(len(queue)):
+			other = queue[i]
+			if ignores[i] or other == executors:
 				continue
 			other_part = ranges[other][0]
 			other_end = ranges[other][1]

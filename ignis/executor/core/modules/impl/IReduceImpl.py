@@ -312,13 +312,13 @@ class IReduceImpl(IBaseImpl):
 		# Python is single core, len(partial) is always 1
 
 		logger.info("Reduce: performing a final tree reduce")
-		distance = 0
+		distance = 1
 		order = 1
-		while distance < executors:
-			distance += 1
+		while order < executors:
 			order *= 2
 			if rank % order == 0:
 				other = rank + distance
+				distance = order
 				if other >= executors:
 					continue
 				self._executor_data.mpi().recv(partial, other, 0)

@@ -184,7 +184,10 @@ class ICommImpl(IBaseImpl):
 				else:
 					self._executor_data.mpi().recvGroup(comm, shared[init - offset + j], other, 0, opt)
 
-		self._executor_data.setPartitions(shared)
+		if source:
+			self._executor_data.deletePartitions()
+		else:
+			self._executor_data.setPartitions(shared)
 
 	def __importDataAux(self, group, source):
 		rank = group.Get_rank()
@@ -267,8 +270,6 @@ class ICommImpl(IBaseImpl):
 			intercomm = comm.Connect(port)
 		comm1 = intercomm.Merge(not leader)
 		intercomm.Free()
-		if comm != MPI.COMM_WORLD:
-			comm.Free()
 		return comm1
 
 	def __getGroup(self, id):

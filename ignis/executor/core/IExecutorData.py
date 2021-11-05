@@ -63,7 +63,8 @@ class IExecutorData:
         return key in self.__variables
 
     def removeVariable(self, key):
-        del self.__variables[key]
+        if key in self.__variables:
+            del self.__variables[key]
 
     def clearVariables(self):
         self.__variables.clear()

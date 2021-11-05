@@ -151,12 +151,6 @@ class IIOImpl(IBaseImpl):
 				json.dump(iter(group[i]), file, cls=IJsonWriter, indent=4 if pretty else None)
 				group[i] = None
 
-		header = path + "/json"
-		with self.__openFileWrite(header) as file:
-			pass
-		st = IDiskPartition(header, 0, False, True)
-		st.sync()
-
 	def __partitionFileName(self, path, index):
 		if not os.path.isdir(path):
 			try:

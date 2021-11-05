@@ -416,7 +416,7 @@ class IGeneralModuleTest(IModuleTest, unittest.TestCase):
 
 		if self._executor_data.mpi().isRoot(0):
 			for item in result:
-				self.assertEqual(counts[item[0]], item[1])
+				self.assertEqual(self._normalize(counts[item[0]]), self._normalize(item[1]))
 
 	def __aggregateByKeyTest(self, zero, seq, comb, partitionType, IElements):
 		self._executor_data.getContext().props()["ignis.partition.type"] = partitionType
@@ -440,7 +440,7 @@ class IGeneralModuleTest(IModuleTest, unittest.TestCase):
 
 		if self._executor_data.mpi().isRoot(0):
 			for item in result:
-				self.assertEqual(counts[item[0]], item[1])
+				self.assertEqual(self._normalize(counts[item[0]]), self._normalize(item[1]))
 
 	def __foldByKeyTest(self, zero, name, partitionType, IElements):
 		self._executor_data.getContext().props()["ignis.partition.type"] = partitionType
@@ -464,7 +464,7 @@ class IGeneralModuleTest(IModuleTest, unittest.TestCase):
 
 		if self._executor_data.mpi().isRoot(0):
 			for item in result:
-				self.assertEqual(counts[item[0]], item[1])
+				self.assertEqual(self._normalize(counts[item[0]]), self._normalize(item[1]))
 
 	def __sortByKeyTest(self, partitionType, IElements):
 		self._executor_data.getContext().props()["ignis.partition.type"] = partitionType

@@ -48,3 +48,9 @@ class IModuleTest:
             while reader.hasNext():
                 elems.append(reader.next())
         return elems
+
+    def _normalize(self, e):
+        if isinstance(e, str):
+            return ''.join(sorted(e))
+        else:
+            return e

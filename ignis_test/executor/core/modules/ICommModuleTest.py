@@ -48,15 +48,29 @@ class ICommModuleTest(IModuleTest, unittest.TestCase):
 		bak = self._executor_data.mpi().native()
 		executors = self._executor_data.mpi().executors()
 		rank = self._executor_data.mpi().rank()
-		color = 1 if rank < math.ceil(0.25 * executors) else 0
+		sources = math.ceil(0.25 * executors)
+		color = 1 if rank < sources else 0
 		group = bak.Split(color, rank)
 		self._executor_data.setMpiGroup(group)
-		elems = IElements().create(2 * parts * executors, 0)
+		elems = IElements().create(200 * parts * (executors - sources), 0)
+		address = ""
 		if color == 0:
 			local_elems = self.rankVector(elems)
 			self.loadToPartitions(local_elems, parts)
+			if self._executor_data.mpi().isRoot(0):
+				address = self.__comm.openGroup()
+				with open("../address.txt", "w") as file:
+					file.write(address)
+					file.flush()
+			bak.Barrier()
+		else:
+			bak.Barrier()
+			with open("../address.txt") as file:
+				address = file.readline()
 
-		self.__comm._ICommModule__impl._ICommImpl__groups["group"] = bak
+		self.__comm.joinToGroupName(address, color == 0, "group")
+		self.__comm.closeGroup()
+
 		self.__comm.importData("group", color == 0, 1)
 
 		if color == 1:
@@ -67,7 +81,8 @@ class ICommModuleTest(IModuleTest, unittest.TestCase):
 			if self._executor_data.mpi().isRoot(0):
 				self.assertEqual(result, elems)
 
-		self._executor_data.setMpiGroup(bak)
+		self.__comm.destroyGroup("group")
 		group.Free()
+		self._executor_data.setMpiGroup(bak)
 		self._executor_data.mpi().barrier()
 

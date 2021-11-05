@@ -75,12 +75,6 @@ class IGeneralActionModuleTest(IModuleTest, unittest.TestCase):
 
     # -------------------------------------Impl-------------------------------------
 
-    def __normalize(self, e):
-        if isinstance(e, str):
-            return ''.join(sorted(e))
-        else:
-            return e
-
     def __executeTest(self, name):
         self.__generalAction.execute(self.newSource(name))
         self.assertTrue(self._executor_data.getContext().vars()["test"])
@@ -158,8 +152,8 @@ class IGeneralActionModuleTest(IModuleTest, unittest.TestCase):
             expected_result = elems[0]
             for i in range(1, len(elems)):
                 expected_result += elems[i]
-            expected_result = self.__normalize(expected_result)
-            result[0] = self.__normalize(result[0])
+            expected_result = self._normalize(expected_result)
+            result[0] = self._normalize(result[0])
             self.assertEqual(expected_result, result[0])
         else:
             self.assertEqual(0, len(result))
@@ -196,8 +190,8 @@ class IGeneralActionModuleTest(IModuleTest, unittest.TestCase):
             expected_result = elems[0]
             for i in range(1, len(elems)):
                 expected_result += elems[i]
-            expected_result = self.__normalize(expected_result)
-            result[0] = self.__normalize(result[0])
+            expected_result = self._normalize(expected_result)
+            result[0] = self._normalize(result[0])
             self.assertEqual(expected_result, result[0])
         else:
             self.assertEqual(0, len(result))

@@ -166,7 +166,6 @@ class IMpiTest:
 		self.__executor_data.getContext().props()["ignis.transport.cores"] = "1"
 		self.__exchange()
 
-
 	def test_async_exchange(self):
 		self.__executor_data.getContext().props()["ignis.modules.exchange.type"] = "async"
 		self.__executor_data.getContext().props()["ignis.transport.cores"] = "0"
