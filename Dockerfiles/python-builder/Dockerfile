@@ -1,7 +1,8 @@
 
 ARG REGISTRY=""
+ARG NAMESPACE="ignishpc"
 ARG TAG=""
-FROM ${REGISTRY}ignishpc/common-builder${TAG}
+FROM ${REGISTRY}${NAMESPACE}common-builder${TAG}
 ARG RELPATH=""
 
 RUN export DEBIAN_FRONTEND=noninteractive && \
