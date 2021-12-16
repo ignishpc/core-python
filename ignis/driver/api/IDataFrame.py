@@ -82,10 +82,10 @@ class IDataFrame:
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
             raise IDriverException(ex.message, ex.cause_)
 
-    def repartition(self, numPartitions):
+    def repartition(self, numPartitions, preserveOrdering, global_):
         try:
             with Ignis._pool.getClient() as client:
-                self._id = client.getDataFrameService().repartition(self._id, numPartitions)
+                self._id = client.getDataFrameService().repartition(self._id, numPartitions, preserveOrdering, global_)
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
             raise IDriverException(ex.message, ex.cause_)
 
