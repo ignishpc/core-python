@@ -445,28 +445,26 @@ class IPairDataFrame(IDataFrame):
     def toPair(self):
         return self
 
-    def join(self, other, preserveOrder=False, numPartitions=None, src=None):
+    def join(self, other, numPartitions=None, src=None):
         try:
             with Ignis._pool.getClient() as client:
                 if src is None:
                     if numPartitions is None:
                         return IDataFrame(
-                            client.getDataFrameService().join(self._id, other._id, preserveOrder)
+                            client.getDataFrameService().join(self._id, other._id)
                         )
                     else:
                         return IDataFrame(
-                            client.getDataFrameService().join4a(self._id, other._id, preserveOrder, numPartitions)
+                            client.getDataFrameService().join3a(self._id, other._id, numPartitions)
                         )
                 else:
                     if numPartitions is None:
                         return IDataFrame(
-                            client.getDataFrameService().join4b(self._id, other._id, preserveOrder,
-                                                                ISource.wrap(src).rpc())
+                            client.getDataFrameService().join3b(self._id, other._id, ISource.wrap(src).rpc())
                         )
                     else:
                         return IDataFrame(
-                            client.getDataFrameService().join5(self._id, other._id, preserveOrder, numPartitions,
-                                                               ISource.wrap(src).rpc())
+                            client.getDataFrameService().join4(self._id, other._id, numPartitions, ISource.wrap(src).rpc())
                         )
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
             raise IDriverException(ex.message, ex.cause_)
