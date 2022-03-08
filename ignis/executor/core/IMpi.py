@@ -135,14 +135,13 @@ class IMpi:
 				group.Send((same_protocol, 1, MPI.BOOL), 0, 0)
 
 		logger.info("Comm: driverGather storage: " + str(storage) + ", operations: " + str(max_partition))
-		if storage == IDiskPartition.TYPE and not same_protocol.value:
-			storage = IRawMemoryPartition.TYPE
-			if not driver:
-				new_part_group = self.__partition_tools.newPartitionGroup()
-				for p in part_group:
-					new_p = self.__partition_tools.newRawMemoryPartition(p.bytes())
-					p.copyTo(new_p)
-				part_group.__dict__ = new_part_group.__dict__
+		if storage != IMemoryPartition.TYPE and not same_protocol.value:
+			if not driver and len(part_group) > 0 and part_group[0]._native:
+				for i in range(len(part_group)):
+					new_p = self.__partition_tools.newPartition(storage)
+					new_p._native = False
+					part_group[i].copyTo(new_p)
+					part_group[i] = new_p
 
 		part_sp = None
 		for i in range(0, max_partition):

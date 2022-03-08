@@ -56,7 +56,7 @@ class ICommImpl(IBaseImpl):
 
 	def destroyGroups(self):
 		for name, comm in self.__groups:
-			comm.Free
+			comm.Free()
 		self.__groups.clear()
 		self.destroyGroup("")
 

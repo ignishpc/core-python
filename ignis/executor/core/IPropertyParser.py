@@ -72,9 +72,9 @@ class IPropertyParser:
 	def getRangeNumber(self, key, min, max):
 		value = self.getNumber(key)
 		if min is not None and value < min:
-			raise ValueError(key + " error " + value + " is less than " + value)
+			raise ValueError(key + " error " + str(value) + " is less than " + str(min))
 		if max is not None and value > max:
-			raise ValueError(key + " error " + value + " is greater than " + value)
+			raise ValueError(key + " error " + str(value) + " is greater than " + str(max))
 		return value
 
 	def getMaxNumber(self, key, max):
@@ -86,9 +86,9 @@ class IPropertyParser:
 	def getRangeFloat(self, key, min, max):
 		value = self.getFloat(key)
 		if min is not None and value < min:
-			raise ValueError(key + " error " + value + " is less than " + value)
+			raise ValueError(key + " error " + str(value) + " is less than " + str(min))
 		if max is not None and value > max:
-			raise ValueError(key + " error " + value + " is greater than " + value)
+			raise ValueError(key + " error " + str(value) + " is greater than " + str(max))
 		return value
 
 	def getMaxFloat(self, key, max):
@@ -98,7 +98,7 @@ class IPropertyParser:
 		return self.getRangeFloat(key, min, None)
 
 	def __parseError(self, key, value, pos):
-		raise ValueError(key + " parsing error " + value[pos] + "(" + pos + 1 + ") in " + value)
+		raise ValueError(key + " parsing error " + value[pos] + "(" + str(pos + 1) + ") in " + value)
 
 	def getSize(self, key):
 		value = self.getString(key).strip()

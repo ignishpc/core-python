@@ -16,7 +16,7 @@ class IModule:
 		self.__logger.error(cause)
 		raise IExecutorException(message=message, cause_=cause)
 
-	def _use_source(self, src):
+	def _use_source(self, src, opt=False):
 		try:
 			self._executor_data.loadLibrary(src).before(self._executor_data.getContext())
 		except Exception as ex:

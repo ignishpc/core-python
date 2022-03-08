@@ -175,12 +175,15 @@ class IMemoryBuffer(TTransportBase, CReadableTransport):
         return self.__maxBufferSize
 
     def setMaxBufferSize(self, maxSize):
-        if maxSize < len(self):
+        if maxSize < self.__maxBufferSize:
             raise TTransportException(message="Maximum buffer size would be less than current buffer size")
+        self.__maxBufferSize = maxSize
 
     def setBufferSize(self, new_size):
         if not self.__owner:
             raise TTransportException(message="resize in buffer we don't own")
+        if new_size > self.__maxBufferSize:
+            raise TTransportException(message="resize more than Maximum buffer size")
         self.__buffer.realloc(new_size)
         self.__size = new_size
         self.__rBase = min(self.__rBase, new_size)
@@ -234,7 +237,7 @@ class IMemoryBuffer(TTransportBase, CReadableTransport):
         new_size = len(self.__buffer)
         while sz > avail:
             if new_size > self.__maxBufferSize / 2:
-                if self.availableWrite() + self.__maxBufferSize - len(self) < sz:
+                if self.availableWrite() + self.__maxBufferSize - len(self.__buffer) < sz:
                     raise TTransportException(message="Internal buffer size overflow")
                 new_size = self.__maxBufferSize
             new_size = new_size * 2 if new_size > 0 else 1
