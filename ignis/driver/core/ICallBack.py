@@ -35,7 +35,7 @@ class ICallBack:
         self.__driverContext = IDriverContext(executor_data)
         self.__server = IExecutorServerModuleImpl(executor_data, self.__driverContext)
         threading.Thread(target=IExecutorServerModuleImpl.serve,
-                         args=(self.__server, "IExecutorServer", port, compression),
+                         args=(self.__server, "IExecutorServer", port, compression, True),
                          daemon=True).start()
 
     def stop(self):

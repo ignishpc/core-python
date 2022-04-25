@@ -81,6 +81,16 @@ class IWorker:
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
             raise IDriverException(ex.message, ex.cause_)
 
+    def plainFile(self, path, minPartitions=None, delim='\n'):
+        try:
+            with Ignis._pool.getClient() as client:
+                if minPartitions is None:
+                    return IDataFrame(client.getWorkerService().plainFile(self._id, path, ord(delim)))
+                else:
+                    return IDataFrame(client.getWorkerService().plainFile4(self._id, path, minPartitions, ord(delim)))
+        except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+            raise IDriverException(ex.message, ex.cause_)
+
     def partitionObjectFile(self, path, src=None):
         try:
             with Ignis._pool.getClient() as client:

@@ -138,19 +138,17 @@ class IDataFrame:
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
             raise IDriverException(ex.message, ex.cause_)
 
-    def mapPartitions(self, src, preservesPartitioning=True):
+    def mapPartitions(self, src):
         try:
             with Ignis._pool.getClient() as client:
-                return IDataFrame(client.getDataFrameService().mapPartitions(self._id, ISource.wrap(src).rpc(),
-                                                                             preservesPartitioning))
+                return IDataFrame(client.getDataFrameService().mapPartitions(self._id, ISource.wrap(src).rpc()))
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
             raise IDriverException(ex.message, ex.cause_)
 
-    def mapPartitionsWithIndex(self, src, preservesPartitioning=True):
+    def mapPartitionsWithIndex(self, src):
         try:
             with Ignis._pool.getClient() as client:
-                return IDataFrame(client.getDataFrameService().mapPartitionsWithIndex(self._id, ISource.wrap(src).rpc(),
-                                                                                      preservesPartitioning))
+                return IDataFrame(client.getDataFrameService().mapPartitionsWithIndex(self._id, ISource.wrap(src).rpc()))
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
             raise IDriverException(ex.message, ex.cause_)
 

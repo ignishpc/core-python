@@ -71,12 +71,12 @@ class IExecutorServerModule(IModule, IExecutorServerModuleIface):
 		self.__server = None
 		self.__processor = None
 
-	def serve(self, name, port, compression):
+	def serve(self, name, port, compression, local_mode):
 		if not self.__server:
 			self.__processor = TMultiplexedProcessor()
 			self.__server = IThreadedServer(
 				self.__processor,
-				TServerSocket(host='127.0.0.1', port=port),
+				TServerSocket(host='127.0.0.1' if local_mode else '0.0.0.0', port=port),
 				TZlibTransportFactoryExt(compression),
 				TCompactProtocolFactory()
 			)

@@ -43,6 +43,18 @@ class IIOModule(IModule, IIOModuleIface):
 		except Exception as ex:
 			self._pack_exception(ex)
 
+	def plainFile(self, path, delim):
+		try:
+			self.__impl.plainFile(path, delim=chr(delim).encode())
+		except Exception as ex:
+			self._pack_exception(ex)
+
+	def plainFile3(self, path, minPartitions, delim):
+		try:
+			self.__impl.plainFile(path, minPartitions, chr(delim).encode())
+		except Exception as ex:
+			self._pack_exception(ex)
+
 	def textFile(self, path):
 		try:
 			self.__impl.textFile(path)

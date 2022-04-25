@@ -189,7 +189,7 @@ class IGeneralModuleTest(IModuleTest, unittest.TestCase):
 		self._executor_data.getContext().props()["ignis.partition.type"] = partitionType
 		elems = IElements().create(100 * 2, 0)
 		self.loadToPartitions(elems, 2)
-		self.__general.mapPartitionsWithIndex(self.newSource(name), True)
+		self.__general.mapPartitionsWithIndex(self.newSource(name))
 		result = self.getFromPartitions()
 
 		self.assertEqual(list(map(str, elems)), result)

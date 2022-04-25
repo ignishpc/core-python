@@ -26,6 +26,12 @@ class IIOModuleTest(IModuleTest, unittest.TestCase):
 	def test_textFileN(self):
 		self.__textFileTest(8)
 
+	def test_plainFile1(self):
+		self.__plainFileTest(1)
+
+	def test_plainFileN(self):
+		self.__plainFileTest(8)
+
 	def test_saveAsTextFile(self):
 		self.__saveAsTextFileTest(8)
 
@@ -39,6 +45,31 @@ class IIOModuleTest(IModuleTest, unittest.TestCase):
 		self.__partitionObjectFileTest()
 
 	# -------------------------------------Impl-------------------------------------
+
+	def __plainFileTest(self, n):
+		path = "./testplainfile.txt"
+		delim = '@'
+		np = self._executor_data.mpi().executors()
+		lines = list()
+		with open(path, "w") as file:
+			for i in range(100):
+				line = ''.join(IElementsStr().create(100, i))
+				file.write(line)
+				file.write(delim)
+				lines.append(line)
+
+		self.__io.plainFile3(path, n, ord(delim))
+
+		self.assertGreaterEqual(math.ceil(n / np), self.__io.partitionCount())
+
+		result = self.getFromPartitions()
+
+		self.loadToPartitions(result, 1)
+		self._executor_data.mpi().gather(self._executor_data.getPartitions()[0], 0)
+		result = self.getFromPartitions()
+
+		if self._executor_data.mpi().isRoot(0):
+			self.assertEqual(lines, result)
 
 	def __textFileTest(self, n):
 		path = "./testfile.txt"

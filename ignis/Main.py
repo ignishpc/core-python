@@ -22,14 +22,15 @@ logger = logging.getLogger(__name__)
 
 def main(argv):
 	ILog.init()
-	if len(argv) < 3:
-		logging.error("Executor need a server port and compression as argument")
+	if len(argv) < 4:
+		logging.error("Executor need a server port, compression and server mode as argument")
 		return 1
 	try:
 		port = int(argv[1])
 		compression = int(argv[2])
+		local_mode = int(argv[3]) == 1
 	except ValueError as ex:
-		logging.error("Executor need a valid server port and compression")
+		logging.error("Executor arguments are not valid")
 		return 1
 
 	class IExecutorServerModuleImpl(IExecutorServerModule):
@@ -53,7 +54,7 @@ def main(argv):
 
 	executor_data = IExecutorData()
 	server = IExecutorServerModuleImpl(executor_data)
-	server.serve("IExecutorServer", port, compression)
+	server.serve("IExecutorServer", port, compression, local_mode)
 
 	return 0
 

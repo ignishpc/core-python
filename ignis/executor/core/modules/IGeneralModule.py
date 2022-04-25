@@ -55,9 +55,9 @@ class IGeneralModule(IModule, IGeneralModuleIface):
         except Exception as ex:
             self._pack_exception(ex)
 
-    def mapPartitionsWithIndex(self, src, preservesPartitioning):
+    def mapPartitionsWithIndex(self, src):
         try:
-            self.__pipe_impl.mapPartitionsWithIndex(self._executor_data.loadLibrary(src), preservesPartitioning)
+            self.__pipe_impl.mapPartitionsWithIndex(self._executor_data.loadLibrary(src))
         except Exception as ex:
             self._pack_exception(ex)
 

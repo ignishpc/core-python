@@ -113,7 +113,7 @@ class IPipeImpl(IBaseImpl):
         f.after(context)
         self._executor_data.setPartitions(output)
 
-    def mapPartitionsWithIndex(self, f, preservesPartitioning):
+    def mapPartitionsWithIndex(self, f):
         context = self._executor_data.getContext()
         input = self._executor_data.getAndDeletePartitions()
         f.before(context)

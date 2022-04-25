@@ -22,9 +22,9 @@ class IIOImpl(IBaseImpl):
 		input = self._executor_data.getPartitions()
 		return sum(map(lambda p: p.bytes(), input))
 
-	def textFile(self, path, minPartitions=1):
-		logger.info("IO: reading text file")
+	def __plainOrTextFile(self, path, minPartitions, createReader, delim):
 		with self.__openFileRead(path, binary=True) as file:
+			readChunk = createReader(file)
 			size = os.path.getsize(path)
 			executorId = self._executor_data.getContext().executorId()
 			executors = self._executor_data.getContext().executors()
@@ -37,9 +37,9 @@ class IIOImpl(IBaseImpl):
 			logger.info("IO: file has " + str(size) + " Bytes")
 
 			if executorId > 0:
-				file.seek(ex_chunk_init - 1 if ex_chunk_init > 0 else ex_chunk_init)
-				file.readline()
-				ex_chunk_init = file.tell()
+				pos = ex_chunk_init - 1 if ex_chunk_init > 0 else ex_chunk_init
+				file.seek(pos)
+				ex_chunk_init = pos + len(readChunk())
 				if executorId == executors - 1:
 					ex_chunk_end = size
 
@@ -61,14 +61,44 @@ class IIOImpl(IBaseImpl):
 					partitionGroup.add(partition)
 					partitionInit = filepos
 
-				bb = file.readline()
-				write_iterator.write(bb[:-1].decode("utf-8"))
+				bb = readChunk()
+				if bb[-1] == delim[0]:
+					write_iterator.write(bb[:-1].decode("utf-8"))
+				else:
+					write_iterator.write(bb.decode("utf-8"))
 				elements += 1
 				filepos += len(bb)
 			ex_chunk_end = file.tell()
 
 			logger.info("IO: created  " + str(len(partitionGroup)) + " partitions, " + str(elements) + " lines and " +
-			            str(ex_chunk_end - ex_chunk_init) + " Bytes read ")
+						str(ex_chunk_end - ex_chunk_init) + " Bytes read ")
+
+	def plainFile(self, path, minPartitions=1, delim=b'\n'):
+		logger.info("IO: reading plain file")
+
+		def createReader(file):
+			buffer = b''
+			def readChunk():
+				nonlocal buffer
+				chunk = b''
+				while True:
+					part, found, buffer = buffer.partition(delim)
+					chunk += part
+					if not found:
+						new_chunk = file.read(4096)
+						if not new_chunk:
+							return chunk
+						buffer += new_chunk
+					else:
+						return chunk + found
+
+			return readChunk
+
+		return self.__plainOrTextFile(path, minPartitions, createReader, delim)
+
+	def textFile(self, path, minPartitions=1):
+		logger.info("IO: reading text file")
+		return self.__plainOrTextFile(path, minPartitions, lambda file: file.readline, b'\n')
 
 	def partitionObjectFile(self, path, first, partitions):
 		logger.info("IO: reading partitions object file")
@@ -92,7 +122,10 @@ class IIOImpl(IBaseImpl):
 				partition = self._executor_data.getPartitionTools().newPartition()
 				write_iterator = partition.writeIterator()
 				for line in file:
-					write_iterator.write(line.strip('\n'))
+					if line[-1] == '\n':
+						write_iterator.write(line[:-1])
+					else:
+						write_iterator.write(line.strip('\n'))
 				group.add(partition)
 
 	def partitionJsonFile(self, path, first, partitions, objectMapping):
