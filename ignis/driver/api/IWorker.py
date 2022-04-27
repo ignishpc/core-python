@@ -10,7 +10,7 @@ class IWorker:
     def __init__(self, cluster, type, name=None, cores=None, instances=0):
         self.__cluster = cluster
         try:
-            with Ignis._pool.getClient() as client:
+            with Ignis._clientPool().getClient() as client:
                 if name is None:
                     if cores is None:
                         self._id = client.getWorkerService().newInstance(cluster._id, type)
@@ -26,14 +26,14 @@ class IWorker:
 
     def start(self):
         try:
-            with Ignis._pool.getClient() as client:
+            with Ignis._clientPool().getClient() as client:
                 client.getWorkerService().start(self._id)
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
             raise IDriverException(ex.message, ex.cause_)
 
     def destroy(self):
         try:
-            with Ignis._pool.getClient() as client:
+            with Ignis._clientPool().getClient() as client:
                 client.getWorkerService().destroy(self._id)
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
             raise IDriverException(ex.message, ex.cause_)
@@ -43,7 +43,7 @@ class IWorker:
 
     def setName(self, name):
         try:
-            with Ignis._pool.getClient() as client:
+            with Ignis._clientPool().getClient() as client:
                 client.getWorkerService().setName(self._id, name)
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
             raise IDriverException(ex.message, ex.cause_)
@@ -51,7 +51,7 @@ class IWorker:
     def parallelize(self, data, partitions, src=None, native=False):
         try:
             data_id = Ignis._driverContext().parallelize(data, native)
-            with Ignis._pool.getClient() as client:
+            with Ignis._clientPool().getClient() as client:
                 if src is None:
                     return IDataFrame(client.getWorkerService().parallelize(self._id, data_id, partitions))
                 else:
@@ -62,7 +62,7 @@ class IWorker:
 
     def importDataFrame(self, data, src=None):
         try:
-            with Ignis._pool.getClient() as client:
+            with Ignis._clientPool().getClient() as client:
                 if src is None:
                     return IDataFrame(client.getWorkerService().importDataFrame(self._id, data))
                 else:
@@ -73,7 +73,7 @@ class IWorker:
 
     def textFile(self, path, minPartitions=None):
         try:
-            with Ignis._pool.getClient() as client:
+            with Ignis._clientPool().getClient() as client:
                 if minPartitions is None:
                     return IDataFrame(client.getWorkerService().textFile(self._id, path))
                 else:
@@ -83,7 +83,7 @@ class IWorker:
 
     def plainFile(self, path, minPartitions=None, delim='\n'):
         try:
-            with Ignis._pool.getClient() as client:
+            with Ignis._clientPool().getClient() as client:
                 if minPartitions is None:
                     return IDataFrame(client.getWorkerService().plainFile(self._id, path, ord(delim)))
                 else:
@@ -93,7 +93,7 @@ class IWorker:
 
     def partitionObjectFile(self, path, src=None):
         try:
-            with Ignis._pool.getClient() as client:
+            with Ignis._clientPool().getClient() as client:
                 if src is None:
                     return IDataFrame(client.getWorkerService().partitionObjectFile(self._id, path))
                 else:
@@ -104,14 +104,14 @@ class IWorker:
 
     def partitionTextFile(self, path):
         try:
-            with Ignis._pool.getClient() as client:
+            with Ignis._clientPool().getClient() as client:
                 return IDataFrame(client.getWorkerService().partitionTextFile(self._id, path))
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
             raise IDriverException(ex.message, ex.cause_)
 
     def partitionJsonFile(self, path, src=None, objectMapping=False):
         try:
-            with Ignis._pool.getClient() as client:
+            with Ignis._clientPool().getClient() as client:
                 if src is None:
                     return IDataFrame(client.getWorkerService().partitionJsonFile3a(self._id, path, objectMapping))
                 else:
@@ -122,21 +122,21 @@ class IWorker:
 
     def loadLibrary(self, path):
         try:
-            with Ignis._pool.getClient() as client:
+            with Ignis._clientPool().getClient() as client:
                 client.getWorkerService().loadLibrary(self._id, path)
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
             raise IDriverException(ex.message, ex.cause_)
 
     def execute(self, src):
         try:
-            with Ignis._pool.getClient() as client:
+            with Ignis._clientPool().getClient() as client:
                 client.getWorkerService().execute(self._id, ISource.wrap(src).rpc())
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
             raise IDriverException(ex.message, ex.cause_)
 
     def executeTo(self, src):
         try:
-            with Ignis._pool.getClient() as client:
+            with Ignis._clientPool().getClient() as client:
                 return IDataFrame(client.getWorkerService().executeTo(self._id, ISource.wrap(src).rpc()))
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
             raise IDriverException(ex.message, ex.cause_)
@@ -146,7 +146,7 @@ class IWorker:
             src = ISource.wrap(src)
             for name, var in kwargs.items():
                 src.addParam(name, var)
-            with Ignis._pool.getClient() as client:
+            with Ignis._clientPool().getClient() as client:
                 if data is None:
                     client.getWorkerService().voidCall(self._id, src.rpc())
                 else:
@@ -159,7 +159,7 @@ class IWorker:
             src = ISource.wrap(src)
             for name, var in kwargs.items():
                 src.addParam(name, var)
-            with Ignis._pool.getClient() as client:
+            with Ignis._clientPool().getClient() as client:
                 if data is None:
                     return IDataFrame(client.getWorkerService().call(self._id, src.rpc()))
                 else:
