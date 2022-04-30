@@ -25,7 +25,8 @@ class IPropertyParser:
 		return self.getBoolean("ignis.modules.sort.resampling")
 
 	def loadType(self):
-		return self.getBoolean("ignis.modules.load.type")
+		key = "ignis.modules.load.type"
+		return key in self.__properties and self.getBoolean(key)
 
 	def ioOverwrite(self):
 		return self.getBoolean("ignis.modules.io.overwrite")
