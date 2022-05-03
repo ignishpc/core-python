@@ -125,7 +125,7 @@ class IIOImpl(IBaseImpl):
 					if line[-1] == '\n':
 						write_iterator.write(line[:-1])
 					else:
-						write_iterator.write(line.strip('\n'))
+						write_iterator.write(line)
 				group.add(partition)
 
 	def partitionJsonFile(self, path, first, partitions, objectMapping):
