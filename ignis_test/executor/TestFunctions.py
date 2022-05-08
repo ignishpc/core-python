@@ -39,6 +39,11 @@ class KeyByString(IFunction):
         return len(v)
 
 
+class MapWithIndexInt(IFunction2):
+
+    def call(self, v1, v2, context):
+        return v1 + v2
+
 class MapPartitionsInt(IFunction):
 
     def call(self, it, context):

@@ -34,13 +34,14 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
     print('  void saveAsTextFile(IDataFrameId id, string path)')
     print('  void saveAsJsonFile(IDataFrameId id, string path, bool pretty)')
     print('  IDataFrameId repartition(IDataFrameId id, i64 numPartitions, bool preserveOrdering, bool global_)')
-    print('  IDataFrameId partitionByRandom(IDataFrameId id, i64 numPartitions)')
+    print('  IDataFrameId partitionByRandom(IDataFrameId id, i64 numPartitions, i32 seed)')
     print('  IDataFrameId partitionByHash(IDataFrameId id, i64 numPartitions)')
     print('  IDataFrameId partitionBy(IDataFrameId id, ISource src, i64 numPartitions)')
     print('  IDataFrameId map_(IDataFrameId id, ISource src)')
     print('  IDataFrameId filter(IDataFrameId id, ISource src)')
     print('  IDataFrameId flatmap(IDataFrameId id, ISource src)')
     print('  IDataFrameId keyBy(IDataFrameId id, ISource src)')
+    print('  IDataFrameId mapWithIndex(IDataFrameId id, ISource src)')
     print('  IDataFrameId mapPartitions(IDataFrameId id, ISource src)')
     print('  IDataFrameId mapPartitionsWithIndex(IDataFrameId id, ISource src)')
     print('  IDataFrameId mapExecutor(IDataFrameId id, ISource src)')
@@ -246,10 +247,10 @@ elif cmd == 'repartition':
     pp.pprint(client.repartition(eval(args[0]), eval(args[1]), eval(args[2]), eval(args[3]),))
 
 elif cmd == 'partitionByRandom':
-    if len(args) != 2:
-        print('partitionByRandom requires 2 args')
+    if len(args) != 3:
+        print('partitionByRandom requires 3 args')
         sys.exit(1)
-    pp.pprint(client.partitionByRandom(eval(args[0]), eval(args[1]),))
+    pp.pprint(client.partitionByRandom(eval(args[0]), eval(args[1]), eval(args[2]),))
 
 elif cmd == 'partitionByHash':
     if len(args) != 2:
@@ -286,6 +287,12 @@ elif cmd == 'keyBy':
         print('keyBy requires 2 args')
         sys.exit(1)
     pp.pprint(client.keyBy(eval(args[0]), eval(args[1]),))
+
+elif cmd == 'mapWithIndex':
+    if len(args) != 2:
+        print('mapWithIndex requires 2 args')
+        sys.exit(1)
+    pp.pprint(client.mapWithIndex(eval(args[0]), eval(args[1]),))
 
 elif cmd == 'mapPartitions':
     if len(args) != 2:

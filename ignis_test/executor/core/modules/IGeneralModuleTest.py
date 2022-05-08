@@ -31,6 +31,9 @@ class IGeneralModuleTest(IModuleTest, unittest.TestCase):
 	def test_keyByStringInt(self):
 		self.__keyByTest("KeyByString", "RawMemory", IElementsStr)
 
+	def test_mapWithIndexInt(self):
+		self.__mapWithIndexTest("MapWithIndexInt", "Memory", IElementsInt)
+
 	def test_mapPartitionsInt(self):
 		self.__mapPartitionsTest("MapPartitionsInt", "Memory", IElementsInt)
 
@@ -175,6 +178,19 @@ class IGeneralModuleTest(IModuleTest, unittest.TestCase):
 		for i in range(len(elems)):
 			self.assertEqual(len(elems[i]), result[i][0])
 			self.assertEqual(elems[i], result[i][1])
+
+	def __mapWithIndexTest(self, name, partitionType, IElements):
+		self._executor_data.getContext().props()["ignis.partition.type"] = partitionType
+		elems = IElements().create(100 * 2, 0)
+		self.loadToPartitions(elems, 2)
+		self.__general.mapWithIndex(self.newSource(name))
+		result = self.getFromPartitions()
+		offset = self._executor_data.mpi().rank() * len(elems)
+		expected = list()
+		for i, elem in enumerate(elems):
+			expected.append(i + elem + offset)
+
+		self.assertEqual(expected, result)
 
 	def __mapPartitionsTest(self, name, partitionType, IElements):
 		self._executor_data.getContext().props()["ignis.partition.type"] = partitionType
@@ -556,7 +572,7 @@ class IGeneralModuleTest(IModuleTest, unittest.TestCase):
 		elems = elems[0:100] + elems
 		self.loadToPartitions(local_elems, 2)
 
-		self.__general.partitionByRandom(2 * np - 1)
+		self.__general.partitionByRandom(2 * np - 1, 0)
 
 		result = self.getFromPartitions()
 

@@ -99,6 +99,26 @@ class IPipeImpl(IBaseImpl):
         f.after(context)
         self._executor_data.setPartitions(output)
 
+    def mapWithIndex(self, f):
+        context = self._executor_data.getContext()
+        input = self._executor_data.getAndDeletePartitions()
+        f.before(context)
+        output = self._executor_data.getPartitionTools().newPartitionGroup(input)
+        logger.info("General: mapWithIndex " + str(len(input)) + " partitions")
+
+        elems = sum([len(p) for p in input])
+        indices = self._executor_data.mpi().native().allgather(elems)
+        id = sum(indices[0:self._executor_data.mpi().rank()])
+
+        for i in range(len(input)):
+            it = output[i].writeIterator()
+            for elem in input[i]:
+                it.write(f.call(id, elem, context))
+                id += 1
+            input[i] = None
+        f.after(context)
+        self._executor_data.setPartitions(output)
+
     def mapPartitions(self, f):
         context = self._executor_data.getContext()
         input = self._executor_data.getAndDeletePartitions()
@@ -119,9 +139,13 @@ class IPipeImpl(IBaseImpl):
         f.before(context)
         output = self._executor_data.getPartitionTools().newPartitionGroup(input)
         logger.info("General: mapPartitionsWithIndex " + str(len(input)) + " partitions")
+
+        indices = self._executor_data.mpi().native().allgather(len(input))
+        offset = sum(indices[0:self._executor_data.mpi().rank()])
+
         for i in range(len(input)):
             it = output[i].writeIterator()
-            for elem in f.call(i, input[i].readIterator(), context):
+            for elem in f.call(offset + i, input[i].readIterator(), context):
                 it.write(elem)
             input[i] = None
         f.after(context)

@@ -109,11 +109,12 @@ class Iface(object):
         """
         pass
 
-    def partitionByRandom(self, id, numPartitions):
+    def partitionByRandom(self, id, numPartitions, seed):
         """
         Parameters:
          - id
          - numPartitions
+         - seed
 
         """
         pass
@@ -165,6 +166,15 @@ class Iface(object):
         pass
 
     def keyBy(self, id, src):
+        """
+        Parameters:
+         - id
+         - src
+
+        """
+        pass
+
+    def mapWithIndex(self, id, src):
         """
         Parameters:
          - id
@@ -1171,21 +1181,23 @@ class Client(Iface):
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "repartition failed: unknown result")
 
-    def partitionByRandom(self, id, numPartitions):
+    def partitionByRandom(self, id, numPartitions, seed):
         """
         Parameters:
          - id
          - numPartitions
+         - seed
 
         """
-        self.send_partitionByRandom(id, numPartitions)
+        self.send_partitionByRandom(id, numPartitions, seed)
         return self.recv_partitionByRandom()
 
-    def send_partitionByRandom(self, id, numPartitions):
+    def send_partitionByRandom(self, id, numPartitions, seed):
         self._oprot.writeMessageBegin('partitionByRandom', TMessageType.CALL, self._seqid)
         args = partitionByRandom_args()
         args.id = id
         args.numPartitions = numPartitions
+        args.seed = seed
         args.write(self._oprot)
         self._oprot.writeMessageEnd()
         self._oprot.trans.flush()
@@ -1424,6 +1436,42 @@ class Client(Iface):
         if result.ex is not None:
             raise result.ex
         raise TApplicationException(TApplicationException.MISSING_RESULT, "keyBy failed: unknown result")
+
+    def mapWithIndex(self, id, src):
+        """
+        Parameters:
+         - id
+         - src
+
+        """
+        self.send_mapWithIndex(id, src)
+        return self.recv_mapWithIndex()
+
+    def send_mapWithIndex(self, id, src):
+        self._oprot.writeMessageBegin('mapWithIndex', TMessageType.CALL, self._seqid)
+        args = mapWithIndex_args()
+        args.id = id
+        args.src = src
+        args.write(self._oprot)
+        self._oprot.writeMessageEnd()
+        self._oprot.trans.flush()
+
+    def recv_mapWithIndex(self):
+        iprot = self._iprot
+        (fname, mtype, rseqid) = iprot.readMessageBegin()
+        if mtype == TMessageType.EXCEPTION:
+            x = TApplicationException()
+            x.read(iprot)
+            iprot.readMessageEnd()
+            raise x
+        result = mapWithIndex_result()
+        result.read(iprot)
+        iprot.readMessageEnd()
+        if result.success is not None:
+            return result.success
+        if result.ex is not None:
+            raise result.ex
+        raise TApplicationException(TApplicationException.MISSING_RESULT, "mapWithIndex failed: unknown result")
 
     def mapPartitions(self, id, src):
         """
@@ -3899,6 +3947,7 @@ class Processor(Iface, TProcessor):
         self._processMap["filter"] = Processor.process_filter
         self._processMap["flatmap"] = Processor.process_flatmap
         self._processMap["keyBy"] = Processor.process_keyBy
+        self._processMap["mapWithIndex"] = Processor.process_mapWithIndex
         self._processMap["mapPartitions"] = Processor.process_mapPartitions
         self._processMap["mapPartitionsWithIndex"] = Processor.process_mapPartitionsWithIndex
         self._processMap["mapExecutor"] = Processor.process_mapExecutor
@@ -4252,7 +4301,7 @@ class Processor(Iface, TProcessor):
         iprot.readMessageEnd()
         result = partitionByRandom_result()
         try:
-            result.success = self._handler.partitionByRandom(args.id, args.numPartitions)
+            result.success = self._handler.partitionByRandom(args.id, args.numPartitions, args.seed)
             msg_type = TMessageType.REPLY
         except TTransport.TTransportException:
             raise
@@ -4424,6 +4473,32 @@ class Processor(Iface, TProcessor):
             msg_type = TMessageType.EXCEPTION
             result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
         oprot.writeMessageBegin("keyBy", msg_type, seqid)
+        result.write(oprot)
+        oprot.writeMessageEnd()
+        oprot.trans.flush()
+
+    def process_mapWithIndex(self, seqid, iprot, oprot):
+        args = mapWithIndex_args()
+        args.read(iprot)
+        iprot.readMessageEnd()
+        result = mapWithIndex_result()
+        try:
+            result.success = self._handler.mapWithIndex(args.id, args.src)
+            msg_type = TMessageType.REPLY
+        except TTransport.TTransportException:
+            raise
+        except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+            msg_type = TMessageType.REPLY
+            result.ex = ex
+        except TApplicationException as ex:
+            logging.exception('TApplication exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = ex
+        except Exception:
+            logging.exception('Unexpected exception in handler')
+            msg_type = TMessageType.EXCEPTION
+            result = TApplicationException(TApplicationException.INTERNAL_ERROR, 'Internal error')
+        oprot.writeMessageBegin("mapWithIndex", msg_type, seqid)
         result.write(oprot)
         oprot.writeMessageEnd()
         oprot.trans.flush()
@@ -7516,13 +7591,15 @@ class partitionByRandom_args(object):
     Attributes:
      - id
      - numPartitions
+     - seed
 
     """
 
 
-    def __init__(self, id=None, numPartitions=None,):
+    def __init__(self, id=None, numPartitions=None, seed=None,):
         self.id = id
         self.numPartitions = numPartitions
+        self.seed = seed
 
     def read(self, iprot):
         if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
@@ -7544,6 +7621,11 @@ class partitionByRandom_args(object):
                     self.numPartitions = iprot.readI64()
                 else:
                     iprot.skip(ftype)
+            elif fid == 3:
+                if ftype == TType.I32:
+                    self.seed = iprot.readI32()
+                else:
+                    iprot.skip(ftype)
             else:
                 iprot.skip(ftype)
             iprot.readFieldEnd()
@@ -7561,6 +7643,10 @@ class partitionByRandom_args(object):
         if self.numPartitions is not None:
             oprot.writeFieldBegin('numPartitions', TType.I64, 2)
             oprot.writeI64(self.numPartitions)
+            oprot.writeFieldEnd()
+        if self.seed is not None:
+            oprot.writeFieldBegin('seed', TType.I32, 3)
+            oprot.writeI32(self.seed)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -7583,6 +7669,7 @@ partitionByRandom_args.thrift_spec = (
     None,  # 0
     (1, TType.STRUCT, 'id', [IDataFrameId, None], None, ),  # 1
     (2, TType.I64, 'numPartitions', None, None, ),  # 2
+    (3, TType.I32, 'seed', None, None, ),  # 3
 )
 
 
@@ -8566,6 +8653,156 @@ class keyBy_result(object):
         return not (self == other)
 all_structs.append(keyBy_result)
 keyBy_result.thrift_spec = (
+    (0, TType.STRUCT, 'success', [IDataFrameId, None], None, ),  # 0
+    (1, TType.STRUCT, 'ex', [ignis.rpc.driver.exception.ttypes.IDriverException, None], None, ),  # 1
+)
+
+
+class mapWithIndex_args(object):
+    """
+    Attributes:
+     - id
+     - src
+
+    """
+
+
+    def __init__(self, id=None, src=None,):
+        self.id = id
+        self.src = src
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 1:
+                if ftype == TType.STRUCT:
+                    self.id = IDataFrameId()
+                    self.id.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 2:
+                if ftype == TType.STRUCT:
+                    self.src = ignis.rpc.source.ttypes.ISource()
+                    self.src.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('mapWithIndex_args')
+        if self.id is not None:
+            oprot.writeFieldBegin('id', TType.STRUCT, 1)
+            self.id.write(oprot)
+            oprot.writeFieldEnd()
+        if self.src is not None:
+            oprot.writeFieldBegin('src', TType.STRUCT, 2)
+            self.src.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(mapWithIndex_args)
+mapWithIndex_args.thrift_spec = (
+    None,  # 0
+    (1, TType.STRUCT, 'id', [IDataFrameId, None], None, ),  # 1
+    (2, TType.STRUCT, 'src', [ignis.rpc.source.ttypes.ISource, None], None, ),  # 2
+)
+
+
+class mapWithIndex_result(object):
+    """
+    Attributes:
+     - success
+     - ex
+
+    """
+
+
+    def __init__(self, success=None, ex=None,):
+        self.success = success
+        self.ex = ex
+
+    def read(self, iprot):
+        if iprot._fast_decode is not None and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None:
+            iprot._fast_decode(self, iprot, [self.__class__, self.thrift_spec])
+            return
+        iprot.readStructBegin()
+        while True:
+            (fname, ftype, fid) = iprot.readFieldBegin()
+            if ftype == TType.STOP:
+                break
+            if fid == 0:
+                if ftype == TType.STRUCT:
+                    self.success = IDataFrameId()
+                    self.success.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            elif fid == 1:
+                if ftype == TType.STRUCT:
+                    self.ex = ignis.rpc.driver.exception.ttypes.IDriverException.read(iprot)
+                else:
+                    iprot.skip(ftype)
+            else:
+                iprot.skip(ftype)
+            iprot.readFieldEnd()
+        iprot.readStructEnd()
+
+    def write(self, oprot):
+        if oprot._fast_encode is not None and self.thrift_spec is not None:
+            oprot.trans.write(oprot._fast_encode(self, [self.__class__, self.thrift_spec]))
+            return
+        oprot.writeStructBegin('mapWithIndex_result')
+        if self.success is not None:
+            oprot.writeFieldBegin('success', TType.STRUCT, 0)
+            self.success.write(oprot)
+            oprot.writeFieldEnd()
+        if self.ex is not None:
+            oprot.writeFieldBegin('ex', TType.STRUCT, 1)
+            self.ex.write(oprot)
+            oprot.writeFieldEnd()
+        oprot.writeFieldStop()
+        oprot.writeStructEnd()
+
+    def validate(self):
+        return
+
+    def __repr__(self):
+        L = ['%s=%r' % (key, value)
+             for key, value in self.__dict__.items()]
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return not (self == other)
+all_structs.append(mapWithIndex_result)
+mapWithIndex_result.thrift_spec = (
     (0, TType.STRUCT, 'success', [IDataFrameId, None], None, ),  # 0
     (1, TType.STRUCT, 'ex', [ignis.rpc.driver.exception.ttypes.IDriverException, None], None, ),  # 1
 )

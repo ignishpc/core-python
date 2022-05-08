@@ -49,6 +49,12 @@ class IGeneralModule(IModule, IGeneralModuleIface):
         except Exception as ex:
             self._pack_exception(ex)
 
+    def mapWithIndex(self, src):
+        try:
+            self.__pipe_impl.mapWithIndex(self._executor_data.loadLibrary(src))
+        except Exception as ex:
+            self._pack_exception(ex)
+
     def mapPartitions(self, src):
         try:
             self.__pipe_impl.mapPartitions(self._executor_data.loadLibrary(src))
@@ -149,9 +155,9 @@ class IGeneralModule(IModule, IGeneralModuleIface):
         except Exception as ex:
             self._pack_exception(ex)
 
-    def partitionByRandom(self, numPartitions):
+    def partitionByRandom(self, numPartitions, seed):
         try:
-            self.__repartition_impl.partitionByRandom(numPartitions)
+            self.__repartition_impl.partitionByRandom(numPartitions, seed)
         except Exception as ex:
             self._pack_exception(ex)
 

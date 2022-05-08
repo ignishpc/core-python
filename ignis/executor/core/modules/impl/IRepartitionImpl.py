@@ -226,8 +226,9 @@ class IRepartitionImpl(IBaseImpl):
 
 		self._executor_data.setPartitions(output)
 
-	def partitionByRandom(self, numPartitions):
-		self.__partitionBy_impl(lambda elem, ctx: random.randint(0, numPartitions), numPartitions)
+	def partitionByRandom(self, numPartitions, seed):
+		r = random.Random(seed)
+		self.__partitionBy_impl(lambda elem, ctx: r.randint(0, numPartitions), numPartitions)
 
 	def partitionByHash(self, numPartitions):
 		self.__partitionBy_impl(lambda elem, ctx: hash(elem), numPartitions)

@@ -89,10 +89,10 @@ class IDataFrame:
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
             raise IDriverException(ex.message, ex.cause_)
 
-    def partitionByRandom(self, numPartitions):
+    def partitionByRandom(self, numPartitions, seed):
         try:
             with Ignis._clientPool().getClient() as client:
-                self._id = client.getDataFrameService().partitionByRandom(self._id, numPartitions)
+                self._id = client.getDataFrameService().partitionByRandom(self._id, numPartitions, seed)
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
             raise IDriverException(ex.message, ex.cause_)
 
@@ -135,6 +135,13 @@ class IDataFrame:
         try:
             with Ignis._clientPool().getClient() as client:
                 return IPairDataFrame(client.getDataFrameService().keyBy(self._id, ISource.wrap(src).rpc()))
+        except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
+            raise IDriverException(ex.message, ex.cause_)
+
+    def mapWithIndex(self, src):
+        try:
+            with Ignis._clientPool().getClient() as client:
+                return IDataFrame(client.getDataFrameService().mapWithIndex(self._id, ISource.wrap(src).rpc()))
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
             raise IDriverException(ex.message, ex.cause_)
 
