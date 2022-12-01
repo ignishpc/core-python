@@ -37,7 +37,7 @@ class IIOImpl(IBaseImpl):
 			logger.info("IO: file has " + str(size) + " Bytes")
 
 			if executorId > 0:
-				pos = ex_chunk_init - 1 if ex_chunk_init > 0 else ex_chunk_init
+				pos = ex_chunk_init - len(delim) if ex_chunk_init >= len(delim) else ex_chunk_init
 				file.seek(pos)
 				ex_chunk_init = pos + len(readChunk())
 				if executorId == executors - 1:
@@ -62,8 +62,8 @@ class IIOImpl(IBaseImpl):
 					partitionInit = filepos
 
 				bb = readChunk()
-				if bb[-1] == delim[0]:
-					write_iterator.write(bb[:-1].decode("utf-8"))
+				if bb[-len(delim):] == delim:
+					write_iterator.write(bb[:-len(delim)].decode("utf-8"))
 				else:
 					write_iterator.write(bb.decode("utf-8"))
 				elements += 1
@@ -73,9 +73,9 @@ class IIOImpl(IBaseImpl):
 			logger.info("IO: created  " + str(len(partitionGroup)) + " partitions, " + str(elements) + " lines and " +
 						str(ex_chunk_end - ex_chunk_init) + " Bytes read ")
 
-	def plainFile(self, path, minPartitions=1, delim=b'\n'):
+	def plainFile(self, path, minPartitions=1, delim='\n'):
 		logger.info("IO: reading plain file")
-
+		delim = delim.encode("utf-8")
 		def createReader(file):
 			buffer = b''
 			def readChunk():

@@ -27,10 +27,16 @@ class IIOModuleTest(IModuleTest, unittest.TestCase):
 		self.__textFileTest(8)
 
 	def test_plainFile1(self):
-		self.__plainFileTest(1)
+		self.__plainFileTest(1, "@")
 
 	def test_plainFileN(self):
-		self.__plainFileTest(8)
+		self.__plainFileTest(8, "@")
+
+	def test_plainFileS1(self):
+		self.__plainFileTest(1, "@@")
+
+	def test_plainFileSN(self):
+		self.__plainFileTest(8, "@@")
 
 	def test_saveAsTextFile(self):
 		self.__saveAsTextFileTest(8)
@@ -46,9 +52,8 @@ class IIOModuleTest(IModuleTest, unittest.TestCase):
 
 	# -------------------------------------Impl-------------------------------------
 
-	def __plainFileTest(self, n):
+	def __plainFileTest(self, n, delim):
 		path = "./testplainfile.txt"
-		delim = '@'
 		np = self._executor_data.mpi().executors()
 		lines = list()
 		with open(path, "w") as file:
@@ -58,7 +63,7 @@ class IIOModuleTest(IModuleTest, unittest.TestCase):
 				file.write(delim)
 				lines.append(line)
 
-		self.__io.plainFile3(path, n, ord(delim))
+		self.__io.plainFile3(path, n, delim)
 
 		self.assertGreaterEqual(math.ceil(n / np), self.__io.partitionCount())
 

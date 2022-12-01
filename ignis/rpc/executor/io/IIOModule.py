@@ -1868,8 +1868,8 @@ class plainFile_args(object):
                 else:
                     iprot.skip(ftype)
             elif fid == 2:
-                if ftype == TType.BYTE:
-                    self.delim = iprot.readByte()
+                if ftype == TType.STRING:
+                    self.delim = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
             else:
@@ -1887,8 +1887,8 @@ class plainFile_args(object):
             oprot.writeString(self.path.encode('utf-8') if sys.version_info[0] == 2 else self.path)
             oprot.writeFieldEnd()
         if self.delim is not None:
-            oprot.writeFieldBegin('delim', TType.BYTE, 2)
-            oprot.writeByte(self.delim)
+            oprot.writeFieldBegin('delim', TType.STRING, 2)
+            oprot.writeString(self.delim.encode('utf-8') if sys.version_info[0] == 2 else self.delim)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -1910,7 +1910,7 @@ all_structs.append(plainFile_args)
 plainFile_args.thrift_spec = (
     None,  # 0
     (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
-    (2, TType.BYTE, 'delim', None, None, ),  # 2
+    (2, TType.STRING, 'delim', 'UTF8', None, ),  # 2
 )
 
 
@@ -2011,8 +2011,8 @@ class plainFile3_args(object):
                 else:
                     iprot.skip(ftype)
             elif fid == 3:
-                if ftype == TType.BYTE:
-                    self.delim = iprot.readByte()
+                if ftype == TType.STRING:
+                    self.delim = iprot.readString().decode('utf-8', errors='replace') if sys.version_info[0] == 2 else iprot.readString()
                 else:
                     iprot.skip(ftype)
             else:
@@ -2034,8 +2034,8 @@ class plainFile3_args(object):
             oprot.writeI64(self.minPartitions)
             oprot.writeFieldEnd()
         if self.delim is not None:
-            oprot.writeFieldBegin('delim', TType.BYTE, 3)
-            oprot.writeByte(self.delim)
+            oprot.writeFieldBegin('delim', TType.STRING, 3)
+            oprot.writeString(self.delim.encode('utf-8') if sys.version_info[0] == 2 else self.delim)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()
@@ -2058,7 +2058,7 @@ plainFile3_args.thrift_spec = (
     None,  # 0
     (1, TType.STRING, 'path', 'UTF8', None, ),  # 1
     (2, TType.I64, 'minPartitions', None, None, ),  # 2
-    (3, TType.BYTE, 'delim', None, None, ),  # 3
+    (3, TType.STRING, 'delim', 'UTF8', None, ),  # 3
 )
 
 
