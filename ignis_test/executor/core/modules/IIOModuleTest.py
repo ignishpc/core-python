@@ -38,6 +38,12 @@ class IIOModuleTest(IModuleTest, unittest.TestCase):
 	def test_plainFileSN(self):
 		self.__plainFileTest(8, "@@")
 
+	def test_plainFileSE1(self):
+		self.__plainFileTest(1, "@@", "!")
+
+	def test_plainFileSEN(self):
+		self.__plainFileTest(8, "@@", "!")
+
 	def test_saveAsTextFile(self):
 		self.__saveAsTextFileTest(8)
 
@@ -52,16 +58,22 @@ class IIOModuleTest(IModuleTest, unittest.TestCase):
 
 	# -------------------------------------Impl-------------------------------------
 
-	def __plainFileTest(self, n, delim):
+	def __plainFileTest(self, n, delim, ex=""):
 		path = "./testplainfile.txt"
 		np = self._executor_data.mpi().executors()
 		lines = list()
 		with open(path, "w") as file:
 			for i in range(100):
 				line = ''.join(IElementsStr().create(100, i))
+				if ex:
+					line += ex + delim
 				file.write(line)
 				file.write(delim)
 				lines.append(line)
+
+		if len(ex) > 0:
+			ex = ex.replace("!", "\\!")
+			delim += "!" + ex
 
 		self.__io.plainFile3(path, n, delim)
 
