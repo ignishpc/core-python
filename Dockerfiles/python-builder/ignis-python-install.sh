@@ -21,5 +21,4 @@ cd ${IGNIS_HOME}/core/python/
 python3 setup.py develop
 
 PYTHON_LIB=$(python3 -c "import sysconfig; print(sysconfig.get_path('stdlib'))")
-mkdir -p $PYTHON_LIB/dist-packages/
-mv $PYTHON_LIB/site-packages/* $PYTHON_LIB/dist-packages/
+ln -s $PYTHON_LIB/site-packages $PYTHON_LIB/dist-packages
