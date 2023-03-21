@@ -85,9 +85,9 @@ class IWorker:
         try:
             with Ignis._clientPool().getClient() as client:
                 if minPartitions is None:
-                    return IDataFrame(client.getWorkerService().plainFile(self._id, path, ord(delim)))
+                    return IDataFrame(client.getWorkerService().plainFile(self._id, path, delim))
                 else:
-                    return IDataFrame(client.getWorkerService().plainFile4(self._id, path, minPartitions, ord(delim)))
+                    return IDataFrame(client.getWorkerService().plainFile4(self._id, path, minPartitions, delim))
         except ignis.rpc.driver.exception.ttypes.IDriverException as ex:
             raise IDriverException(ex.message, ex.cause_)
 
