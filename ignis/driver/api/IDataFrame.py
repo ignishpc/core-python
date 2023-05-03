@@ -209,11 +209,9 @@ class IDataFrame:
         try:
             with Ignis._clientPool().getClient() as client:
                 if src is None:
-                    return Ignis._driverContext().collect(
-                        client.getDataFrameService().union_(self._id, other._id, preserveOrder)
-                    )
+                    return IDataFrame( client.getDataFrameService().union_(self._id, other._id, preserveOrder) )
                 else:
-                    return Ignis._driverContext().collect(
+                    return IDataFrame(
                         client.getDataFrameService().union4(self._id, other._id, preserveOrder, ISource.wrap(src).rpc())
                     )
 

@@ -83,7 +83,6 @@ class ICacheImpl(IBaseImpl):
 			return
 
 		group_cache = self._executor_data.getPartitions()
-		same_level = True
 		level_sel = level
 
 		if level == 1:  # PRESERVE
@@ -97,7 +96,6 @@ class ICacheImpl(IBaseImpl):
 		if level_sel == 2:  # MEMORY
 			logger.info("CacheContext: saving partition in " + IMemoryPartition.TYPE + " cache")
 			if not self._executor_data.getPartitionTools().isMemory(group_cache):
-				same_level = False
 				group = IPartitionGroup()
 				for part_cache in group_cache:
 					part = self._executor_data.getPartitionTools().newMemoryPartition(part_cache.size())
@@ -107,7 +105,6 @@ class ICacheImpl(IBaseImpl):
 		elif level_sel == 3:  # RAW_MEMORY
 			logger.info("CacheContext: saving partition in " + IRawMemoryPartition.TYPE + " cache")
 			if not self._executor_data.getPartitionTools().isRawMemory(group_cache):
-				same_level = False
 				group = IPartitionGroup()
 				for part_cache in group_cache:
 					part = self._executor_data.getPartitionTools().newRawMemoryPartition(part_cache.bytes())
@@ -120,7 +117,6 @@ class ICacheImpl(IBaseImpl):
 				for part_cache in group_cache:
 					part_cache.persist(True)
 			else:
-				same_level = False
 				group = IPartitionGroup()
 				for part_cache in group_cache:
 					part = self._executor_data.getPartitionTools().newDiskPartition(persist=True)
@@ -138,9 +134,7 @@ class ICacheImpl(IBaseImpl):
 		else:
 			raise ValueError("CacheContext: cache level " + str(level) + " is not valid")
 
-		if same_level:
-			self.__cache = group_cache
-
+		group_cache.cache(True)
 		self.__cache[id] = group_cache
 
 	def loadCacheFromDisk(self):

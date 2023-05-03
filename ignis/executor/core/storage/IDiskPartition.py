@@ -43,6 +43,7 @@ class IDiskPartition(IRawPartition):
 		return newPartition
 
 	def clear(self):
+		self._zlib.flush()
 		IRawPartition.clear(self)
 		self._transport.fileobj.truncate(0)
 		self.sync()
