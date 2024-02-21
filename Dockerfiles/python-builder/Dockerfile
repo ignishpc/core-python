@@ -36,6 +36,6 @@ RUN cd ${IGNIS_HOME}/core/python && \
 	python3 setup.py build
 
 COPY ${DOCK_DIR}bin/* ${IGNIS_HOME}/bin/
-RUN chmod +x ${IGNIS_HOME}/bin/
+RUN chmod +x ${IGNIS_HOME}/bin/*
 
 COPY / ${IGNIS_HOME}/core/python/core
