@@ -1,3 +1,4 @@
+import os
 import threading
 
 from ignis.driver.core.IDriverContext import IDriverContext
@@ -13,10 +14,8 @@ from ignis.rpc.executor.io.IIOModule import Processor as IIOModuleProcessor
 
 class ICallBack:
 
-    def __init__(self, port, compression):
+    def __init__(self, usock, compression):
         ILog.init()
-        self.__port = port
-        self.__compression = compression
 
         class IExecutorServerModuleImpl(IExecutorServerModule):
 
@@ -34,8 +33,10 @@ class ICallBack:
         executor_data = IExecutorData()
         self.__driverContext = IDriverContext(executor_data)
         self.__server = IExecutorServerModuleImpl(executor_data, self.__driverContext)
+        if os.path.exists(usock):
+            os.remove(usock)
         threading.Thread(target=IExecutorServerModuleImpl.serve,
-                         args=(self.__server, "IExecutorServer", port, compression, True),
+                         args=(self.__server, "IExecutorServer", usock, compression),
                          daemon=True).start()
 
     def stop(self):

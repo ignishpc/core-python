@@ -1,0 +1,5 @@
+#!/bin/env bash
+
+export PYTHONHASHSEED=1234
+
+exec python3 -m ignis.executor.core.Main "$@"

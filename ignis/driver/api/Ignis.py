@@ -1,5 +1,7 @@
 import logging
+import os
 import subprocess
+import sys
 import threading
 
 from ignis.driver.api.IDriverException import IDriverException
@@ -21,15 +23,12 @@ class Ignis:
             with cls.__lock:
                 if cls.__pool:
                     return
-                cls.__backend = subprocess.Popen(["ignis-backend"], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+                transport_cmp = int(os.getenv("IGNIS_TRANSPORT_COMPRESSION", "0"))
+                job_sockets = os.getenv("IGNIS_JOB_SOCKETS", "")
+                cls.__backend = subprocess.Popen(["ignis-backend"], stdin=subprocess.PIPE)
 
-                backend_port = int(cls.__backend.stdout.readline())
-                backend_compression = int(cls.__backend.stdout.readline())
-                callback_port = int(cls.__backend.stdout.readline())
-                callback_compression = int(cls.__backend.stdout.readline())
-
-                cls.__callback = ICallBack(callback_port, callback_compression)
-                cls.__pool = IClientPool(backend_port, backend_compression)
+                cls.__callback = ICallBack(os.path.join(job_sockets, "driver.sock"), transport_cmp)
+                cls.__pool = IClientPool(os.path.join(job_sockets, "backend.sock"), transport_cmp)
         except Exception as ex:
             raise IDriverException(str(ex)) from ex
 
@@ -41,15 +40,16 @@ class Ignis:
                     return
                 with cls.__pool.getClient() as client:
                     client.getBackendService().stop()
-                cls.__backend.wait()
                 cls.__pool.destroy()
+                cls.__backend.wait()
+
                 try:
                     cls.__callback.stop()
                 except Exception as ex:
                     logger.error(str(ex))
 
                 cls.__backend = None
-                cls._pool = None
+                cls.__pool = None
                 cls.__callback = None
         except Exception as ex:
             raise IDriverException(ex) from ex

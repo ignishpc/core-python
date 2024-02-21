@@ -1,4 +1,5 @@
 import logging
+import os.path
 import sys
 
 from ignis.executor.core import ILog
@@ -22,16 +23,12 @@ logger = logging.getLogger(__name__)
 
 def main(argv):
 	ILog.init()
-	if len(argv) < 4:
-		logging.error("Executor need a server port, compression and server mode as argument")
+	if len(argv) < 2:
+		logging.error("Executor requires a socket address")
 		return 1
-	try:
-		port = int(argv[1])
-		compression = int(argv[2])
-		local_mode = int(argv[3]) == 1
-	except ValueError as ex:
-		logging.error("Executor arguments are not valid")
-		return 1
+
+	usock = argv[1]
+	compression = int(os.getenv("IGNIS_TRANSPORT_COMPRESSION", "0"))
 
 	class IExecutorServerModuleImpl(IExecutorServerModule):
 
@@ -54,7 +51,7 @@ def main(argv):
 
 	executor_data = IExecutorData()
 	server = IExecutorServerModuleImpl(executor_data)
-	server.serve("IExecutorServer", port, compression, local_mode)
+	server.serve("IExecutorServer", usock, compression)
 
 	return 0
 

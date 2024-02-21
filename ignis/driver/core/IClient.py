@@ -14,8 +14,8 @@ from ignis.rpc.driver.worker import IWorkerService
 
 class IClient:
 
-	def __init__(self, port, compression):
-		self.__transport = TZlibTransport(TSocket("localhost", port), compression)
+	def __init__(self, usock, compression):
+		self.__transport = TZlibTransport(TSocket(unix_socket=usock), compression)
 		socket_logger.disabled = True  # Avoid reconnection errors
 		for i in range(0, 10):
 			try:

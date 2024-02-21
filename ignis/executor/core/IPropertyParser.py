@@ -41,7 +41,7 @@ class IPropertyParser:
 		return self.getRangeNumber("ignis.partition.compression", 0, 9)
 
 	def nativeSerialization(self):
-		return self.getString("ignis.partition.serialization") == "native"
+		return self.getString("ignis.partition.encoding") == "native"
 
 	def partitionType(self):
 		return self.getString("ignis.partition.type")
@@ -50,10 +50,10 @@ class IPropertyParser:
 		return self.getString("ignis.modules.exchange.type")
 
 	def jobName(self):
-		return self.getString("ignis.job.name")
+		return self.getString("ignis.job.id")
 
 	def jobDirectory(self):
-		return self.getString("ignis.job.directory")
+		return self.getString("ignis.job.dir")
 
 	def executorDirectory(self):
 		return self.getString("ignis.executor.directory")
