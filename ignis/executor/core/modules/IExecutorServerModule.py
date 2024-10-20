@@ -33,9 +33,7 @@ class IThreadedServer(TServer):
                     self.__clients.append(client)
                     if not client:
                         continue
-                    t = threading.Thread(target=self.handle, args=(client,))
-                    t.setDaemon(True)
-                    t.start()
+                    threading.Thread(target=self.handle, args=(client,), daemon=True).start()
                 except KeyboardInterrupt:
                     raise
                 except Exception as x:
