@@ -11,7 +11,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 	rm -rf /var/lib/apt/lists/* && \
 	wget https://bootstrap.pypa.io/get-pip.py -O ${IGNIS_HOME}/bin/get-pip.py && \
 	python3 ${IGNIS_HOME}/bin/get-pip.py --break-system-packages && \
-	pip install setuptools --break-system-packages
+	pip install setuptools==80.9.0 --break-system-packages
 
 ENV MPI4PY_VERSION=3.1.5
 RUN mkdir ${IGNIS_HOME}/core/python && \
