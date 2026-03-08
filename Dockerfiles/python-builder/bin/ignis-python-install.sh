@@ -11,7 +11,7 @@ rm -rf /var/lib/apt/lists/*
 
 python3 ${IGNIS_HOME}/bin/get-pip.py --break-system-packages
 rm -f ${IGNIS_HOME}/bin/get-pip.py
-python3 -m pip install certifi numpy setuptools==80.9.0 --break-system-packages
+python3 -m pip install certifi numpy --break-system-packages
 
 cd ${IGNIS_HOME}/core/python/
 cd mpi4py

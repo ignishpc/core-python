@@ -27,6 +27,7 @@ RUN mkdir ${IGNIS_HOME}/core/python && \
 	export CPATH=${IGNIS_DEVEL}/mpi/include && \
 	if [ $(echo "${MPICH_VERSION}"  | cut -c1,2) = "3." ]; then \
 		sed -re "s/^(\s+)([^\s].*MPI_Comm_connect.*)$/\1if root != rank: port_name = asmpistr(port_name, \&cportname)\n\1\2/g" -i src/mpi4py/MPI/Comm.pyx ; \
+		sed -i 's/setuptools >= [0-9.]\+/&, <= 80.9.0/' pyproject.toml ; \
 	fi && \
 	python3 setup.py build  --mpicc=${CC}
 
